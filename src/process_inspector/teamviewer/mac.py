@@ -5,21 +5,6 @@ from functools import cache
 from pathlib import Path
 
 
-@cache
-def is_teamviewer_installed() -> bool:
-    """
-    Check if TeamViewer is installed on a Mac by verifying the existence of
-    the application bundle.
-
-    :return: True if TeamViewer is installed, False otherwise
-    """
-    # Path where TeamViewer is typically installed on macOS
-    teamviewer_path = Path("/Applications/TeamViewer.app")
-
-    # Check if the TeamViewer application bundle exists
-    return teamviewer_path.exists()
-
-
 def _query_teamviewer_id() -> str:
     """Safely get TeamViewer ID from command line."""
     paths = [
@@ -65,6 +50,18 @@ def _query_teamviewer_version() -> str:
 
 
 @cache
+def get_teamviewer_path() -> Path:
+    return Path("/Applications/TeamViewer.app")
+
+
+@cache
+def is_teamviewer_installed() -> bool:
+    """Check if TeamViewer is installed on a Mac."""
+    teamviewer_path = get_teamviewer_path()
+    return teamviewer_path.exists()
+
+
+@cache
 def get_teamviewer_id() -> str:
     """Get TeamViewer ID."""
     if result := _query_teamviewer_id():
@@ -76,10 +73,6 @@ def get_teamviewer_id() -> str:
 def get_teamviewer_version() -> str:
     """Get TeamViewer version."""
     return _query_teamviewer_version()
-
-
-def get_teamviewer_path() -> Path:
-    return Path("/Applications/TeamViewer.app")
 
 
 def get_teamviewer_info() -> dict:

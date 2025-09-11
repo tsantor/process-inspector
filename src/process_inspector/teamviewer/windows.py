@@ -4,22 +4,6 @@ from functools import cache
 from pathlib import Path
 
 
-@cache
-def is_teamviewer_installed() -> bool:
-    """
-    Check if TeamViewer is installed by verifying the
-    existence of common executable paths.
-
-    :return: True if TeamViewer is installed, False otherwise
-    """
-    # Check if any of the possible paths contain the TeamViewer executable
-    possible_paths = [
-        Path("C:/Program Files (x86)/TeamViewer/TeamViewer.exe"),
-        Path("C:/Program Files/TeamViewer/TeamViewer.exe"),
-    ]
-    return any(path.is_file() for path in possible_paths)
-
-
 def _query_teamviewer_id() -> str:
     """Safely get TeamViewer ID from Windows Registry."""
     with contextlib.suppress(FileNotFoundError):
@@ -49,6 +33,32 @@ def _query_teamviewer_version() -> str:
 
 
 @cache
+def get_teamviewer_path() -> Path:
+    """Get TeamViewer executable path."""
+    possible_paths = [
+        Path("C:/Program Files (x86)/TeamViewer/TeamViewer.exe"),
+        Path("C:/Program Files/TeamViewer/TeamViewer.exe"),
+    ]
+    return next((path for path in possible_paths if path.is_file()), "")
+
+
+@cache
+def is_teamviewer_installed() -> bool:
+    """
+    Check if TeamViewer is installed by verifying the
+    existence of common executable paths.
+
+    :return: True if TeamViewer is installed, False otherwise
+    """
+    # Check if any of the possible paths contain the TeamViewer executable
+    possible_paths = [
+        Path("C:/Program Files (x86)/TeamViewer/TeamViewer.exe"),
+        Path("C:/Program Files/TeamViewer/TeamViewer.exe"),
+    ]
+    return any(path.is_file() for path in possible_paths)
+
+
+@cache
 def get_teamviewer_id() -> str:
     """Get Teamviewer ID"""
     if result := _query_teamviewer_id():
@@ -60,16 +70,6 @@ def get_teamviewer_id() -> str:
 def get_teamviewer_version() -> str:
     """Get TeamViewer version."""
     return _query_teamviewer_version().strip()
-
-
-@cache
-def get_teamviewer_path() -> Path:
-    """Get TeamViewer executable path."""
-    possible_paths = [
-        Path("C:/Program Files (x86)/TeamViewer/TeamViewer.exe"),
-        Path("C:/Program Files/TeamViewer/TeamViewer.exe"),
-    ]
-    return next((path for path in possible_paths if path.is_file()), "")
 
 
 def get_teamviewer_info() -> dict:

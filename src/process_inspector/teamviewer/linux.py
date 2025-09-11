@@ -9,24 +9,6 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 
-@cache
-def is_teamviewer_installed() -> bool:
-    """
-    Check if TeamViewer is installed on a Raspberry Pi by verifying the
-    existence of common executable paths.
-
-    :return: True if TeamViewer is installed, False otherwise
-    """
-    # Check if any of the possible paths contain the TeamViewer executable
-    possible_paths = [
-        Path("/usr/bin/teamviewer"),
-        Path("/usr/local/bin/teamviewer"),
-        Path("/opt/teamviewer/bin/teamviewer"),
-        Path("~/.local/bin/teamviewer").expanduser(),
-    ]
-    return any(path.is_file() for path in possible_paths)
-
-
 def _extract_teamviewer_id(hex_str) -> str:
     """Extract the ID."""
     regex = r"\d{9,10}"
@@ -64,6 +46,23 @@ def _query_teamviewer_version() -> str:
     return "--"
 
 
+def get_teamviewer_path() -> Path:
+    # Check if any of the possible paths contain the TeamViewer executable
+    possible_paths = [
+        Path("/usr/bin/teamviewer"),
+        Path("/usr/local/bin/teamviewer"),
+        Path("/opt/teamviewer/bin/teamviewer"),
+        Path("~/.local/bin/teamviewer").expanduser(),
+    ]
+    return next((path for path in possible_paths if path.is_file()), False)
+
+
+@cache
+def is_teamviewer_installed() -> bool:
+    """Check if TeamViewer is installed on a Linux system."""
+    return get_teamviewer_path()
+
+
 @cache
 def get_teamviewer_id() -> str:
     """Convenience method to do 3 method calls in one."""
@@ -75,17 +74,6 @@ def get_teamviewer_id() -> str:
 def get_teamviewer_version() -> str:
     """Get TeamViewer version."""
     return _query_teamviewer_version()
-
-
-def get_teamviewer_path() -> Path:
-    # Check if any of the possible paths contain the TeamViewer executable
-    possible_paths = [
-        Path("/usr/bin/teamviewer"),
-        Path("/usr/local/bin/teamviewer"),
-        Path("/opt/teamviewer/bin/teamviewer"),
-        Path("~/.local/bin/teamviewer").expanduser(),
-    ]
-    return next((path for path in possible_paths if path.is_file()), "")
 
 
 def get_teamviewer_info() -> dict:

@@ -50,5 +50,6 @@ def test_teamviewer_is_running(teamviewer):
     assert teamviewer.is_running() is True
 
 
+@pytest.mark.skip(reason="We don't want to close TeamViewer during tests")
 def test_teamviewer_close(teamviewer):
     assert teamviewer.close() is True
