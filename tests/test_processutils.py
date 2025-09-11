@@ -12,11 +12,18 @@ pytestmark = pytest.mark.skipif(
 )
 
 
+# @pytest.fixture
+# def process():
+#     if sys.platform == "win32":
+#         return "explorer.exe"
+#     return "Finder"
+
+
 @pytest.fixture
 def process():
     if sys.platform == "win32":
-        return "explorer.exe"
-    return "Finder"
+        return "python.exe"
+    return "python"
 
 
 @pytest.fixture
@@ -28,9 +35,7 @@ def invalid_process():
 
 @pytest.fixture
 def killable_process():
-    if sys.platform == "win32":
-        return ["timeout", "/T", "30"]
-    return ["sleep", "30"]
+    return [sys.executable, "-c", "import time; time.sleep(30)"]
 
 
 def test_get_process_by_name(process):
@@ -135,7 +140,7 @@ def test_get_uptime_as_string(process):
     assert len(uptime_str) > 0
 
 
-def test_process_info(process):
+def test_get_process_info(process):
     proc = processutils.get_process_by_name(process)
     proc_info = processutils.get_process_info(proc)
     assert isinstance(proc_info, dict)

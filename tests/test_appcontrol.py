@@ -1,5 +1,6 @@
 import contextlib
 import sys
+import time
 from pathlib import Path
 
 import pytest
@@ -38,6 +39,9 @@ def test_native_app_open(app, ensure_app_closed):
 
 def test_native_app_is_running(app, ensure_app_closed):
     assert app.open() is True
+    # Windows needs some time to report is_running correctly
+    if sys.platform == "win32":
+        time.sleep(1)
     assert app.is_running() is True
     assert app.close() is True
 
@@ -75,6 +79,9 @@ def test_to_dict(app):
 
 def test_process_info(app, ensure_app_closed):
     assert app.open() is True
+    # Windows needs some time to report is_running correctly
+    if sys.platform == "win32":
+        time.sleep(1)
     assert app.is_running() is True
     proc_info = app.process_info()
     assert isinstance(proc_info, dict)

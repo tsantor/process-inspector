@@ -73,10 +73,10 @@ uv_lock_check:	## Check if lock file is up to date
 # -----------------------------------------------------------------------------
 
 pytest:  ## Run tests
-	pytest -vx --cov --cov-report=html
+	pytest -vx --ff --cov --cov-report=html
 
 pytest_verbose:  ## Run tests in verbose mode
-	pytest -vvs --cov --cov-report=html
+	pytest -vvs --ff --cov --cov-report=html
 
 coverage:  ## Run tests with coverage
 	coverage run -m pytest && coverage html
