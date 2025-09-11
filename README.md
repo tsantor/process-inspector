@@ -42,6 +42,14 @@ If you experience any issues, please create an [issue](https://github.com/tsanto
 from process_inspector import NativeApp
 from process_inpsector import OperatingSystem
 
+app = NativeApp('C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe')
+app.open()
+app.is_running()
+app.get_version()
+app.to_dict()
+app.process_info()
+app.close()
+
 # This operation requires sudo priveleges on Linux and Mac so ensure you allow it for the user the application is running under.
 OperatingSystem().reboot()
 ```
