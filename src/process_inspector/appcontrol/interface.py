@@ -70,6 +70,5 @@ class AppInterface(ABC):
     def process_info(self) -> dict:
         """Return a dictionary representation of the process."""
         if proc := self.get_process():
-            with proc.oneshot():
-                return get_process_info(proc)
-        return {}
+            return get_process_info(proc)
+        return {}  # pragma: no cover
