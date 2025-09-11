@@ -4,7 +4,7 @@
 
 ## Overview
 
-A Python package for cross-platform process management, providing process data as dicts/JSON and allowing process control (start, stop, kill) on Windows, Mac, and Linux.
+A Python package for cross-platform process management, providing process data as dicts/JSON and allowing process/service control (start, stop, kill) on Windows, Mac, and Linux.
 
 ## Installation
 
@@ -41,6 +41,7 @@ If you experience any issues, please create an [issue](https://github.com/tsanto
 ```python
 from process_inspector import NativeApp
 from process_inspector import Service
+from process_inspector import Teamviewer
 from process_inpsector import OperatingSystem
 
 # App control
@@ -57,6 +58,13 @@ service = Service("Spooler")
 service.start()
 service.is_running()
 service.stop()
+
+# Teamviewer
+tv = Teamviewer()
+tv.open()
+tv.is_running()
+tv.close()
+tv.get_teamviewer_info()
 
 # This operation requires sudo priveleges on Linux and Mac so ensure you allow it for the user the application is running under.
 OperatingSystem().reboot()

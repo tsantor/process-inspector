@@ -9,7 +9,7 @@ from process_inspector.servicecontrol import Service
 def app():
     if sys.platform == "win32":
         return Service("Spooler")
-    return Service("xapp_monitor")
+    return Service("process_inspector")
 
 
 def test_service_start(app):

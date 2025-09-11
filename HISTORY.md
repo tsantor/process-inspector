@@ -13,3 +13,4 @@ All notable changes to this project will be documented in this file. This projec
 ## 0.1.2 (2025-09-11)
 
 - ADDED - Service control (Windows Services or Linux/ Mac `supervisorctl` processes)
+- ADDED - TeamViewer status and basic control (start, stop)
