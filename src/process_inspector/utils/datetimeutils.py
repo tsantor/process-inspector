@@ -2,15 +2,23 @@ import humanize
 
 
 def human_date(dt) -> str:
-    return dt.strftime("%A, %B %d, %Y")
+    return dt.strftime("%A, %B %-d, %Y")
+
+
+def human_date_short(dt) -> str:
+    return dt.strftime("%a, %b %-d, %Y")
 
 
 def human_time(dt) -> str:
-    return dt.strftime("%I:%M %p")
+    return dt.strftime("%-I:%M %p")
 
 
 def human_datetime(dt) -> str:
-    return dt.strftime("%A, %B %d, %Y %I:%M %p")
+    return dt.strftime("%A, %B %-d, %Y %-I:%M %p")
+
+
+def human_datetime_short(dt) -> str:
+    return dt.strftime("%a, %b %-d, %Y %-I:%M %p")
 
 
 def human_delta(seconds: int) -> str:

@@ -7,22 +7,22 @@ from pathlib import Path
 
 import psutil
 
-# from .byteutils import human_readable_bytes
+from .byteutils import human_readable_bytes
 from .datetimeutils import human_delta
 
 logger = logging.getLogger(__name__)
 
 
-# def get_mem_usage(process: psutil.Process) -> str:
-#     """Return memory usage in human readable units."""
-#     mem_info = process.memory_info()
-#     return human_readable_bytes(mem_info.rss, metric=False)
+def get_mem_usage(process: psutil.Process) -> str:
+    """Return memory usage in human readable units."""
+    mem_info = process.memory_info()
+    return human_readable_bytes(mem_info.rss, metric=False)
 
 
-# def get_vmem_usage(process: psutil.Process) -> str:
-#     """Return virtual memory usage in human readable units."""
-#     mem_info = process.memory_info()
-#     return human_readable_bytes(mem_info.vms, metric=False)
+def get_vmem_usage(process: psutil.Process) -> str:
+    """Return virtual memory usage in human readable units."""
+    mem_info = process.memory_info()
+    return human_readable_bytes(mem_info.vms, metric=False)
 
 
 def get_mem_usage_perc(process: psutil.Process) -> str:
@@ -132,12 +132,12 @@ def get_process_info(process: psutil.Process) -> dict:
     with process.oneshot():
         return {
             "pid": process.pid,
-            # "status": proc.status(),
-            # "mem_usage_percent": get_mem_usage_perc(process) if process else "--",
-            # "mem_usage": get_mem_usage(process) if process else "--",
-            # "vmem_usage": get_vmem_usage(process) if process else "--",
-            # "proc_usage": get_proc_usage(process) if process else "--",
-            "uptime": get_uptime(process) if process else "--",
-            "uptime_str": get_uptime_as_string(process) if process else "--",
+            "status": process.status(),
+            "mem_usage_percent": get_mem_usage_perc(process) if process else "--",
+            "mem_usage": get_mem_usage(process) if process else "--",
+            "vmem_usage": get_vmem_usage(process) if process else "--",
+            "proc_usage": get_proc_usage(process) if process else "--",
+            "uptime_seconds": get_uptime(process) if process else "--",
+            "uptime": get_uptime_as_string(process) if process else "--",
         }
     return {}

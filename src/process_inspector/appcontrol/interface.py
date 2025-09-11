@@ -1,4 +1,3 @@
-import json
 import logging
 from abc import ABC
 from abc import abstractmethod
@@ -7,7 +6,7 @@ from pathlib import Path
 
 from psutil import Process
 
-from process_inspector.utils.datetimeutils import human_datetime
+from process_inspector.utils.datetimeutils import human_datetime_short
 from process_inspector.utils.processutils import get_process_info
 
 logger = logging.getLogger(__name__)
@@ -64,8 +63,8 @@ class AppInterface(ABC):
             "path": str(self.app_path),
             "is_installed": self.is_installed(),
             "version": self.get_version(),
-            "install_date": self.get_install_date().strftime("%Y-%m-%d"),
-            "install_date_str": human_datetime(self.get_install_date()),
+            "install_date_short": self.get_install_date().strftime("%Y-%m-%d"),
+            "install_date": human_datetime_short(self.get_install_date()),
         }
 
     def process_info(self) -> dict:
@@ -74,7 +73,3 @@ class AppInterface(ABC):
             with proc.oneshot():
                 return get_process_info(proc)
         return {}
-
-    def to_json(self) -> str:
-        """Return a JSON representation of the object."""
-        return json.dumps(self.to_dict(), indent=True)
