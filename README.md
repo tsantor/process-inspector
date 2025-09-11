@@ -11,7 +11,7 @@ A Python package for cross-platform process management, providing process data a
 Use `uv` or `pip`.
 
 ```bash
-uv pip install process-inspector
+uv add process-inspector
 python3 -m pip install process-inspector
 ```
 
@@ -40,8 +40,10 @@ If you experience any issues, please create an [issue](https://github.com/tsanto
 
 ```python
 from process_inspector import NativeApp
+from process_inspector import Service
 from process_inpsector import OperatingSystem
 
+# App control
 app = NativeApp('C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe')
 app.open()
 app.is_running()
@@ -49,6 +51,12 @@ app.get_version()
 app.to_dict()
 app.process_info()
 app.close()
+
+# Service control
+service = Service("Spooler")
+service.start()
+service.is_running()
+service.stop()
 
 # This operation requires sudo priveleges on Linux and Mac so ensure you allow it for the user the application is running under.
 OperatingSystem().reboot()
