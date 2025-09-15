@@ -10,8 +10,6 @@ logger = logging.getLogger(__name__)
 class SystemCtl(ServiceInterface):
     """Linux System Ctl Service"""
 
-    use_sudo = True
-
     @property
     def prefix(self):
         """Prefix with sudo if needed."""

@@ -2,6 +2,7 @@ import logging
 from abc import ABC
 from abc import abstractmethod
 from datetime import datetime
+from functools import cached_property
 from pathlib import Path
 
 from psutil import Process
@@ -22,6 +23,7 @@ class AppInterface(ABC):
         self.app_path = app_path
         self.app_exe = app_path.name
         self.app_name = app_path.stem
+        # self.is_installed = self.app_path.exists()
 
         # logger.info("App path: %s", app_path)
         # logger.info(self.to_dict())
@@ -55,6 +57,7 @@ class AppInterface(ABC):
         tz = datetime.now().astimezone().tzinfo
         return datetime.fromtimestamp(self.app_path.stat().st_mtime, tz=tz)
 
+    @cached_property
     def to_dict(self) -> dict:
         """Return a dictionary representation of the object."""
         return {

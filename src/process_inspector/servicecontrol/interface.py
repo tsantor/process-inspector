@@ -8,8 +8,9 @@ logger = logging.getLogger(__name__)
 class ServiceInterface(ABC):
     """Basic control of a Service"""
 
-    def __init__(self, name):
+    def __init__(self, name, use_sudo=True):
         self.name = name
+        self.use_sudo = use_sudo
         # TODO: Why do we keep instantiating this class?
         # TODO: Add a check to see if the service exists
         logger.debug("Service name: %s", self.name)

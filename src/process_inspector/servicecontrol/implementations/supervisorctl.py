@@ -17,7 +17,6 @@ class SupervisorCtl(ServiceInterface):
     """
 
     supervisor_path = None
-    use_sudo = True
 
     @property
     def prefix(self):
