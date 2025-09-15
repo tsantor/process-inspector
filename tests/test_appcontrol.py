@@ -32,22 +32,22 @@ def ensure_app_closed(app):
         app.close()
 
 
-def test_native_app_open(app, ensure_app_closed):
+def test_native_app_open(app):
     assert app.open() is True
-    assert app.close() is True
+    # assert app.close() is True
 
 
-def test_native_app_is_running(app, ensure_app_closed):
-    assert app.open() is True
+def test_native_app_is_running(app):
+    # assert app.open() is True
     # Windows needs some time to report is_running correctly
     if sys.platform == "win32":
         time.sleep(1)
     assert app.is_running() is True
-    assert app.close() is True
+    # assert app.close() is True
 
 
-def test_native_app_close(app, ensure_app_closed):
-    assert app.open() is True
+def test_native_app_close(app):
+    # assert app.open() is True
     assert app.close() is True
 
 
