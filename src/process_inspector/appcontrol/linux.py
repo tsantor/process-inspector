@@ -2,7 +2,6 @@ import logging
 import shlex
 import subprocess
 
-from process_inspector.utils.processutils import get_process_by_name
 from process_inspector.utils.stringutils import extract_version
 
 from .interface import AppInterface
@@ -14,26 +13,25 @@ class App(AppInterface):
     """Basic control of a Linux App. This is under the full assumption you are
     running apps under Supervisor."""
 
-    def get_process(self):
-        """Return the process object of the app."""
-        return get_process_by_name(self.app_path)
-
     def is_running(self) -> bool:
         """Determine if app is running."""
-        if self.service:
-            return self.service.is_running()
+        logger.warning(
+            "Linux App control is experimental and may not work as expected."
+        )
         return False
 
     def open(self) -> bool:
         """Open app"""
-        if self.service:
-            return self.service.start()
+        logger.warning(
+            "Linux App control is experimental and may not work as expected."
+        )
         return False
 
     def close(self) -> bool:
         """Close app"""
-        if self.service:
-            return self.service.stop()
+        logger.warning(
+            "Linux App control is experimental and may not work as expected."
+        )
         return False
 
     def get_version(self) -> str:

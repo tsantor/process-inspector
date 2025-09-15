@@ -5,9 +5,8 @@ from datetime import datetime
 from functools import cached_property
 from pathlib import Path
 
-from psutil import Process
-
 from process_inspector.utils.datetimeutils import human_datetime_short
+from process_inspector.utils.processutils import get_process_by_name
 from process_inspector.utils.processutils import get_process_info
 
 logger = logging.getLogger(__name__)
@@ -39,13 +38,13 @@ class AppInterface(ABC):
         and return the new one."""
         if self._process is None or not self.is_running():
             logger.debug("Refreshing process info for %s", self.app_name)
-            self._process = self.get_process()
+            self._process = self._get_process()
         logger.debug("Using cached process info for %s", self.app_name)
         return self._process
 
-    @abstractmethod
-    def get_process(self) -> Process:
+    def _get_process(self):
         """Return the process object of the app."""
+        return get_process_by_name(self.app_path)
 
     @abstractmethod
     def is_running(self) -> bool:
@@ -68,7 +67,6 @@ class AppInterface(ABC):
         tz = datetime.now().astimezone().tzinfo
         return datetime.fromtimestamp(self.app_path.stat().st_mtime, tz=tz)
 
-    @cached_property
     def to_dict(self) -> dict:
         """Return a dictionary representation of the object."""
         return {
@@ -81,8 +79,13 @@ class AppInterface(ABC):
             "install_date": human_datetime_short(self.get_install_date()),
         }
 
+    @cached_property
+    def as_dict(self) -> dict:
+        """Return a dictionary representation of the object."""
+        return self.to_dict()
+
     def process_info(self) -> dict:
         """Return a dictionary representation of the process."""
-        if proc := self.get_process():
+        if proc := self.process:
             return get_process_info(proc)
         return {}  # pragma: no cover

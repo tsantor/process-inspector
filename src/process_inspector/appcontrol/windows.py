@@ -14,10 +14,6 @@ logger = logging.getLogger(__name__)
 class App(AppInterface):
     """Basic control of a Windows App"""
 
-    def get_process(self):
-        """Return the process object of the app."""
-        return get_process_by_name(self.app_path)
-
     def is_running(self) -> bool:
         """Determine if app is running."""
         return is_process_running_by_name(self.app_path)

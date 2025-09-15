@@ -3,8 +3,6 @@ import re
 import shlex
 import subprocess
 
-from process_inspector.utils.processutils import get_process_by_name
-
 from .interface import AppInterface
 
 logger = logging.getLogger(__name__)
@@ -12,10 +10,6 @@ logger = logging.getLogger(__name__)
 
 class App(AppInterface):
     """Basic control of a Mac App."""
-
-    def get_process(self):
-        """Return the process object of the app."""
-        return get_process_by_name(self.app_path)
 
     def is_running(self) -> bool:
         """Determine if app is running."""
