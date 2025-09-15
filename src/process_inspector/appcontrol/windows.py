@@ -17,7 +17,9 @@ class App(AppInterface):
 
     def is_running(self) -> bool:
         """Determine if app is running."""
-        return is_process_running_by_pid(self.get_pid()) if self.get_pid() else False
+        if not self._process:
+            self._process = self._get_process()
+        return is_process_running_by_pid(self._processs.pid) if self._process else False
         # return is_process_running_by_name(self.app_path)
 
     def open(self) -> bool:
