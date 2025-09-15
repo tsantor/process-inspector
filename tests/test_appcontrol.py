@@ -56,7 +56,7 @@ def test_native_app_version(app):
 
 
 def test_to_dict(app):
-    app_dict = app.to_dict
+    app_dict = app.to_dict()
     assert isinstance(app_dict, dict)
     expected_keys = [
         "exe",
