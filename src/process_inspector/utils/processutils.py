@@ -17,25 +17,25 @@ logger = logging.getLogger(__name__)
 def get_process_by_name(name) -> psutil.Process | None:
     """Return a Process by name or None."""
     if isinstance(name, Path):
-        # macOS uses the stem, Linux/Windows uses the name
         name = name.stem if sys.platform == "darwin" else name.name
 
-    # logger.debug("Searching for process by name: %s", name)
-
     name = name.lower()
-    for proc in psutil.process_iter(["name", "cmdline"]):
+
+    # Only fetch 'name' unless on Linux
+    attrs = ["pid", "name"] if sys.platform != "linux" else ["pid", "name", "cmdline"]
+
+    for proc in psutil.process_iter(attrs):
         try:
-            proc_name = proc.name().lower()
-            # logger.debug("Checking process: %s", proc_name)
+            proc_name = proc.info["name"].lower()
             if proc_name == name:
                 return proc
 
+            # Only check cmdline on Linux
             if sys.platform == "linux":
-                for arg in proc.cmdline():
+                for arg in proc.info.get("cmdline", []):
                     if name in Path(arg).name.lower():
                         return proc
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-            logger.warning("Could not access process: %s", name)
             continue
     return None
 

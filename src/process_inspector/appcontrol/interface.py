@@ -23,7 +23,6 @@ class AppInterface(ABC):
         self.app_exe = app_path.name
         self.app_name = app_path.stem
         self._process = None
-        # self.is_installed = self.app_path.exists()
 
         # logger.info("App path: %s", app_path)
         # logger.info(self.to_dict())
@@ -39,8 +38,13 @@ class AppInterface(ABC):
         if self._process is None or not self.is_running():
             logger.debug("Refreshing process info for %s", self.app_name)
             self._process = self._get_process()
+
         logger.debug("Using cached process info for %s", self.app_name)
         return self._process
+
+    def get_pid(self) -> int | None:
+        """Return the PID of the app if it's running, otherwise None."""
+        return self.process.pid if self.process else None
 
     def _get_process(self):
         """Return the process object of the app."""

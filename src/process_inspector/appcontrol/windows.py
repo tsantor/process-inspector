@@ -5,6 +5,7 @@ import subprocess
 
 from process_inspector.utils.processutils import get_process_by_name
 from process_inspector.utils.processutils import is_process_running_by_name
+from process_inspector.utils.processutils import is_process_running_by_pid
 
 from .interface import AppInterface
 
@@ -16,7 +17,8 @@ class App(AppInterface):
 
     def is_running(self) -> bool:
         """Determine if app is running."""
-        return is_process_running_by_name(self.app_path)
+        return is_process_running_by_pid(self.get_pid()) if self.get_pid() else False
+        # return is_process_running_by_name(self.app_path)
 
     def open(self) -> bool:
         """Open app"""
