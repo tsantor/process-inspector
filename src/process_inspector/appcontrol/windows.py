@@ -5,7 +5,6 @@ import subprocess
 
 from process_inspector.utils.processutils import get_process_by_name
 from process_inspector.utils.processutils import is_process_running_by_name
-from process_inspector.utils.processutils import is_process_running_by_pid
 
 from .interface import AppInterface
 
@@ -16,12 +15,15 @@ class App(AppInterface):
     """Basic control of a Windows App"""
 
     def is_running(self) -> bool:
-        """Determine if app is running."""
-        if not self._process:
-            logger.debug("Getting process ID for '%s'...", self.app_exe)
-            self._process = self._get_process()
-        return is_process_running_by_pid(self._process.pid) if self._process else False
-        # return is_process_running_by_name(self.app_path)
+        """Check if cached PID is alive, fallback to name lookup."""
+        if self._pid:
+            proc = self._get_process_by_pid()
+            if proc:
+                return True
+            # stale PID, reset
+            self._pid = None
+            self._process = None
+        return False
 
     def open(self) -> bool:
         """Open app"""
