@@ -75,6 +75,7 @@ def get_teamviewer_version() -> str:
     return _query_teamviewer_version()
 
 
+@cache
 def get_teamviewer_info() -> dict:
     """Return a dict of Teamviewer info."""
     return {

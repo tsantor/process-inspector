@@ -23,6 +23,7 @@ class AppInterface(ABC):
         self.app_path = app_path
         self.app_exe = app_path.name
         self.app_name = app_path.stem
+        self._process = None
         # self.is_installed = self.app_path.exists()
 
         # logger.info("App path: %s", app_path)
@@ -31,6 +32,16 @@ class AppInterface(ABC):
     def is_installed(self) -> bool:
         """Determine if the app is installed."""
         return self.app_path.exists()
+
+    @property
+    def process(self):
+        """Return the cached process object if it's running, otherwise find
+        and return the new one."""
+        if self._process is None or not self.is_running():
+            logger.debug("Refreshing process info for %s", self.app_name)
+            self._process = self.get_process()
+        logger.debug("Using cached process info for %s", self.app_name)
+        return self._process
 
     @abstractmethod
     def get_process(self) -> Process:
