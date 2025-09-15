@@ -38,6 +38,14 @@ def killable_process():
     return [sys.executable, "-c", "import time; time.sleep(30)"]
 
 
+def test_get_process_by_name_timing(process):
+    start = time.time()
+    proc = processutils.get_process_by_name(process)
+    elapsed = time.time() - start
+    print(f"get_process_by_name('{process}') took {elapsed:.3f} seconds")  # noqa: T201
+    assert proc is not None
+
+
 def test_get_process_by_name(process):
     proc = processutils.get_process_by_name(process)
     assert proc is not None
@@ -76,6 +84,17 @@ def test_is_process_running_by_pid(process):
     proc = processutils.get_process_by_name(process)
     is_running = processutils.is_process_running_by_pid(proc.pid)
     assert is_running is True
+
+
+def test_is_process_running_by_name_timing(process):
+    start = time.time()
+    proc = processutils.get_process_by_name(process)
+    assert proc is not None
+    is_running = processutils.is_process_running_by_pid(proc.pid)
+    assert is_running is True
+    elapsed = time.time() - start
+    print(f"is_process_running_by_pid('{process}') took {elapsed:.3f} seconds")  # noqa: T201
+    assert proc is not None
 
 
 def test_is_process_running_by_pid_invalid():

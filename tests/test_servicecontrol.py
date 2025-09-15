@@ -4,6 +4,10 @@ import pytest
 
 from process_inspector.servicecontrol import Service
 
+pytestmark = pytest.mark.skipif(
+    sys.platform == "darwin", reason="Skipping as requires sudo on macOS"
+)
+
 
 @pytest.fixture
 def app():
