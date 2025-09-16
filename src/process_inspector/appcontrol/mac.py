@@ -22,7 +22,7 @@ class App(AppInterface):
 
     def open(self) -> bool:
         """Open app"""
-        cmd = f"""osascript -e 'tell application "{self.app_path}" to activate'"""
+        cmd = f"""osascript -e 'tell application "{self.app_path.stem}" to activate'"""
         logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(shlex.split(cmd), check=True)  # noqa: S603
         return proc.returncode == 0
