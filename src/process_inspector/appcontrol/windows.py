@@ -38,7 +38,7 @@ class App(AppInterface):
         cmd = f'START "" "{self.app_path}"'  # fails if spaces in filename
         cmd = cmd.replace("&", "^&")  # escape special characters
         logger.debug("Execute command: %s", cmd)
-        proc = subprocess.run(shlex.split(cmd), check=True, shell=True)  # noqa: S602
+        proc = subprocess.run(shlex.split(cmd), check=False, shell=True)  # noqa: S602
         return proc.returncode == 0
 
     def close(self) -> bool:
@@ -48,7 +48,7 @@ class App(AppInterface):
 
         cmd = f"Taskkill /PID {self._pid} /F"
         logger.debug("Execute command: %s", cmd)
-        proc = subprocess.run(shlex.split(cmd), check=True, capture_output=True)  # noqa: S603
+        proc = subprocess.run(shlex.split(cmd), check=False)  # noqa: S603
         return proc.returncode == 0
 
     def get_version(self) -> str:

@@ -34,21 +34,35 @@ def ensure_app_closed(app):
 
 def test_app_open(app):
     assert app.open() is True
+    timeout = 10
+    start = time.time()
+    while not app.is_running():
+        if time.time() - start > timeout:
+            pytest.fail("App did not start within timeout")
+        time.sleep(1)
     assert app.close() is True
 
 
 def test_app_is_running(app):
     assert app.open() is True
-
-    # Windows needs some time to report is_running correctly
-    if sys.platform == "win32":
-        time.sleep(5)
+    timeout = 10
+    start = time.time()
+    while not app.is_running():
+        if time.time() - start > timeout:
+            pytest.fail("App did not start within timeout")
+        time.sleep(1)
     assert app.is_running() is True
     assert app.close() is True
 
 
 def test_app_close(app):
     assert app.open() is True
+    timeout = 10
+    start = time.time()
+    while not app.is_running():
+        if time.time() - start > timeout:
+            pytest.fail("App did not start within timeout")
+        time.sleep(1)
     assert app.close() is True
 
 
@@ -80,9 +94,12 @@ def test_to_dict(app):
 
 def test_process_info(app):
     assert app.open() is True
-    # Windows needs some time to report is_running correctly
-    if sys.platform == "win32":
-        time.sleep(5)
+    timeout = 10
+    start = time.time()
+    while not app.is_running():
+        if time.time() - start > timeout:
+            pytest.fail("App did not start within timeout")
+        time.sleep(1)
     assert app.is_running() is True
     proc_info = app.process_info()
     assert isinstance(proc_info, dict)
