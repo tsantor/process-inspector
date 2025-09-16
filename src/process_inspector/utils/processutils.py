@@ -1,7 +1,5 @@
 import contextlib
 import logging
-
-# import signal
 import sys
 import time
 from pathlib import Path
@@ -76,19 +74,6 @@ def kill_process(process: psutil.Process) -> bool:
             "Failed to kill process %s with PID %s", process.info["name"], process.pid
         )
         return False
-
-
-# def kill_child_processes(parent_pid, sig=signal.SIGTERM) -> None:
-#     """Kill child processes."""
-#     try:
-#         parent = psutil.Process(parent_pid)
-#     except psutil.NoSuchProcess:
-#         return
-#     children = parent.children(recursive=True)
-#     for child in children:
-#         child.send_signal(sig)
-#         # child.kill()
-#     parent.kill()
 
 
 def get_mem_usage(process: psutil.Process) -> str:

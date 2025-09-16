@@ -3,8 +3,9 @@ import re
 import shlex
 import subprocess
 
+import psutil
+
 from process_inspector.utils.processutils import get_process_by_name
-from process_inspector.utils.processutils import is_process_running_by_name
 
 from .interface import AppInterface
 
@@ -15,33 +16,41 @@ class App(AppInterface):
     """Basic control of a Windows App"""
 
     def is_running(self) -> bool:
-        """Check if cached PID is alive, fallback to name lookup."""
-        if self._pid:
-            proc = self._get_process_by_pid()
-            if proc:
-                return True
-            # stale PID, reset
-            self._pid = None
-            self._process = None
+        """Check if the application is running."""
+        if self._process is None or self._pid is None:
+            self._process = get_process_by_name(self.app_path)
+            self._pid = self._process.pid if self._process else None
+
+        if self._pid is not None:
+            try:
+                return psutil.Process(self._pid).is_running()
+            except psutil.NoSuchProcess:
+                self._process = None
+                self._pid = None
+                return False
         return False
 
     def open(self) -> bool:
         """Open app"""
-        if not is_process_running_by_name(self.app_path):
-            cmd = f'START "" "{self.app_path}"'  # fails if spaces in filename
-            cmd = cmd.replace("&", "^&")  # escape special characters
-            logger.debug("Execute command: %s", cmd)
-            subprocess.run(shlex.split(cmd), check=True, shell=True)  # noqa: S602
+        if self.is_running():
+            return True
+
+        cmd = f'START "" "{self.app_path}"'  # fails if spaces in filename
+        cmd = cmd.replace("&", "^&")  # escape special characters
+        logger.debug("Execute command: %s", cmd)
+        proc = subprocess.run(shlex.split(cmd), check=True, shell=True)  # noqa: S602
+        print("returncode", proc.returncode)  # noqa: T201
         return True
 
     def close(self) -> bool:
         """Close app"""
-        if process := get_process_by_name(self.app_path):
-            cmd = f'Taskkill /IM "{process.name()}" /F'
-            logger.debug("Execute command: %s", cmd)
-            proc = subprocess.run(shlex.split(cmd), check=True, capture_output=True)  # noqa: S603
-            return proc.returncode == 0
-        return True
+        if not self.is_running():
+            return True
+
+        cmd = f"Taskkill /PID {self._pid} /F"
+        logger.debug("Execute command: %s", cmd)
+        proc = subprocess.run(shlex.split(cmd), check=True, capture_output=True)  # noqa: S603
+        return proc.returncode == 0
 
     def get_version(self) -> str:
         escaped_path = str(self.app_path).replace("\\", "\\\\")

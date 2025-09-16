@@ -13,7 +13,6 @@ class App(AppInterface):
 
     def is_running(self) -> bool:
         """Determine if app is running."""
-        # This is a more robust way to close an app using its bundle identifier
         cmd = f"""osascript -e 'application "{self.app_path.stem}" is running'"""
         # logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
@@ -30,7 +29,9 @@ class App(AppInterface):
 
     def close(self) -> bool:
         """Close app"""
-        # This is a more robust way to close an app using its bundle identifier
+        if not self.is_running():
+            return True
+
         cmd = f"""osascript -e 'tell application "{self.app_path.stem}" to quit'"""
         logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(shlex.split(cmd), check=True)  # noqa: S603

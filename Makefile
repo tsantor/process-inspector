@@ -23,7 +23,7 @@ help:
 
 PYTHON_VERSION=3.13.1
 package_name=process_inspector
-package_version=0.1.2
+package_version=0.1.3
 aws_profile=xstudios
 s3_bucket=xstudios-pypi
 wheel_name=${package_name}-${package_version}-py3-none-any.whl
@@ -73,10 +73,10 @@ uv_lock_check:	## Check if lock file is up to date
 # -----------------------------------------------------------------------------
 
 pytest:  ## Run tests
-	pytest -vx --ff --cov --cov-report=html
+	pytest -vx --cov --cov-report=html
 
 pytest_verbose:  ## Run tests in verbose mode
-	pytest -vvs --ff --cov --cov-report=html
+	pytest -vvs --cov --cov-report=html
 
 coverage:  ## Run tests with coverage
 	coverage run -m pytest && coverage html

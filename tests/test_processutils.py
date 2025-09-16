@@ -39,10 +39,14 @@ def killable_process():
 
 
 def test_get_process_by_name_timing(process):
+    benchmark_time = 0.5
     start = time.time()
     proc = processutils.get_process_by_name(process)
     elapsed = time.time() - start
-    print(f"get_process_by_name('{process}') took {elapsed:.3f} seconds")  # noqa: T201
+    assert elapsed < benchmark_time, (
+        f"get_process_by_name took too long: {elapsed:.3f} seconds, "
+        f"expected less than {benchmark_time} seconds"
+    )
     assert proc is not None
 
 
@@ -87,13 +91,17 @@ def test_is_process_running_by_pid(process):
 
 
 def test_is_process_running_by_name_timing(process):
+    benchmark_time = 0.5
     start = time.time()
     proc = processutils.get_process_by_name(process)
     assert proc is not None
     is_running = processutils.is_process_running_by_pid(proc.pid)
     assert is_running is True
     elapsed = time.time() - start
-    print(f"is_process_running_by_pid('{process}') took {elapsed:.3f} seconds")  # noqa: T201
+    assert elapsed < benchmark_time, (
+        f"get_process_by_name took too long: {elapsed:.3f} seconds, "
+        f"expected less than {benchmark_time} seconds"
+    )
     assert proc is not None
 
 
