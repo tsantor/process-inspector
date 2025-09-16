@@ -39,8 +39,7 @@ class App(AppInterface):
         cmd = cmd.replace("&", "^&")  # escape special characters
         logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(shlex.split(cmd), check=True, shell=True)  # noqa: S602
-        print("returncode", proc.returncode)  # noqa: T201
-        return True
+        return proc.returncode == 0
 
     def close(self) -> bool:
         """Close app"""
