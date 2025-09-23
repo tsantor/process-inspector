@@ -29,6 +29,10 @@ class ServiceInterface(ABC):
     def restart(self) -> bool:
         """Restart service"""
 
+    @abstractmethod
+    def status(self) -> str:
+        """Service status"""
+
     def open(self) -> bool:
         """Alias so we can use a service like an app."""
         return self.start()
@@ -37,15 +41,12 @@ class ServiceInterface(ABC):
         """Alias so we can use a service like an app."""
         return self.stop()
 
-    # @abstractmethod
-    # def status(self) -> str:
-    #     """Service status"""
-    #     raise NotImplementedError(
-    #         "This method should return a String: running, stopped or fatal"
-    #     )
-
     def __repr__(self):
-        return f"ServiceInterface('{self.name}')"
+        return f"Service('{self.name}')"
 
     def to_dict(self) -> dict:
-        return {"name": self.name, "is_running": self.is_running()}
+        return {
+            "name": self.name,
+            "is_running": self.is_running(),
+            "status": self.status(),
+        }

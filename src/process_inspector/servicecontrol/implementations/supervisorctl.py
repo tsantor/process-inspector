@@ -24,7 +24,7 @@ class SupervisorCtl(ServiceInterface):
 
     def is_running(self) -> bool:
         """Determine if service is running."""
-        cmd = f"{self.supervisor_path} status {self.name}".strip()
+        cmd = f"sudo {self.supervisor_path} status {self.name}".strip()
         # logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
             shlex.split(cmd), check=False, text=True, capture_output=True
@@ -33,29 +33,47 @@ class SupervisorCtl(ServiceInterface):
 
     def start(self) -> bool:
         """Start service"""
-        cmd = f"{self.supervisor_path} start {self.name}".strip()
+        cmd = f"sudo {self.supervisor_path} start {self.name}".strip()
         logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
             shlex.split(cmd), check=False, text=True, capture_output=True
         )
         matches = ["started", "already started"]
-        return any(x in proc.stdout.strip() for x in matches)
+        output = proc.stdout.strip().lower()
+        return any(x in output for x in matches)
 
     def stop(self) -> bool:
         """Stop service"""
-        cmd = f"{self.supervisor_path} stop {self.name}".strip()
+        cmd = f"sudo {self.supervisor_path} stop {self.name}".strip()
         logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
             shlex.split(cmd), check=False, text=True, capture_output=True
         )
         matches = ["stopped", "not running"]
-        return any(x in proc.stdout.strip() for x in matches)
+        output = proc.stdout.strip().lower()
+        return any(x in output for x in matches)
 
     def restart(self) -> bool:
         """Restart service"""
-        cmd = f"{self.supervisor_path} restart {self.name}".strip()
+        cmd = f"sudo {self.supervisor_path} restart {self.name}".strip()
         logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
             shlex.split(cmd), check=False, text=True, capture_output=True
         )
-        return "started" in proc.stdout.strip()
+        matches = ["started"]
+        output = proc.stdout.strip().lower()
+        return any(x in output for x in matches)
+
+    def status(self) -> str:
+        """Get service status (e.g., RUNNING, STOPPED, etc.)"""
+        cmd = f"sudo {self.supervisor_path} status {self.name}".strip()
+        # logger.debug("Execute command: %s", cmd)
+        proc = subprocess.run(  # noqa: S603
+            shlex.split(cmd), check=False, text=True, capture_output=True
+        )
+        output = proc.stdout.strip()
+        if output:
+            parts = output.split()
+            if len(parts) > 1:
+                return parts[1].upper()  # The status (e.g., STOPPED, RUNNING)
+        return "--"

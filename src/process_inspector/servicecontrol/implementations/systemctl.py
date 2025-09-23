@@ -18,16 +18,16 @@ class SystemCtl(ServiceInterface):
 
     def is_running(self) -> bool:
         """Determine if service is running."""
-        cmd = f"{self.systemctl_path} status {self.name}".strip()
+        cmd = f"sudo {self.systemctl_path} status {self.name}".strip()
         # logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
             shlex.split(cmd), check=False, text=True, capture_output=True
         )
-        return "active (running)" in proc.stdout.strip()
+        return "active (running)" in proc.stdout.strip().lower()
 
     def start(self) -> bool:
         """Start service"""
-        cmd = f"{self.systemctl_path} start {self.name}".strip()
+        cmd = f"sudo {self.systemctl_path} start {self.name}".strip()
         logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
             shlex.split(cmd), check=False, text=True, capture_output=True
@@ -36,7 +36,7 @@ class SystemCtl(ServiceInterface):
 
     def stop(self) -> bool:
         """Stop service"""
-        cmd = f"{self.systemctl_path} stop {self.name}".strip()
+        cmd = f"sudo {self.systemctl_path} stop {self.name}".strip()
         logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
             shlex.split(cmd), check=False, text=True, capture_output=True
@@ -45,9 +45,32 @@ class SystemCtl(ServiceInterface):
 
     def restart(self) -> bool:
         """Restart service"""
-        cmd = f"{self.systemctl_path} restart {self.name}".strip()
+        cmd = f"sudo {self.systemctl_path} restart {self.name}".strip()
         logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
             shlex.split(cmd), check=False, text=True, capture_output=True
         )
         return proc.returncode == 0
+
+    def status(self) -> str:
+        """Get service status"""
+        cmd = f"sudo {self.systemctl_path} status {self.name}".strip()
+        proc = subprocess.run(  # noqa: S603
+            shlex.split(cmd), check=False, text=True, capture_output=True
+        )
+        output = proc.stdout.strip().lower()
+
+        if "could not be found" in output:
+            return "--"
+
+        status_map = {
+            "active (running)": "RUNNING",
+            "inactive (dead)": "STOPPED",
+            "failed": "FAILED",
+            "activating (start)": "STARTING",
+            "deactivating (stop)": "STOPPING",
+        }
+        for key, value in status_map.items():
+            if key in output:
+                return value
+        return "--"

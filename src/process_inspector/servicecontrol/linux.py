@@ -3,9 +3,20 @@ from pathlib import Path
 
 from .implementations import SupervisorCtl
 
+# from .implementations import SystemCtl
+
 
 class Service(SupervisorCtl):
     """Linux Supervisor Control"""
+
+    # def get_controller(name, impl="supervisor"):
+    #     if impl == "supervisor":
+    #         return SupervisorCtl(name)
+    #     if impl == "systemctl":
+    #         return SystemCtl(name)
+
+    #     msg = f"Unknown implementation: {impl}"
+    #     raise ValueError(msg)
 
     @cached_property
     def supervisor_path(self) -> Path:
