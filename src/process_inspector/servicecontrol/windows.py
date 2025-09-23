@@ -51,7 +51,16 @@ class Service(ServiceInterface):
         proc = subprocess.run(shlex.split(cmd), check=True)  # noqa: S603
         return proc.returncode == 0
 
-    # def status(self):
-    #     """Return status string."""
-    #     if self.service:
-    #         return self.service.status()
+    def status(self) -> str:
+        """Return status string (e.g., 'Running', 'Stopped')."""
+        cmd = f'''powershell -command "Get-Service -Name '{self.name}'"'''
+        # logger.debug("Execute command: %s", cmd)
+        proc = subprocess.run(  # noqa: S603
+            shlex.split(cmd), check=True, capture_output=True, text=True
+        )
+        output = proc.stdout.strip().splitlines()
+        # Find the line after the header (skip the first two lines)
+        if len(output) >= 3:  # noqa: PLR2004
+            status_line = output[2]
+            return status_line.split()[0].upper()
+        return "--"
