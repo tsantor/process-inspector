@@ -1,4 +1,5 @@
 import contextlib
+import json
 import time
 from pathlib import Path
 
@@ -33,6 +34,12 @@ def ensure_app_closed(teamviewer):
 def test_get_teamviewer_info():
     info = get_teamviewer_info()
     assert all(x in info for x in ["id", "version", "path", "is_installed"])
+
+
+def test_get_teamviewer_info_is_serializable(teamviewer):
+    info = get_teamviewer_info()
+    serialized = json.dumps(info)
+    assert isinstance(serialized, str)
 
 
 def test_get_teamviewer_path():

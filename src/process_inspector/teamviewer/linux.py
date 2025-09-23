@@ -60,7 +60,7 @@ def get_teamviewer_path() -> Path:
 @cache
 def is_teamviewer_installed() -> bool:
     """Check if TeamViewer is installed on a Linux system."""
-    return get_teamviewer_path()
+    return get_teamviewer_path() is not False
 
 
 @cache

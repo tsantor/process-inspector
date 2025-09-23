@@ -1,4 +1,5 @@
 import contextlib
+import json
 import sys
 import time
 from pathlib import Path
@@ -123,3 +124,24 @@ def test_process_info(app):
     assert isinstance(proc_info["proc_usage"], str)
     assert isinstance(proc_info["uptime_seconds"], int)
     assert isinstance(proc_info["uptime"], str)
+
+
+def test_to_dict_is_serializable(app):
+    app_dict = app.to_dict()
+    serialized = json.dumps(app_dict)
+    assert isinstance(serialized, str)
+
+
+def test_process_info_is_serializable(app):
+    assert app.open() is True
+    timeout = 10
+    start = time.time()
+    while not app.is_running():
+        if time.time() - start > timeout:
+            pytest.fail("App did not start within timeout")
+        time.sleep(1)
+    assert app.is_running() is True
+    proc_info = app.process_info()
+    serialized = json.dumps(proc_info)
+    assert isinstance(serialized, str)
+    assert app.close() is True
