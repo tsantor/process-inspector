@@ -67,6 +67,10 @@ def test_app_close(app):
     assert app.close() is True
 
 
+def test_close_when_app_not_running(app):
+    assert app.close() is True
+
+
 def test_app_version(app):
     assert app.get_version() is not None
 
@@ -84,13 +88,14 @@ def test_to_dict(app):
         "install_date_short",
     ]
     assert all(key in app_dict for key in expected_keys)
+    assert isinstance(app_dict["install_date"], str)
+    assert isinstance(app_dict["install_date_short"], str)
+    assert isinstance(app_dict["version"], str)
+    assert isinstance(app_dict["is_installed"], bool)
     assert app_dict["is_installed"] is True
     assert app_dict["exe"] == app.app_exe
     assert app_dict["name"] == app.app_name
     assert app_dict["path"] == str(app.app_path)
-    assert isinstance(app_dict["install_date"], str)
-    assert isinstance(app_dict["install_date_short"], str)
-    assert isinstance(app_dict["version"], str)
 
 
 def test_process_info(app):

@@ -33,11 +33,11 @@ class ServiceInterface(ABC):
 
     def open(self) -> bool:
         """Alias so we can use a service like an app."""
-        self.start()
+        return self.start()
 
     def close(self) -> bool:
         """Alias so we can use a service like an app."""
-        self.stop()
+        return self.stop()
 
     # @abstractmethod
     # def status(self) -> str:
