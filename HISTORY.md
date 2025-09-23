@@ -18,3 +18,7 @@ All notable changes to this project will be documented in this file. This projec
 ## 0.1.3 (2025-09-16)
 
 - CHANGED - Improved query times for process running and process info
+
+## 0.1.4 (2025-09-23)
+
+- CHANGED - Fixed failing Linux tests
