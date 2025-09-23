@@ -34,21 +34,21 @@ class Service(ServiceInterface):
         """Start Service"""
         cmd = f'''powershell -command "Start-Service '{self.name}'"'''
         logger.debug("Execute command: %s", cmd)
-        proc = subprocess.run(shlex.split(cmd), check=True)  # noqa: S603
+        proc = subprocess.run(shlex.split(cmd), check=False)  # noqa: S603
         return proc.returncode == 0
 
     def stop(self) -> bool:
         """Stop Service"""
         cmd = f'''powershell -command "Stop-Service '{self.name}' -Force"'''
         logger.debug("Execute command: %s", cmd)
-        proc = subprocess.run(shlex.split(cmd), check=True)  # noqa: S603
+        proc = subprocess.run(shlex.split(cmd), check=False)  # noqa: S603
         return proc.returncode == 0
 
     def restart(self) -> bool:
         """Restart service"""
         cmd = f'''powershell -command "Restart-Service '{self.name}' -Force"'''
         logger.debug("Execute command: %s", cmd)
-        proc = subprocess.run(shlex.split(cmd), check=True)  # noqa: S603
+        proc = subprocess.run(shlex.split(cmd), check=False)  # noqa: S603
         return proc.returncode == 0
 
     def status(self) -> str:
