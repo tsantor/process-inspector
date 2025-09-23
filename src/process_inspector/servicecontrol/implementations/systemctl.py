@@ -10,14 +10,15 @@ logger = logging.getLogger(__name__)
 class SystemCtl(ServiceInterface):
     """Linux System Ctl Service"""
 
-    @property
-    def prefix(self):
-        """Prefix with sudo if needed."""
-        return "sudo" if self.use_sudo else ""
+    def __init__(self, name):
+        super().__init__(name)
+        if not self.systemctl_path:
+            msg = "systemctl executable not found"
+            raise FileNotFoundError(msg)
 
     def is_running(self) -> bool:
         """Determine if service is running."""
-        cmd = f"{self.prefix} systemctl status {self.name}".strip()
+        cmd = f"{self.systemctl_path} status {self.name}".strip()
         # logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
             shlex.split(cmd), check=False, text=True, capture_output=True
@@ -26,7 +27,7 @@ class SystemCtl(ServiceInterface):
 
     def start(self) -> bool:
         """Start service"""
-        cmd = f"{self.prefix} systemctl start {self.name}".strip()
+        cmd = f"{self.systemctl_path} start {self.name}".strip()
         logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
             shlex.split(cmd), check=False, text=True, capture_output=True
@@ -35,7 +36,7 @@ class SystemCtl(ServiceInterface):
 
     def stop(self) -> bool:
         """Stop service"""
-        cmd = f"{self.prefix} systemctl stop {self.name}".strip()
+        cmd = f"{self.systemctl_path} stop {self.name}".strip()
         logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
             shlex.split(cmd), check=False, text=True, capture_output=True
@@ -44,7 +45,7 @@ class SystemCtl(ServiceInterface):
 
     def restart(self) -> bool:
         """Restart service"""
-        cmd = f"{self.prefix} systemctl restart {self.name}".strip()
+        cmd = f"{self.systemctl_path} restart {self.name}".strip()
         logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
             shlex.split(cmd), check=False, text=True, capture_output=True

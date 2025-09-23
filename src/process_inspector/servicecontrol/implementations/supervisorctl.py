@@ -16,16 +16,15 @@ class SupervisorCtl(ServiceInterface):
     instead.
     """
 
-    supervisor_path = None
-
-    @property
-    def prefix(self):
-        """Prefix with sudo if needed."""
-        return "sudo" if self.use_sudo else ""
+    def __init__(self, name):
+        super().__init__(name)
+        if not self.supervisor_path:
+            msg = "supervisorctl executable not found"
+            raise FileNotFoundError(msg)
 
     def is_running(self) -> bool:
         """Determine if service is running."""
-        cmd = f"{self.prefix} {self.supervisor_path} status {self.name}".strip()
+        cmd = f"{self.supervisor_path} status {self.name}".strip()
         # logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
             shlex.split(cmd), check=False, text=True, capture_output=True
@@ -34,7 +33,7 @@ class SupervisorCtl(ServiceInterface):
 
     def start(self) -> bool:
         """Start service"""
-        cmd = f"{self.prefix} {self.supervisor_path} start {self.name}".strip()
+        cmd = f"{self.supervisor_path} start {self.name}".strip()
         logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
             shlex.split(cmd), check=False, text=True, capture_output=True
@@ -44,7 +43,7 @@ class SupervisorCtl(ServiceInterface):
 
     def stop(self) -> bool:
         """Stop service"""
-        cmd = f"{self.prefix} {self.supervisor_path} stop {self.name}".strip()
+        cmd = f"{self.supervisor_path} stop {self.name}".strip()
         logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
             shlex.split(cmd), check=False, text=True, capture_output=True
@@ -54,7 +53,7 @@ class SupervisorCtl(ServiceInterface):
 
     def restart(self) -> bool:
         """Restart service"""
-        cmd = f"{self.prefix} {self.supervisor_path} restart {self.name}".strip()
+        cmd = f"{self.supervisor_path} restart {self.name}".strip()
         logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
             shlex.split(cmd), check=False, text=True, capture_output=True

@@ -4,7 +4,7 @@
 
 ## Overview
 
-A Python package for cross-platform process management, providing process data as dicts/JSON and allowing process/service control (start, stop, kill) on Windows, Mac, and Linux.
+A Python package for cross-platform process management, providing process data as dicts/JSON and allowing process/service control (start, stop, kill) on Windows, Mac, and Linux (Raspberry Pi).
 
 ## Installation
 
@@ -53,12 +53,6 @@ app.to_dict()
 app.process_info()
 app.close()
 
-# Service control
-service = Service("Spooler")
-service.start()
-service.is_running()
-service.stop()
-
 # Teamviewer
 tv = Teamviewer()
 tv.open()
@@ -66,6 +60,58 @@ tv.is_running()
 tv.close()
 tv.get_teamviewer_info()
 
-# This operation requires sudo priveleges on Linux and Mac so ensure you allow it for the user the application is running under.
+# This operation requires sudo priveleges on Linux and Mac
+# Service control
+service = Service("Spooler")
+service.start()
+service.is_running()
+service.stop()
+
+# This operation requires sudo priveleges on Linux and Mac
 OperatingSystem().reboot()
 ```
+
+## Use with Caution!
+
+To control system services we need to allow passwordless use of specific executables. You should know the security implications of doing this so **use at your own risk**.
+
+### Linux
+
+Use `sudo visudo` to add the following lines:
+
+```ini
+%sudo ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl
+%sudo ALL=(ALL) NOPASSWD: /usr/bin/systemctl
+%sudo ALL=(ALL) NOPASSWD: /usr/sbin/reboot
+```
+
+Save and exit the file (`:wq!`). Then do:
+
+```bash
+sudo nano /etc/supervisor/supervisord.conf
+```
+
+Adjust the config so your user can access it:
+
+```ini
+[unix_http_server]
+chmod=0770
+chown=root:pi
+```
+
+Then restart supervisor:
+
+```bash
+sudo systemctl restart supervisor
+```
+
+### macOS
+
+Use `sudo visudo` to add the following lines:
+
+```ini
+%admin ALL=(ALL) NOPASSWD: /opt/homebrew/bin/supervisorctl
+%admin ALL=(ALL) NOPASSWD: /sbin/reboot
+```
+
+Save and exit the file (`:wq!`).
