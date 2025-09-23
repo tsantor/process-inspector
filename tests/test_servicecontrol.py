@@ -12,7 +12,7 @@ from process_inspector.servicecontrol import Service
 @pytest.fixture
 def app():
     if sys.platform == "win32":
-        return Service("Spooler")
+        return Service("Print Spooler")
     # return Service("teamviewerd.service")  # systemctl
     return Service("xapp_monitor")  # supervisorctl
 
