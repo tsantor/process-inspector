@@ -2,6 +2,8 @@ import logging
 from abc import ABC
 from abc import abstractmethod
 
+import psutil
+
 from process_inspector.utils.processutils import get_process_info
 
 logger = logging.getLogger(__name__)
@@ -11,13 +13,16 @@ class ServiceInterface(ABC):
     """Basic control of a Service"""
 
     def __init__(self, name):
-        self.name = name
-        self._pid = None
-        self._process = None
+        self.name: str = name
+        self._pid: int = None
+        self._process: psutil.Process = None
         logger.info("Service name: %s", self.name)
 
-    def pid(self):
+    def pid(self) -> int | None:
         return self._pid
+
+    def get_process(self) -> psutil.Process:
+        return psutil.Process(self._pid)
 
     @abstractmethod
     def is_running(self) -> bool:
@@ -59,6 +64,6 @@ class ServiceInterface(ABC):
         }
 
     def process_info(self) -> dict:
-        if proc := self._process:
+        if proc := (self._process or self._cached_process):
             return get_process_info(proc)
         return {}

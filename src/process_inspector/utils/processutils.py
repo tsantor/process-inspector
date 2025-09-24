@@ -115,7 +115,7 @@ def get_process_info(process: psutil.Process) -> dict:
     with process.oneshot():
         return {
             "pid": process.pid,
-            "status": process.status(),
+            "status": process.status().upper(),
             "mem_usage_percent": get_mem_usage_perc(process) if process else "--",
             "mem_usage": get_mem_usage(process) if process else "--",
             "vmem_usage": get_vmem_usage(process) if process else "--",

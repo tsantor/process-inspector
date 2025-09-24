@@ -234,23 +234,16 @@ def test_as_dict(app):
     service_dict = app.as_dict()
     assert isinstance(service_dict, dict)
 
-    # Check for expected keys (adjust based on your Service implementation)
     expected_keys = [
         "name",
+        "pid",
         "status",
-        "version",
-        "is_installed",
+        "is_running",
     ]
+    missing_keys = [key for key in expected_keys if key not in service_dict]
 
-    # Check that at least some expected keys exist
-    for key in expected_keys:
-        if key in service_dict:
-            # Basic type validation
-            assert service_dict[key] is not None
-
-    # Status should always be present and be a string
-    if "status" in service_dict:
-        assert isinstance(service_dict["status"], str)
+    assert not missing_keys, f"Missing keys: {missing_keys}"
+    assert isinstance(service_dict["status"], str)
 
 
 def test_process_info_when_running(app):
@@ -258,6 +251,7 @@ def test_process_info_when_running(app):
     with running_service(app) as running:
         proc_info = running.process_info()
         assert isinstance(proc_info, dict)
+        assert proc_info != {}, "Dict is empty"
 
         expected_keys = [
             "pid",
@@ -269,23 +263,24 @@ def test_process_info_when_running(app):
             "uptime_seconds",
             "uptime",
         ]
+        missing_keys = [key for key in expected_keys if key not in proc_info]
+        assert not missing_keys, f"Missing keys: {missing_keys}"
 
-        # Check that keys exist and have correct types
-        for key in expected_keys:
-            if key in proc_info:
-                if key == "pid":
-                    assert isinstance(proc_info[key], int)
-                    assert proc_info[key] > 0
-                elif key == "uptime_seconds":
-                    assert isinstance(proc_info[key], int)
-                    assert proc_info[key] >= 0
-                else:
-                    assert isinstance(proc_info[key], str)
+        assert isinstance(proc_info["pid"], int)
+        assert proc_info["pid"] > 0
+
+        assert isinstance(proc_info["uptime_seconds"], int)
+        assert proc_info["uptime_seconds"] >= 0
+
+        assert isinstance(proc_info["status"], str)
+        assert proc_info["status"] == "RUNNING"
 
 
 def test_as_dict_is_serializable(app):
     """Test that as_dict output is JSON serializable."""
     service_dict = app.as_dict()
+    assert isinstance(service_dict, dict)
+
     serialized = json.dumps(service_dict)
     assert isinstance(serialized, str)
 
@@ -307,8 +302,9 @@ def test_process_info_is_serializable(app):
 
 def test_instantiate_invalid_service():
     """Test instantiating an invalid service."""
-    with pytest.raises(psutil.NoSuchProcess):
-        Service("InvalidServiceName")
+    # with pytest.raises(psutil.NoSuchProcess):
+    service = Service("InvalidServiceName")
+    assert service.status() == "ERROR"
 
 
 def test_context_manager_exception_handling(app):
