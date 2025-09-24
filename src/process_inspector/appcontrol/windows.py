@@ -2,6 +2,7 @@ import logging
 import re
 import shlex
 import subprocess
+from pathlib import Path
 
 import psutil
 
@@ -15,41 +16,97 @@ logger = logging.getLogger(__name__)
 class App(AppInterface):
     """Basic control of a Windows App"""
 
-    def is_running(self) -> bool:
-        """Check if the application is running."""
-        if self._process is None or self._pid is None:
-            self._process = get_process_by_name(self.app_path)
-            self._pid = self._process.pid if self._process else None
+    def __init__(self, app_path: Path):
+        super().__init__(app_path)
+        self._create_time: float | None = None
 
-        if self._pid is not None:
-            try:
-                return psutil.Process(self._pid).is_running()
-            except psutil.NoSuchProcess:
-                self._process = None
-                self._pid = None
+    def _reset_proc(self) -> None:
+        self._process = None
+        self._pid = None
+        self._create_time = None
+
+    def is_running(self) -> bool:
+        """Check if the *specific* app instance is running."""
+        if self._pid is None:
+            # Fallback (first run, or after a manual kill outside our code)
+            proc = get_process_by_name(self.app_path)
+            if not proc:
                 return False
-        return False
+            self._process = proc
+            self._pid = proc.pid
+            try:
+                self._create_time = proc.create_time()
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                self._reset_proc()
+                return False
+
+        try:
+            p = self._process or psutil.Process(self._pid)
+            # Guard against PID reuse: ensure it's the same process we started
+            if self._create_time is not None:
+                if abs(p.create_time() - self._create_time) > 1e-3:
+                    # Different process now occupies this PID
+                    self._reset_proc()
+                    return False
+
+            # psutil quirk: is_running can be True for zombies; also check status
+            return p.is_running() and p.status() != psutil.STATUS_ZOMBIE
+        except psutil.NoSuchProcess:
+            self._reset_proc()
+            return False
 
     def open(self) -> bool:
-        """Open app"""
+        """Open app and remember the PID we spawned."""
         if self.is_running():
             return True
 
-        cmd = f'START "" "{self.app_path}"'  # fails if spaces in filename
-        cmd = cmd.replace("&", "^&")  # escape special characters
-        logger.debug("Execute command: %s", cmd)
-        proc = subprocess.run(shlex.split(cmd), check=False, shell=True)  # noqa: S602
-        return proc.returncode == 0
+        # Launch the executable directly
+        try:
+            proc = subprocess.Popen([str(self.app_path)])  # noqa: S603
+        except FileNotFoundError:
+            logger.exception("App not found: %s", self.app_path)
+            return False
+        except Exception:
+            logger.exception("Failed to start app: %s", self.app_path)
+            return False
+
+        self._pid = proc.pid
+        try:
+            self._process = psutil.Process(self._pid)
+            self._create_time = self._process.create_time()
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            # Very unlikely right after spawn; handle gracefully
+            self._reset_proc()
+            return False
+
+        return True
 
     def close(self) -> bool:
-        """Close app"""
+        """Close the running app we launched (terminate → kill) and wait."""
         if not self.is_running():
+            self._reset_proc()
             return True
 
-        cmd = f"Taskkill /PID {self._pid} /F"
-        logger.debug("Execute command: %s", cmd)
-        proc = subprocess.run(shlex.split(cmd), check=False)  # noqa: S603
-        return proc.returncode == 0
+        try:
+            p = self._process or psutil.Process(self._pid)
+        except psutil.NoSuchProcess:
+            self._reset_proc()
+            return True
+
+        # Try graceful terminate, then escalate
+        try:
+            p.terminate()  # On Windows this is TerminateProcess under the hood
+            p.wait(timeout=2.0)
+        except (psutil.NoSuchProcess, psutil.TimeoutExpired):
+            try:
+                p.kill()
+                p.wait(timeout=3.0)
+            except (psutil.NoSuchProcess, psutil.TimeoutExpired):
+                # If it still won't die, consider it a failure but reset state
+                logger.warning("Failed to kill process PID=%s", self._pid)
+
+        self._reset_proc()
+        return True
 
     def get_version(self) -> str:
         escaped_path = str(self.app_path).replace("\\", "\\\\")
