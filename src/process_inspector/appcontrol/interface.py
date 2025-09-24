@@ -5,10 +5,10 @@ from datetime import datetime
 from functools import cached_property
 from pathlib import Path
 
-import psutil
-
+# import psutil
 from process_inspector.utils.datetimeutils import human_datetime_short
-from process_inspector.utils.processutils import get_process_by_name
+
+# from process_inspector.utils.processutils import get_process_by_name
 from process_inspector.utils.processutils import get_process_info
 
 logger = logging.getLogger(__name__)
@@ -33,14 +33,14 @@ class AppInterface(ABC):
         # Initialize PID and process (if already running)
         self.is_running()
 
-    @property
-    def process(self) -> psutil.Process | None:
-        """Return cached process if running, else refresh."""
-        if self._process is None or not self.is_running():
-            # logger.debug("Refreshing process info for %s", self.app_name)
-            self._process = get_process_by_name(self.app_path)
-            self._pid = self._process.pid if self._process else None
-        return self._process
+    # @property
+    # def process(self) -> psutil.Process | None:
+    #     """Return cached process if running, else refresh."""
+    #     if self._process is None or not self.is_running():
+    #         # logger.debug("Refreshing process info for %s", self.app_name)
+    #         self._process = get_process_by_name(self.app_path)
+    #         self._pid = self._process.pid if self._process else None
+    #     return self._process
 
     def is_installed(self) -> bool:
         return self.app_path.exists()
@@ -95,6 +95,6 @@ class AppInterface(ABC):
         return self.to_dict()
 
     def process_info(self) -> dict:
-        if proc := self.process:
+        if proc := self._process:
             return get_process_info(proc)
         return {}
