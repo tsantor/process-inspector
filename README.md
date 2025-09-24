@@ -49,7 +49,7 @@ app = NativeApp('C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe')
 app.open()
 app.is_running()
 app.get_version()
-app.to_dict()
+app.as_dict()
 app.process_info()
 app.close()
 

@@ -154,9 +154,9 @@ def test_app_version(app):
     assert app.get_version() != "--"
 
 
-def test_to_dict(app):
+def test_as_dict(app):
     """Test dictionary representation."""
-    app_dict = app.to_dict()
+    app_dict = app.as_dict()
     assert isinstance(app_dict, dict)
     expected_keys = [
         "exe",
@@ -215,9 +215,9 @@ def test_process_info(app):
         assert proc_info["uptime_seconds"] >= 0
 
 
-def test_to_dict_is_serializable(app):
-    """Test that to_dict output is JSON serializable."""
-    app_dict = app.to_dict()
+def test_as_dict_is_serializable(app):
+    """Test that as_dict output is JSON serializable."""
+    app_dict = app.as_dict()
     serialized = json.dumps(app_dict)
     assert isinstance(serialized, str)
 

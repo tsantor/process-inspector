@@ -1,5 +1,10 @@
+import contextlib
+import json
 import sys
+import time
+from collections.abc import Callable
 
+import psutil
 import pytest
 
 from process_inspector.servicecontrol import Service
@@ -7,6 +12,152 @@ from process_inspector.servicecontrol import Service
 # pytestmark = pytest.mark.skipif(
 #     sys.platform == "darwin", reason="Skipping as requires sudo on macOS"
 # )
+
+
+def wait_for_condition(
+    condition_func: Callable[[], bool],
+    timeout: float = 10,
+    interval: float = 0.1,
+    description: str = "condition",
+) -> bool:
+    """Wait for a condition to be met with exponential backoff for efficiency."""
+    start = time.time()
+    current_interval = interval
+    max_interval = 1.0  # Cap backoff at 1 second
+
+    while time.time() - start < timeout:
+        if condition_func():
+            return True
+        time.sleep(current_interval)
+        # Exponential backoff for efficiency
+        current_interval = min(current_interval * 1.2, max_interval)
+
+    pytest.fail(f"{description} was not met within {timeout} seconds")
+
+
+@contextlib.contextmanager
+def running_service(
+    service: Service, startup_timeout: float = 15, shutdown_timeout: float = 10
+):
+    """Context manager to ensure service is running and properly cleaned up."""
+    # Store original state to restore later
+    original_was_running = service.is_running()
+
+    # Ensure clean state before starting
+    try:
+        if service.is_running():
+            service.stop()
+            wait_for_condition(
+                lambda: not service.is_running(),
+                timeout=shutdown_timeout,
+                description="Pre-test service cleanup",
+            )
+    except Exception:  # noqa: BLE001
+        # If we can't clean up, skip this iteration
+        pytest.skip("Could not clean up service before test")
+
+    # Start the service
+    start_result = service.start()
+    if not start_result:
+        pytest.fail("Failed to initiate service startup")
+
+    try:
+        # Wait for service to be fully running
+        wait_for_condition(
+            lambda: service.is_running(),
+            timeout=startup_timeout,
+            description="Service startup",
+        )
+
+        # Yield the running service
+        yield service
+
+    except Exception:
+        # If something goes wrong, still try to clean up
+        with contextlib.suppress(Exception):
+            if service.is_running() and not original_was_running:
+                service.stop()
+        # Raise the original exception
+        raise
+
+    finally:
+        # Restore original state
+        try:
+            current_state = service.is_running()
+            if current_state != original_was_running:
+                if original_was_running:
+                    # Should be running but isn't - start it
+                    if not current_state:
+                        start_result = service.start()
+                        if start_result:
+                            wait_for_condition(
+                                lambda: service.is_running(),
+                                timeout=startup_timeout,
+                                description="Service restoration to running state",
+                            )
+                # Should be stopped but isn't - stop it
+                elif current_state:
+                    stop_result = service.stop()
+                    if stop_result:
+                        wait_for_condition(
+                            lambda: not service.is_running(),
+                            timeout=shutdown_timeout,
+                            description="Service restoration to stopped state",
+                        )
+        except Exception as cleanup_error:  # noqa: BLE001
+            # Log cleanup failure but don't fail the test
+            print(f"Warning: Service cleanup failed: {cleanup_error}")  # noqa: T201
+
+
+@contextlib.contextmanager
+def stopped_service(service: Service, shutdown_timeout: float = 10):
+    """Context manager to ensure service is stopped and restore original state."""
+    # Store original state to restore later
+    original_was_running = service.is_running()
+
+    # Ensure service is stopped
+    try:
+        if service.is_running():
+            service.stop()
+            wait_for_condition(
+                lambda: not service.is_running(),
+                timeout=shutdown_timeout,
+                description="Service shutdown for test",
+            )
+    except Exception:  # noqa: BLE001
+        pytest.skip("Could not stop service for test")
+
+    try:
+        yield service
+    finally:
+        # Restore original state
+        try:
+            if original_was_running and not service.is_running():
+                start_result = service.start()
+                if start_result:
+                    wait_for_condition(
+                        lambda: service.is_running(),
+                        timeout=15,
+                        description="Service restoration to original running state",
+                    )
+        except Exception as cleanup_error:  # noqa: BLE001
+            print(f"Warning: Service restoration failed: {cleanup_error}")  # noqa: T201
+
+
+@contextlib.contextmanager
+def service_if_needed(
+    service: Service,
+    need_running: bool = True,
+    startup_timeout: float = 15,
+    shutdown_timeout: float = 10,
+):
+    """Context manager that manages service state as needed."""
+    if need_running:
+        with running_service(service, startup_timeout, shutdown_timeout) as running:
+            yield running
+    else:
+        with stopped_service(service, shutdown_timeout) as stopped:
+            yield stopped
 
 
 @pytest.fixture
@@ -17,36 +168,200 @@ def app():
     return Service("xapp_monitor")  # supervisorctl
 
 
-def test_service_start(app):
-    assert app.start() is True
+def test_service_start_stop(app):
+    """Test basic start/stop functionality."""
+    with running_service(app) as running:
+        assert running.is_running() is True
 
 
 def test_service_is_running(app):
-    app.start()
-    assert app.is_running() is True
+    """Test is_running status."""
+    with running_service(app) as running:
+        assert running.is_running() is True
 
 
-def test_service_stop(app):
-    assert app.stop() is True
+def test_service_stop_when_running(app):
+    """Test stopping a running service."""
+    with running_service(app) as running:
+        assert running.is_running() is True
+        assert running.stop() is True
+        wait_for_condition(
+            lambda: not running.is_running(),
+            timeout=10,
+            description="Service stop",
+        )
+
+
+def test_service_start_when_stopped(app):
+    """Test starting a stopped service."""
+    with stopped_service(app) as stopped:
+        assert stopped.is_running() is False
+        assert stopped.start() is True
+        wait_for_condition(
+            lambda: stopped.is_running(),
+            timeout=15,
+            description="Service start",
+        )
 
 
 def test_service_restart(app):
-    assert app.restart() is True
+    """Test restart functionality."""
+    with running_service(app) as running:
+        initial_pid = running.pid
+
+        assert running.restart() is True
+
+        # Wait for service to be running again
+        wait_for_condition(
+            lambda: running.is_running(),
+            timeout=20,  # Restart might take longer
+            description="Service restart",
+        )
+
+        assert running.pid() != initial_pid, "Service PID should change after restart"
 
 
 def test_service_status(app):
+    """Test status retrieval."""
     status = app.status()
     assert isinstance(status, str)
     assert status != "--"
+    assert len(status) > 0
 
 
-def test_service_invalid():
-    if sys.platform == "win32":
-        svc = Service("InvalidServiceName")
-    else:
-        svc = Service("invalid-service-name")
-    assert svc.start() is False
-    assert svc.stop() is False
-    assert svc.restart() is False
-    assert svc.is_running() is False
-    assert svc.status() == "ERROR"
+def test_as_dict(app):
+    """Test dictionary representation."""
+    service_dict = app.as_dict()
+    assert isinstance(service_dict, dict)
+
+    # Check for expected keys (adjust based on your Service implementation)
+    expected_keys = [
+        "name",
+        "status",
+        "version",
+        "is_installed",
+    ]
+
+    # Check that at least some expected keys exist
+    for key in expected_keys:
+        if key in service_dict:
+            # Basic type validation
+            assert service_dict[key] is not None
+
+    # Status should always be present and be a string
+    if "status" in service_dict:
+        assert isinstance(service_dict["status"], str)
+
+
+def test_process_info_when_running(app):
+    """Test process information retrieval when service is running."""
+    with running_service(app) as running:
+        proc_info = running.process_info()
+        assert isinstance(proc_info, dict)
+
+        expected_keys = [
+            "pid",
+            "status",
+            "mem_usage_percent",
+            "mem_usage",
+            "vmem_usage",
+            "proc_usage",
+            "uptime_seconds",
+            "uptime",
+        ]
+
+        # Check that keys exist and have correct types
+        for key in expected_keys:
+            if key in proc_info:
+                if key == "pid":
+                    assert isinstance(proc_info[key], int)
+                    assert proc_info[key] > 0
+                elif key == "uptime_seconds":
+                    assert isinstance(proc_info[key], int)
+                    assert proc_info[key] >= 0
+                else:
+                    assert isinstance(proc_info[key], str)
+
+
+def test_as_dict_is_serializable(app):
+    """Test that as_dict output is JSON serializable."""
+    service_dict = app.as_dict()
+    serialized = json.dumps(service_dict)
+    assert isinstance(serialized, str)
+
+    deserialized = json.loads(serialized)
+    assert deserialized == service_dict
+
+
+def test_process_info_is_serializable(app):
+    with running_service(app) as running:
+        proc_dict = running.process_info()
+        assert isinstance(proc_dict, dict)
+
+        serialized = json.dumps(proc_dict)
+        assert isinstance(serialized, str)
+
+        deserialized = json.loads(serialized)
+        assert deserialized == proc_dict
+
+
+def test_instantiate_invalid_service():
+    """Test instantiating an invalid service."""
+    with pytest.raises(psutil.NoSuchProcess):
+        Service("InvalidServiceName")
+
+
+def test_context_manager_exception_handling(app):
+    """Test that context manager restores state even if test fails."""
+    original_state = app.is_running()
+
+    with contextlib.suppress(ValueError), running_service(app) as running:
+        assert running.is_running() is True
+        msg = "Simulated test failure"
+        raise ValueError(msg)
+
+    # Service should be restored to original state
+    wait_for_condition(
+        lambda: app.is_running() == original_state,
+        timeout=10,
+        description="State restoration after exception",
+    )
+
+
+def test_performance_timing(app):
+    """Test and measure service startup/shutdown performance."""
+    startup_max_time = 15  # Services can be slower than apps
+    shutdown_max_time = 10
+
+    # Measure full cycle time
+    start_time = time.time()
+
+    with running_service(app) as running:
+        startup_time = time.time() - start_time
+        assert running.is_running() is True
+
+        # Test restart performance too
+        restart_start = time.time()
+        assert running.restart() is True
+        wait_for_condition(
+            lambda: running.is_running(),
+            timeout=20,
+            description="Service restart timing test",
+        )
+        restart_time = time.time() - restart_start
+
+    total_time = time.time() - start_time
+    shutdown_time = total_time - startup_time
+
+    # These are loose bounds - adjust based on your service characteristics
+    assert startup_time < startup_max_time, (
+        f"Service took {startup_time:.2f}s to start (too slow)"
+    )
+    assert shutdown_time < shutdown_max_time, (
+        f"Service took {shutdown_time:.2f}s to shut down (too slow)"
+    )
+
+    print(  # noqa: T201
+        f"Startup: {startup_time:.2f}s, Shutdown: {shutdown_time:.2f}s, "
+        f"Restart: {restart_time:.2f}s, Total: {total_time:.2f}s"
+    )

@@ -2,6 +2,8 @@ import logging
 from abc import ABC
 from abc import abstractmethod
 
+from process_inspector.utils.processutils import get_process_info
+
 logger = logging.getLogger(__name__)
 
 
@@ -10,8 +12,12 @@ class ServiceInterface(ABC):
 
     def __init__(self, name):
         self.name = name
-        logger.debug("Service name: %s", self.name)
-        # TODO: Add a check to see if the service exists
+        self._pid = None
+        self._process = None
+        logger.info("Service name: %s", self.name)
+
+    def pid(self):
+        return self._pid
 
     @abstractmethod
     def is_running(self) -> bool:
@@ -44,9 +50,15 @@ class ServiceInterface(ABC):
     def __repr__(self):
         return f"Service('{self.name}')"
 
-    def to_dict(self) -> dict:
+    def as_dict(self) -> dict:
         return {
+            "pid": self.pid(),
             "name": self.name,
             "is_running": self.is_running(),
             "status": self.status(),
         }
+
+    def process_info(self) -> dict:
+        if proc := self._process:
+            return get_process_info(proc)
+        return {}

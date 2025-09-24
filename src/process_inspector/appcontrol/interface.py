@@ -33,15 +33,6 @@ class AppInterface(ABC):
         # Initialize PID and process (if already running)
         self.is_running()
 
-    # @property
-    # def process(self) -> psutil.Process | None:
-    #     """Return cached process if running, else refresh."""
-    #     if self._process is None or not self.is_running():
-    #         # logger.debug("Refreshing process info for %s", self.app_name)
-    #         self._process = get_process_by_name(self.app_path)
-    #         self._pid = self._process.pid if self._process else None
-    #     return self._process
-
     def is_installed(self) -> bool:
         return self.app_path.exists()
 
@@ -79,7 +70,7 @@ class AppInterface(ABC):
             return None
         return human_datetime_short(self.install_date)
 
-    def to_dict(self) -> dict:
+    def as_dict(self) -> dict:
         return {
             "exe": self.app_exe,
             "name": self.app_name,
@@ -89,10 +80,6 @@ class AppInterface(ABC):
             "install_date_short": self.install_date_short,
             "install_date": self.install_date_human_short,
         }
-
-    @cached_property
-    def as_dict(self) -> dict:
-        return self.to_dict()
 
     def process_info(self) -> dict:
         if proc := self._process:

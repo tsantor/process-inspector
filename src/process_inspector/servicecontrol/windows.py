@@ -15,20 +15,19 @@ class Service(ServiceInterface):
 
     def __init__(self, name):
         super().__init__(name)
-        self.service = self.get_service()
-
-        if self.service:
-            logger.debug("%s service found | PID: %s", self.name, self.service.pid())
-        else:
-            logger.warning("%s service not found", self.name)
+        self._service = self.get_service()
+        self._pid = self._service.pid() if self._service else None
+        # self._process = self.get_process()
+        logger.info("Service: %s | Status: %s", name, self.status())
 
     def get_service(self):
-        """Get Windows Service by name."""
-        with contextlib.suppress(psutil.NoSuchProcess):
-            return psutil.win_service_get(self.name)
+        return psutil.win_service_get(self.name)
+
+    def get_process(self) -> psutil.Process:
+        return psutil.Process(self._pid)
 
     def is_running(self) -> bool:
-        return self.service and self.service.status() == "running"
+        return self._service and self._service.status() == "running"
 
     def start(self) -> bool:
         """Start Service"""
@@ -53,15 +52,4 @@ class Service(ServiceInterface):
 
     def status(self) -> str:
         """Return status string (e.g., 'Running', 'Stopped')."""
-        # cmd = f'''powershell -command "Get-Service -Name '{self.name}'"'''
-        # # logger.debug("Execute command: %s", cmd)
-        # proc = subprocess.run(
-        #     shlex.split(cmd), check=False, capture_output=True, text=True
-        # )
-        # output = proc.stdout.strip().splitlines()
-        # # Find the line after the header (skip the first two lines)
-        # if len(output) >= 3:
-        #     status_line = output[2]
-        #     return status_line.split()[0].upper()
-        # return "--"
-        return self.service.status().upper() if self.service else "ERROR"
+        return self._service.status().upper() if self._service else "ERROR"
