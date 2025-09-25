@@ -16,14 +16,25 @@ class SystemCtl(ServiceInterface):
             msg = "systemctl executable not found"
             raise FileNotFoundError(msg)
 
+    # def is_running(self) -> bool:
+    #     """Determine if service is running."""
+    #     cmd = f"sudo {self.systemctl_path} status {self.name}".strip()
+    #     # logger.debug("Execute command: %s", cmd)
+    #     proc = subprocess.run(
+    #         shlex.split(cmd), check=False, text=True, capture_output=True
+    #     )
+    #     return "active (running)" in proc.stdout.strip().lower()
+
     def is_running(self) -> bool:
-        """Determine if service is running."""
-        cmd = f"sudo {self.systemctl_path} status {self.name}".strip()
-        # logger.debug("Execute command: %s", cmd)
-        proc = subprocess.run(  # noqa: S603
-            shlex.split(cmd), check=False, text=True, capture_output=True
-        )
-        return "active (running)" in proc.stdout.strip().lower()
+        """Check if service is running."""
+        # This will refresh PID/process if needed
+        current_process = self.get_process()
+
+        if not current_process:
+            logger.debug("No process found for service '%s'", self.name)
+            return False
+
+        return self.status() == "RUNNING"
 
     def start(self) -> bool:
         """Start service"""

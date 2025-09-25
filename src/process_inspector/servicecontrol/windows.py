@@ -17,47 +17,21 @@ class Service(ServiceInterface):
         self._service = self.get_service()
 
         # Initialize with current PID if available
-        current_pid = self._service.pid() if self._service else None
+        current_pid = self.get_pid()
         if current_pid:
             self._cached_pid = current_pid
             self._cached_process = self._get_process_for_pid(current_pid)
 
         logger.info("Service: %s | Status: %s", name, self.status())
 
+    def get_pid(self) -> int | None:
+        return self._service.pid() if self._service else None
+
     def pid(self) -> int | None:
         """Get current PID, updating cache if it changed."""
         if not self._service:
             return None
-
-        current_pid = self._service.pid()
-
-        # Update cache if PID changed
-        if current_pid != self._cached_pid:
-            self._cached_pid = current_pid
-            if current_pid:
-                self._cached_process = self._get_process_for_pid(current_pid)
-            else:
-                self._cached_process = None
-
-        return self._cached_pid
-
-    # def get_process(self) -> psutil.Process | None:
-    #     """Get process object, fetching only if PID changed."""
-    #     # Ensure PID is up to date (this will update cache if needed)
-    #     current_pid = self.pid()
-
-    #     if not current_pid:
-    #         return None
-
-    #     return self._cached_process
-
-    def _get_process_for_pid(self, pid: int) -> psutil.Process | None:
-        """Helper to safely create Process object."""
-        try:
-            return psutil.Process(pid)
-        except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
-            logger.warning("Failed to get process for PID %d: %s", pid, e)
-            return None
+        return super().pid()
 
     def get_service(self):
         """Get the service object."""
@@ -72,14 +46,7 @@ class Service(ServiceInterface):
         if not self._service:
             return False
 
-        # This will refresh PID/process if needed
-        current_process = self.get_process()
-
-        if not current_process:
-            logger.debug("No process found for service '%s'", self.name)
-            return False
-
-        return self.status() == "RUNNING"
+        return super().is_running()
 
     def start(self) -> bool:
         """Start Service"""
@@ -123,10 +90,10 @@ class Service(ServiceInterface):
     def status(self) -> str:
         """Return status string (e.g., 'RUNNING', 'STOPPED')."""
         if not self._service:
-            return "ERROR"
+            return "--"
 
         try:
             return self._service.status().upper()
         except Exception as e:  # noqa: BLE001
             logger.error("Failed to get status for service '%s': %s", self.name, e)  # noqa: TRY400
-            return "ERROR"
+            return "--"

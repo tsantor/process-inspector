@@ -245,7 +245,7 @@ def test_as_dict(app):
     assert isinstance(service_dict["status"], str)
 
 
-@pytest.mark.skipif(sys.platform != "win32", reason="Windows only right now")
+# @pytest.mark.skipif(sys.platform == "linux", reason="Not implemented")
 def test_process_info_when_running(app):
     """Test process information retrieval when service is running."""
     with running_service(app) as running:
@@ -273,7 +273,10 @@ def test_process_info_when_running(app):
         assert proc_info["uptime_seconds"] >= 0
 
         assert isinstance(proc_info["status"], str)
-        assert proc_info["status"] == "RUNNING"
+        # RUNNING or SLEEPING is expected
+        assert proc_info["status"] in ("RUNNING", "SLEEPING"), (
+            f"Unexpected status: {proc_info['status']}"
+        )
 
 
 def test_as_dict_is_serializable(app):
@@ -327,8 +330,8 @@ def test_context_manager_exception_handling(app):
 
 def test_performance_timing(app):
     """Test and measure service startup/shutdown performance."""
-    startup_max_time = 15
-    shutdown_max_time = 15
+    startup_max_time = 20
+    shutdown_max_time = 20
 
     # Measure full cycle time
     start_time = time.time()

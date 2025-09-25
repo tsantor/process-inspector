@@ -23,8 +23,22 @@ class ServiceInterface(ABC):
         self._cached_process = None
 
     @abstractmethod
+    def get_pid(self) -> int | None:
+        """Get PID of the service if running, else None."""
+
     def pid(self) -> int | None:
         """Get current PID, updating cache if it changed."""
+        current_pid = self.get_pid()
+
+        # Update cache if PID changed
+        if current_pid != self._cached_pid:
+            self._cached_pid = current_pid
+            if current_pid:
+                self._cached_process = self._get_process_for_pid(current_pid)
+            else:
+                self._cached_process = None
+
+        return self._cached_pid
 
     def get_process(self) -> psutil.Process | None:
         """Get process object, fetching only if PID changed."""
@@ -36,9 +50,28 @@ class ServiceInterface(ABC):
 
         return self._cached_process
 
-    @abstractmethod
+    def _get_process_for_pid(self, pid: int) -> psutil.Process | None:
+        """Helper to safely create Process object."""
+        try:
+            return psutil.Process(pid)
+        except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
+            logger.warning("Failed to get process for PID %d: %s", pid, e)
+            return None
+
+    # @abstractmethod
+    # def is_running(self) -> bool:
+    #     """Determine if service is running"""
+
     def is_running(self) -> bool:
-        """Determine if service is running"""
+        """Check if service is running."""
+        # This will refresh PID/process if needed
+        current_process = self.get_process()
+
+        if not current_process:
+            logger.debug("No process found for service '%s'", self.name)
+            return False
+
+        return self.status() in ["RUNNING", "SLEEPING"]
 
     @abstractmethod
     def start(self) -> bool:
