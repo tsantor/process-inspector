@@ -29,3 +29,7 @@ class Service(SupervisorCtl):
         # Check if any of the possible paths contain the executable
         possible_paths = [Path("/usr/bin/systemctl")]
         return next((path for path in possible_paths if path.is_file()), False)
+
+    def pid(self) -> int | None:
+        # TODO
+        return None
