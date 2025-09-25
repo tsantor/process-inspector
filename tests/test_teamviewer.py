@@ -1,6 +1,5 @@
 import contextlib
 import json
-import time
 from pathlib import Path
 
 import pytest
@@ -9,6 +8,8 @@ from process_inspector.teamviewer import Teamviewer
 from process_inspector.teamviewer import get_teamviewer_info
 from process_inspector.teamviewer import get_teamviewer_path
 from process_inspector.teamviewer import is_teamviewer_installed
+
+from .utils import wait_for_condition
 
 pytestmark = pytest.mark.skipif(
     not is_teamviewer_installed(), reason="TeamViewer is not installed"
@@ -41,6 +42,9 @@ def test_get_teamviewer_info_is_serializable(teamviewer):
     serialized = json.dumps(info)
     assert isinstance(serialized, str)
 
+    deserialized = json.loads(serialized)
+    assert deserialized == info
+
 
 def test_get_teamviewer_path():
     path = get_teamviewer_path()
@@ -53,7 +57,11 @@ def test_teamviewer_open(teamviewer):
 
 def test_teamviewer_is_running(teamviewer):
     assert teamviewer.open() is True
-    time.sleep(1)  # Give it a moment to start
+    wait_for_condition(
+        lambda: teamviewer.is_running(),
+        timeout=10,
+        description="TeamViewer to be running",
+    )
     assert teamviewer.is_running() is True
 
 

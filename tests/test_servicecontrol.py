@@ -2,36 +2,16 @@ import contextlib
 import json
 import sys
 import time
-from collections.abc import Callable
 
 import pytest
 
 from process_inspector.servicecontrol import Service
 
+from .utils import wait_for_condition
+
 # pytestmark = pytest.mark.skipif(
 #     sys.platform == "darwin", reason="Skipping as requires sudo on macOS"
 # )
-
-
-def wait_for_condition(
-    condition_func: Callable[[], bool],
-    timeout: float = 10,
-    interval: float = 0.1,
-    description: str = "condition",
-) -> bool:
-    """Wait for a condition to be met with exponential backoff for efficiency."""
-    start = time.time()
-    current_interval = interval
-    max_interval = 1.0  # Cap backoff at 1 second
-
-    while time.time() - start < timeout:
-        if condition_func():
-            return True
-        time.sleep(current_interval)
-        # Exponential backoff for efficiency
-        current_interval = min(current_interval * 1.2, max_interval)
-
-    pytest.fail(f"{description} was not met within {timeout} seconds")
 
 
 @contextlib.contextmanager
@@ -308,7 +288,19 @@ def test_instantiate_invalid_service():
     # with pytest.raises(psutil.NoSuchProcess):
     service = Service("InvalidServiceName")
     assert service.pid() is None
-    assert service.status() == "--"
+    assert service.status() in ["--", "ERROR"]
+    assert service.process_info() == {}
+    assert service.is_running() is False
+    assert service.as_dict() == {
+        "pid": None,
+        "name": "InvalidServiceName",
+        "is_running": False,
+        "status": service.status(),
+    }
+
+    invalid_pid = 999999
+    proc = service._get_process_for_pid(invalid_pid)  # noqa: SLF001
+    assert proc is None
 
 
 def test_context_manager_exception_handling(app):

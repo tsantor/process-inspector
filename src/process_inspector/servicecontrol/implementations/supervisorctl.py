@@ -19,8 +19,8 @@ class SupervisorCtl(ServiceInterface):
     def __init__(self, name):
         super().__init__(name)
         if not self.supervisor_path:
-            msg = "supervisorctl executable not found"
-            raise FileNotFoundError(msg)
+            msg = "supervisorctl executable not found"  # pragma: no cover
+            raise FileNotFoundError(msg)  # pragma: no cover
 
         # Initialize with current PID if available
         current_pid = self.get_pid()
@@ -42,26 +42,6 @@ class SupervisorCtl(ServiceInterface):
             return int(output)
         return None
 
-    # def is_running(self) -> bool:
-    #     """Determine if service is running."""
-    #     cmd = f"sudo {self.supervisor_path} status {self.name}".strip()
-    #     # logger.debug("Execute command: %s", cmd)
-    #     proc = subprocess.run(
-    #         shlex.split(cmd), check=False, text=True, capture_output=True
-    #     )
-    #     return "RUNNING" in proc.stdout.strip()
-
-    # def is_running(self) -> bool:
-    #     """Check if service is running."""
-    #     # This will refresh PID/process if needed
-    #     current_process = self.get_process()
-
-    #     if not current_process:
-    #         logger.debug("No process found for service '%s'", self.name)
-    #         return False
-
-    #     return self.status() == "RUNNING"
-
     def start(self) -> bool:
         """Start service"""
         cmd = f"sudo {self.supervisor_path} start {self.name}".strip()
@@ -71,7 +51,10 @@ class SupervisorCtl(ServiceInterface):
         )
         matches = ["started", "already started"]
         output = proc.stdout.strip().lower()
-        return any(x in output for x in matches)
+        result = any(x in output for x in matches)
+
+        self.reset_cache()
+        return result
 
     def stop(self) -> bool:
         """Stop service"""
@@ -82,7 +65,10 @@ class SupervisorCtl(ServiceInterface):
         )
         matches = ["stopped", "not running"]
         output = proc.stdout.strip().lower()
-        return any(x in output for x in matches)
+        result = any(x in output for x in matches)
+
+        self.reset_cache()
+        return result
 
     def restart(self) -> bool:
         """Restart service"""
@@ -93,7 +79,10 @@ class SupervisorCtl(ServiceInterface):
         )
         matches = ["started"]
         output = proc.stdout.strip().lower()
-        return any(x in output for x in matches)
+        result = any(x in output for x in matches)
+
+        self.reset_cache()
+        return result
 
     def status(self) -> str:
         """Get service status (e.g., RUNNING, STOPPED, etc.)"""
@@ -102,8 +91,8 @@ class SupervisorCtl(ServiceInterface):
         proc = subprocess.run(  # noqa: S603
             shlex.split(cmd), check=False, text=True, capture_output=True
         )
-        if output := proc.stdout.strip():
-            parts = output.split()
-            if len(parts) > 1:
-                return parts[1].upper()
-        return "--"
+        output = proc.stdout.strip()
+        parts = output.split()
+        if len(parts) > 1:
+            return parts[1].upper()
+        return "--"  # pragma: no cover

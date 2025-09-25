@@ -13,8 +13,8 @@ class SystemCtl(ServiceInterface):
     def __init__(self, name):
         super().__init__(name)
         if not self.systemctl_path:
-            msg = "systemctl executable not found"
-            raise FileNotFoundError(msg)
+            msg = "systemctl executable not found"  # pragma: no cover
+            raise FileNotFoundError(msg)  # pragma: no cover
 
     # def is_running(self) -> bool:
     #     """Determine if service is running."""

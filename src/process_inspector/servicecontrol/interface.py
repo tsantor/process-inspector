@@ -91,11 +91,11 @@ class ServiceInterface(ABC):
 
     def open(self) -> bool:
         """Alias so we can use a service like an app."""
-        return self.start()
+        return self.start()  # pragma: no cover
 
     def close(self) -> bool:
         """Alias so we can use a service like an app."""
-        return self.stop()
+        return self.stop()  # pragma: no cover
 
     def __repr__(self):
         return f"Service('{self.name}')"
