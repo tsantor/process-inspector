@@ -17,8 +17,6 @@ class ServiceInterface(ABC):
         self._cached_pid: int = None
         self._cached_process: psutil.Process = None
 
-        logger.info("Service: %s | Status: %s", name, self.status())
-
     def reset_cache(self):
         """Clear cached PID and process info."""
         self._cached_pid = None

@@ -15,8 +15,6 @@ class Service(ServiceInterface):
     def __init__(self, name):
         super().__init__(name)
         self._service = self.get_service()
-        # self._cached_pid = None
-        # self._cached_process = None
 
         # Initialize with current PID if available
         current_pid = self._service.pid() if self._service else None
@@ -24,7 +22,7 @@ class Service(ServiceInterface):
             self._cached_pid = current_pid
             self._cached_process = self._get_process_for_pid(current_pid)
 
-        # logger.info("Service: %s | Status: %s", name, self.status())
+        logger.info("Service: %s | Status: %s", name, self.status())
 
     def pid(self) -> int | None:
         """Get current PID, updating cache if it changed."""
