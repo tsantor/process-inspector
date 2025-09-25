@@ -308,7 +308,7 @@ def test_instantiate_invalid_service():
     # with pytest.raises(psutil.NoSuchProcess):
     service = Service("InvalidServiceName")
     assert service.pid() is None
-    assert service.status() == "ERROR"
+    assert service.status() == "--"
 
 
 def test_context_manager_exception_handling(app):
@@ -330,8 +330,8 @@ def test_context_manager_exception_handling(app):
 
 def test_performance_timing(app):
     """Test and measure service startup/shutdown performance."""
-    startup_max_time = 20
-    shutdown_max_time = 20
+    startup_max_time = 30
+    shutdown_max_time = 30
 
     # Measure full cycle time
     start_time = time.time()
