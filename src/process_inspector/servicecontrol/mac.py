@@ -18,3 +18,7 @@ class Service(SupervisorCtl):
             Path("/usr/local/bin/supervisorctl"),
         ]
         return next((path for path in possible_paths if path.is_file()), False)
+
+    def pid(self) -> int | None:
+        # TODO
+        return None

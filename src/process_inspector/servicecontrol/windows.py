@@ -15,8 +15,8 @@ class Service(ServiceInterface):
     def __init__(self, name):
         super().__init__(name)
         self._service = self.get_service()
-        self._cached_pid = None
-        self._cached_process = None
+        # self._cached_pid = None
+        # self._cached_process = None
 
         # Initialize with current PID if available
         current_pid = self._service.pid() if self._service else None
@@ -24,7 +24,7 @@ class Service(ServiceInterface):
             self._cached_pid = current_pid
             self._cached_process = self._get_process_for_pid(current_pid)
 
-        logger.info("Service: %s | Status: %s", name, self.status())
+        # logger.info("Service: %s | Status: %s", name, self.status())
 
     def pid(self) -> int | None:
         """Get current PID, updating cache if it changed."""
@@ -43,15 +43,15 @@ class Service(ServiceInterface):
 
         return self._cached_pid
 
-    def get_process(self) -> psutil.Process | None:
-        """Get process object, fetching only if PID changed."""
-        # Ensure PID is up to date (this will update cache if needed)
-        current_pid = self.pid()
+    # def get_process(self) -> psutil.Process | None:
+    #     """Get process object, fetching only if PID changed."""
+    #     # Ensure PID is up to date (this will update cache if needed)
+    #     current_pid = self.pid()
 
-        if not current_pid:
-            return None
+    #     if not current_pid:
+    #         return None
 
-        return self._cached_process
+    #     return self._cached_process
 
     def _get_process_for_pid(self, pid: int) -> psutil.Process | None:
         """Helper to safely create Process object."""
@@ -65,8 +65,8 @@ class Service(ServiceInterface):
         """Get the service object."""
         try:
             return psutil.win_service_get(self.name)
-        except Exception as e:
-            logger.error("Failed to get service '%s': %s", self.name, e)
+        except Exception as e:  # noqa: BLE001
+            logger.error("Failed to get service '%s': %s", self.name, e)  # noqa: TRY400
             return None
 
     def is_running(self) -> bool:
@@ -91,10 +91,8 @@ class Service(ServiceInterface):
 
         # Refresh service info after start attempt
         if proc.returncode == 0:
-            self._service = self.get_service()
-            # Clear cache to force refresh on next access
-            self._cached_pid = None
-            self._cached_process = None
+            # self._service = self.get_service()
+            self.reset_cache()
 
         return proc.returncode == 0
 
@@ -106,9 +104,8 @@ class Service(ServiceInterface):
 
         # Clear cache after stop attempt since process will be gone
         if proc.returncode == 0:
-            self._service = self.get_service()
-            self._cached_pid = None
-            self._cached_process = None
+            # self._service = self.get_service()
+            self.reset_cache()
 
         return proc.returncode == 0
 
@@ -120,10 +117,8 @@ class Service(ServiceInterface):
 
         # Refresh service info after restart attempt
         if proc.returncode == 0:
-            self._service = self.get_service()
-            # Clear cache to force refresh on next access (new PID expected)
-            self._cached_pid = None
-            self._cached_process = None
+            # self._service = self.get_service()
+            self.reset_cache()
 
         return proc.returncode == 0
 
@@ -134,6 +129,6 @@ class Service(ServiceInterface):
 
         try:
             return self._service.status().upper()
-        except Exception as e:
-            logger.error("Failed to get status for service '%s': %s", self.name, e)
+        except Exception as e:  # noqa: BLE001
+            logger.error("Failed to get status for service '%s': %s", self.name, e)  # noqa: TRY400
             return "ERROR"

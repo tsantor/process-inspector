@@ -14,15 +14,29 @@ class ServiceInterface(ABC):
 
     def __init__(self, name):
         self.name: str = name
-        self._pid: int = None
-        self._process: psutil.Process = None
-        logger.info("Service name: %s", self.name)
+        self._cached_pid: int = None
+        self._cached_process: psutil.Process = None
 
+        logger.info("Service: %s | Status: %s", name, self.status())
+
+    def reset_cache(self):
+        """Clear cached PID and process info."""
+        self._cached_pid = None
+        self._cached_process = None
+
+    @abstractmethod
     def pid(self) -> int | None:
-        return self._pid
+        """Get current PID, updating cache if it changed."""
 
-    def get_process(self) -> psutil.Process:
-        return psutil.Process(self._pid)
+    def get_process(self) -> psutil.Process | None:
+        """Get process object, fetching only if PID changed."""
+        # Ensure PID is up to date (this will update cache if needed)
+        current_pid = self.pid()
+
+        if not current_pid:
+            return None
+
+        return self._cached_process
 
     @abstractmethod
     def is_running(self) -> bool:
@@ -64,6 +78,6 @@ class ServiceInterface(ABC):
         }
 
     def process_info(self) -> dict:
-        if proc := (self._process or self._cached_process):
+        if proc := self._cached_process:
             return get_process_info(proc)
         return {}

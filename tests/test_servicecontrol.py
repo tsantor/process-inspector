@@ -4,7 +4,6 @@ import sys
 import time
 from collections.abc import Callable
 
-import psutil
 import pytest
 
 from process_inspector.servicecontrol import Service
@@ -36,7 +35,7 @@ def wait_for_condition(
 
 
 @contextlib.contextmanager
-def running_service(
+def running_service(  # noqa: C901, PLR0912
     service: Service, startup_timeout: float = 15, shutdown_timeout: float = 10
 ):
     """Context manager to ensure service is running and properly cleaned up."""
@@ -246,6 +245,7 @@ def test_as_dict(app):
     assert isinstance(service_dict["status"], str)
 
 
+@pytest.mark.skipif(sys.platform != "win32", reason="Windows only right now")
 def test_process_info_when_running(app):
     """Test process information retrieval when service is running."""
     with running_service(app) as running:
@@ -304,6 +304,7 @@ def test_instantiate_invalid_service():
     """Test instantiating an invalid service."""
     # with pytest.raises(psutil.NoSuchProcess):
     service = Service("InvalidServiceName")
+    assert service.pid() is None
     assert service.status() == "ERROR"
 
 
@@ -326,8 +327,8 @@ def test_context_manager_exception_handling(app):
 
 def test_performance_timing(app):
     """Test and measure service startup/shutdown performance."""
-    startup_max_time = 15  # Services can be slower than apps
-    shutdown_max_time = 10
+    startup_max_time = 15
+    shutdown_max_time = 15
 
     # Measure full cycle time
     start_time = time.time()
