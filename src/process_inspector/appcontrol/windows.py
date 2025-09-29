@@ -12,6 +12,12 @@ from .interface import AppInterface
 logger = logging.getLogger(__name__)
 
 
+def debug_process_info(proc: psutil.Process) -> dict:
+    return proc.as_dict(
+        attrs=["pid", "name", "exe", "cmdline", "create_timeppid", "status"]
+    )
+
+
 class App(AppInterface):
     """Basic control of a Windows App"""
 
@@ -27,7 +33,7 @@ class App(AppInterface):
                 return False
             self._process = proc
             self._pid = proc.pid
-            logger.debug("PID %s parent: %s", self._pid, proc.parent().as_dict())
+            logger.debug("PID %s parent: %s", self._pid, debug_process_info(proc))
             try:
                 self._create_time = proc.create_time()
             except (psutil.NoSuchProcess, psutil.AccessDenied):
@@ -68,7 +74,7 @@ class App(AppInterface):
         logger.debug("Spawned %s with PID=%s", self.app_name, self._pid)
         try:
             self._process = psutil.Process(self._pid)
-            logger.debug("Process info: %s", self._process.as_dict())
+            logger.debug("Process info: %s", debug_process_info(self._process))
             self._create_time = self._process.create_time()
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             logger.warning("Process disappeared or access denied after launch")
