@@ -64,6 +64,7 @@ class App(AppInterface):
             return False
 
         self._pid = proc.pid
+        logger.debug("Spawned %s with PID=%s", self.app_name, self._pid)
         try:
             self._process = psutil.Process(self._pid)
             self._create_time = self._process.create_time()
