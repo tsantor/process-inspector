@@ -22,3 +22,7 @@ All notable changes to this project will be documented in this file. This projec
 ## 0.1.4 (2025-09-23)
 
 - CHANGED - Fixed failing Linux tests
+
+## 0.1.5 (2025-09-29)
+
+- CHANGED - `get_process_info` can fail if the process was killed by the user within Windows/Mac. This fix handles that by resetting the cache so the process is looked up again.

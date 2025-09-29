@@ -26,7 +26,7 @@ class App(AppInterface):
         self._pid: int | None = None
         self._create_time: float | None = None
 
-    def _reset_proc(self) -> None:
+    def reset_cache(self) -> None:
         """Clear cached process info."""
         self._process = None
         self._pid = None
@@ -46,20 +46,20 @@ class App(AppInterface):
             try:
                 self._create_time = proc.create_time()
             except (psutil.NoSuchProcess, psutil.AccessDenied):
-                self._reset_proc()
+                self.reset_cache()
                 return False
 
         try:
             # Use cached process or look it up again
             p = self._process or psutil.Process(self._pid)
             if abs(p.create_time() - self._create_time) > PID_CREATE_TIME_TOLERANCE:
-                self._reset_proc()
+                self.reset_cache()
                 return False
 
             # Check status
             return p.is_running() and p.status() != psutil.STATUS_ZOMBIE
         except psutil.NoSuchProcess:
-            self._reset_proc()
+            self.reset_cache()
             return False
 
     def open(self) -> bool:
@@ -95,7 +95,7 @@ class App(AppInterface):
             self._process = new_proc
             self._create_time = self._process.create_time()
         except (psutil.NoSuchProcess, psutil.AccessDenied):
-            self._reset_proc()
+            self.reset_cache()
             return False
 
         return True
@@ -103,13 +103,13 @@ class App(AppInterface):
     def close(self) -> bool:
         """Close the running app we launched (terminate -> kill) and wait."""
         if not self.is_running():
-            self._reset_proc()
+            self.reset_cache()
             return True
 
         try:
             p = self._process or psutil.Process(self._pid)
         except psutil.NoSuchProcess:
-            self._reset_proc()
+            self.reset_cache()
             return True
 
         # Try graceful terminate (SIGTERM), then escalate (SIGKILL)
@@ -123,7 +123,7 @@ class App(AppInterface):
             except (psutil.NoSuchProcess, psutil.TimeoutExpired):
                 logger.warning("Failed to kill process PID=%s", self._pid)
 
-        self._reset_proc()
+        self.reset_cache()
         return True
 
     def get_version(self) -> str:

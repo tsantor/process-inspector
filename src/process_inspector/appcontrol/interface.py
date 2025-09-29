@@ -5,7 +5,8 @@ from datetime import datetime
 from functools import cached_property
 from pathlib import Path
 
-# import psutil
+import psutil
+
 from process_inspector.utils.datetimeutils import human_datetime_short
 
 # from process_inspector.utils.processutils import get_process_by_name
@@ -82,6 +83,15 @@ class AppInterface(ABC):
         }
 
     def process_info(self) -> dict:
+        """Safely return process info dict or empty dict."""
         if proc := self._process:
-            return get_process_info(proc)
+            try:
+                return get_process_info(proc)
+            except psutil.NoSuchProcess:
+                logger.warning(
+                    "Process for app '%s' with PID %s no longer exists.",
+                    self.app_name,
+                    self._pid,
+                )
+                self.reset_cache()
         return {}

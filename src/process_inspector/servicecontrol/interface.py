@@ -110,5 +110,8 @@ class ServiceInterface(ABC):
 
     def process_info(self) -> dict:
         if proc := self._cached_process:
-            return get_process_info(proc)
+            try:
+                return get_process_info(proc)
+            except psutil.NoSuchProcess:
+                self.reset_cache()
         return {}

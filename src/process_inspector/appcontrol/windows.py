@@ -20,7 +20,7 @@ class App(AppInterface):
         super().__init__(app_path)
         self._create_time: float | None = None
 
-    def _reset_proc(self) -> None:
+    def reset_cache(self) -> None:
         self._process = None
         self._pid = None
         self._create_time = None
@@ -37,22 +37,22 @@ class App(AppInterface):
             try:
                 self._create_time = proc.create_time()
             except (psutil.NoSuchProcess, psutil.AccessDenied):
-                self._reset_proc()
+                self.reset_cache()
                 return False
 
         try:
             p = self._process or psutil.Process(self._pid)
             # Guard against PID reuse: ensure it's the same process we started
             if self._create_time is not None:
-                if abs(p.create_time() - self._create_time) > 1e-3:
+                if abs(p.create_time() - self._create_time) > 1e-3:  # noqa: PLR2004
                     # Different process now occupies this PID
-                    self._reset_proc()
+                    self.reset_cache()
                     return False
 
             # psutil quirk: is_running can be True for zombies; also check status
             return p.is_running() and p.status() != psutil.STATUS_ZOMBIE
         except psutil.NoSuchProcess:
-            self._reset_proc()
+            self.reset_cache()
             return False
 
     def open(self) -> bool:
@@ -76,7 +76,7 @@ class App(AppInterface):
             self._create_time = self._process.create_time()
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             # Very unlikely right after spawn; handle gracefully
-            self._reset_proc()
+            self.reset_cache()
             return False
 
         return True
@@ -84,13 +84,13 @@ class App(AppInterface):
     def close(self) -> bool:
         """Close the running app we launched (terminate → kill) and wait."""
         if not self.is_running():
-            self._reset_proc()
+            self.reset_cache()
             return True
 
         try:
             p = self._process or psutil.Process(self._pid)
         except psutil.NoSuchProcess:
-            self._reset_proc()
+            self.reset_cache()
             return True
 
         # Try graceful terminate, then escalate
@@ -105,7 +105,7 @@ class App(AppInterface):
                 # If it still won't die, consider it a failure but reset state
                 logger.warning("Failed to kill process PID=%s", self._pid)
 
-        self._reset_proc()
+        self.reset_cache()
         return True
 
     def get_version(self) -> str:
