@@ -18,3 +18,8 @@ class Service(SupervisorCtl):
             Path("/usr/local/bin/supervisorctl"),
         ]
         return next((path for path in possible_paths if path.is_file()), False)
+
+    @cached_property
+    def service_control_path(self) -> Path:
+        """Get path to the service executable if available."""
+        return self.supervisor_path

@@ -1,6 +1,7 @@
 import logging
 from abc import ABC
 from abc import abstractmethod
+from pathlib import Path
 
 import psutil
 
@@ -16,6 +17,11 @@ class ServiceInterface(ABC):
         self.name: str = name
         self._cached_pid: int = None
         self._cached_process: psutil.Process = None
+
+    @abstractmethod
+    def service_control_path(self) -> Path | None:
+        """Get path to service control executable, else None."""
+        ...
 
     def reset_cache(self):
         """Clear cached PID and process info."""
