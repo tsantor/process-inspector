@@ -2,7 +2,6 @@ import logging
 import re
 import shlex
 import subprocess
-import time
 
 import psutil
 
@@ -34,10 +33,11 @@ class App(AppInterface):
                 return False
             self._process = proc
             self._pid = proc.pid
-            logger.debug("PID %s parent: %s", self._pid, debug_process_info(proc))
+            logger.debug("Process: %s", debug_process_info(proc))
             try:
                 self._create_time = proc.create_time()
             except (psutil.NoSuchProcess, psutil.AccessDenied):
+                logger.warning("Process disappeared or access denied after lookup")
                 self.reset_cache()
                 return False
 
@@ -63,7 +63,7 @@ class App(AppInterface):
 
         # Launch the executable directly
         try:
-            proc = subprocess.Popen([str(self.app_path)])  # noqa: S603
+            subprocess.Popen([str(self.app_path)])  # noqa: S603
         except FileNotFoundError:
             logger.exception("App not found: %s", self.app_path)
             return False
@@ -74,15 +74,15 @@ class App(AppInterface):
         # NOTE: On Windows, we won't always get the actual app process PID here,
         # especially for apps that use a launcher or helper process. We try to
         # find the actual app process by name below if needed.
-        time.sleep(1.0)  # Give it a moment to start
-        proc = get_process_by_name(self.app_path, newest=True)
-        if not proc:
-            self.reset_cache()
-            return False
-        self._process = proc
-        self._pid = proc.pid
-        self._create_time = proc.create_time()
-        logger.debug("Spawned %s with PID=%s", self.app_exe, self._pid)
+        # time.sleep(1.0)  # Give it a moment to start
+        # proc = get_process_by_name(self.app_path, newest=True)
+        # if not proc:
+        #     self.reset_cache()
+        #     return False
+        # self._process = proc
+        # self._pid = proc.pid
+        # self._create_time = proc.create_time()
+        # logger.debug("Spawned %s with PID=%s", self.app_exe, self._pid)
 
         # self._pid = proc.pid
         # logger.debug("Spawned %s with PID=%s", self.app_exe, self._pid)
