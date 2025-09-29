@@ -68,6 +68,7 @@ class App(AppInterface):
             self._process = psutil.Process(self._pid)
             self._create_time = self._process.create_time()
         except (psutil.NoSuchProcess, psutil.AccessDenied):
+            logger.warning("Process disappeared or access denied after launch")
             # Very unlikely right after spawn; handle gracefully
             self.reset_cache()
             return False
