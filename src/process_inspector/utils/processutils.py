@@ -12,30 +12,43 @@ from .datetimeutils import human_delta
 logger = logging.getLogger(__name__)
 
 
-def get_process_by_name(name) -> psutil.Process | None:
-    """Return a Process by name or None."""
+def get_process_by_name(name, *, newest: bool = True) -> psutil.Process | None:
+    """Return a Process by name or None. If newest=True, return the most recently created."""
     if isinstance(name, Path):
         name = name.stem if sys.platform == "darwin" else name.name
 
     name = name.lower()
+    attrs = (
+        ["pid", "name", "create_time"]
+        if sys.platform != "linux"
+        else ["pid", "name", "cmdline", "create_time"]
+    )
 
-    # Only fetch 'name' unless on Linux
-    attrs = ["pid", "name"] if sys.platform != "linux" else ["pid", "name", "cmdline"]
-
+    matches = []
     for proc in psutil.process_iter(attrs):
         try:
             proc_name = proc.info["name"].lower()
             if proc_name == name:
-                return proc
-
-            # Only check cmdline on Linux
-            if sys.platform == "linux":
+                matches.append(proc)
+            elif sys.platform == "linux":
                 for arg in proc.info.get("cmdline", []):
                     if name in Path(arg).name.lower():
-                        return proc
+                        matches.append(proc)
+                        break
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             continue
-    return None
+
+    if not matches:
+        return None
+
+    logger.debug("Found %d processes matching name '%s'", len(matches), name)
+
+    if newest:
+        # Return the process with the latest create_time
+        return max(matches, key=lambda p: p.info.get("create_time", 0))
+
+    # Return the first match (original behavior)
+    return matches[0]
 
 
 def get_process_by_pid(pid: int) -> psutil.Process | None:
