@@ -2,7 +2,6 @@ import logging
 import re
 import shlex
 import subprocess
-from pathlib import Path
 
 import psutil
 
@@ -19,18 +18,8 @@ PID_CREATE_TIME_TOLERANCE = 0.001
 class App(AppInterface):
     """Basic control of a Mac App using Popen and psutil."""
 
-    def __init__(self, app_path: Path):
-        super().__init__(app_path)
-        # Store process details similar to Windows
-        self._process: psutil.Process | None = None
-        self._pid: int | None = None
-        self._create_time: float | None = None
-
-    def reset_cache(self) -> None:
-        """Clear cached process info."""
-        self._process = None
-        self._pid = None
-        self._create_time = None
+    # def __init__(self, app_path: Path):
+    #     super().__init__(app_path)
 
     def is_running(self) -> bool:
         """Check if the *specific* app instance is running."""

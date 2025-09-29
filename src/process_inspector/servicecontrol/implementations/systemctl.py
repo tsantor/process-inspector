@@ -16,6 +16,18 @@ class SystemCtl(ServiceInterface):
             msg = "systemctl executable not found"  # pragma: no cover
             raise FileNotFoundError(msg)  # pragma: no cover
 
+    def get_pid(self) -> int | None:
+        """Get PID of the service if running, else None."""
+        cmd = f"sudo {self.systemctl_path} show --property MainPID --value {self.name}".strip()
+        # logger.debug("Execute command: %s", cmd)
+        proc = subprocess.run(  # noqa: S603
+            shlex.split(cmd), check=False, text=True, capture_output=True
+        )
+        output = proc.stdout.strip()
+        if output.isdigit():
+            return int(output)
+        return None
+
     # def is_running(self) -> bool:
     #     """Determine if service is running."""
     #     cmd = f"sudo {self.systemctl_path} status {self.name}".strip()

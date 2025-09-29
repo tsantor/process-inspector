@@ -2,7 +2,6 @@ import logging
 import re
 import shlex
 import subprocess
-from pathlib import Path
 
 import psutil
 
@@ -16,14 +15,8 @@ logger = logging.getLogger(__name__)
 class App(AppInterface):
     """Basic control of a Windows App"""
 
-    def __init__(self, app_path: Path):
-        super().__init__(app_path)
-        self._create_time: float | None = None
-
-    def reset_cache(self) -> None:
-        self._process = None
-        self._pid = None
-        self._create_time = None
+    # def __init__(self, app_path: Path):
+    #     super().__init__(app_path)
 
     def is_running(self) -> bool:
         """Check if the *specific* app instance is running."""

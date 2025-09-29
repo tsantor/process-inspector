@@ -8,8 +8,6 @@ from pathlib import Path
 import psutil
 
 from process_inspector.utils.datetimeutils import human_datetime_short
-
-# from process_inspector.utils.processutils import get_process_by_name
 from process_inspector.utils.processutils import get_process_info
 
 logger = logging.getLogger(__name__)
@@ -28,11 +26,17 @@ class AppInterface(ABC):
                 "App path does not exist: '%s'", app_path
             )  # pragma: no cover
 
-        self._pid = None
-        self._process = None
+        self._process: psutil.Process | None = None
+        self._pid: int | None = None
+        self._create_time: float | None = None
 
         # Initialize PID and process (if already running)
         self.is_running()
+
+    def reset_cache(self) -> None:
+        self._process = None
+        self._pid = None
+        self._create_time = None
 
     def is_installed(self) -> bool:
         return self.app_path.exists()
@@ -98,4 +102,5 @@ class AppInterface(ABC):
                     self._pid,
                 )
                 self.reset_cache()
-        return {}
+        # We can reach here if the process was killed by the user
+        return {"is_running": False}
