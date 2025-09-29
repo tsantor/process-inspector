@@ -77,6 +77,7 @@ class App(AppInterface):
         time.sleep(1.0)  # Give it a moment to start
         proc = get_process_by_name(self.app_path, newest=True)
         if not proc:
+            self.reset_cache()
             return False
         self._process = proc
         self._pid = proc.pid
