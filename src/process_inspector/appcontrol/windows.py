@@ -27,6 +27,7 @@ class App(AppInterface):
                 return False
             self._process = proc
             self._pid = proc.pid
+            logger.debug("PID %s parent: %s", self._pid, proc.parent().as_dict())
             try:
                 self._create_time = proc.create_time()
             except (psutil.NoSuchProcess, psutil.AccessDenied):
@@ -67,6 +68,7 @@ class App(AppInterface):
         logger.debug("Spawned %s with PID=%s", self.app_name, self._pid)
         try:
             self._process = psutil.Process(self._pid)
+            logger.debug("Process info: %s", self._process.as_dict())
             self._create_time = self._process.create_time()
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             logger.warning("Process disappeared or access denied after launch")
