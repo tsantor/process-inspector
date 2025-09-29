@@ -71,10 +71,11 @@ class App(AppInterface):
             return False
 
         self._pid = proc.pid
-        logger.debug("Spawned %s with PID=%s", self.app_name, self._pid)
+        logger.debug("Spawned %s with PID=%s", self.app_exe, self._pid)
         try:
             self._process = psutil.Process(self._pid)
             logger.debug("Process info: %s", debug_process_info(self._process))
+            logger.debug("Parent info: %s", debug_process_info(self._process.parent()))
             self._create_time = self._process.create_time()
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             logger.warning("Process disappeared or access denied after launch")
@@ -100,6 +101,7 @@ class App(AppInterface):
         try:
             p.terminate()  # On Windows this is TerminateProcess under the hood
             p.wait(timeout=2.0)
+            logger.debug("Terminated %s process PID=%s", self.app_exe, self._pid)
         except (psutil.NoSuchProcess, psutil.TimeoutExpired):
             try:
                 p.kill()
