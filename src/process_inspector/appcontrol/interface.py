@@ -50,6 +50,10 @@ class AppInterface(ABC):
     def get_version(self) -> str: ...
 
     @cached_property
+    def version(self) -> str:
+        return self.get_version()
+
+    @cached_property
     def install_date(self) -> datetime | None:
         """Return creation/install date of the application."""
         if self.is_installed() is False:
@@ -77,7 +81,7 @@ class AppInterface(ABC):
             "name": self.app_name,
             "path": str(self.app_path),
             "is_installed": self.is_installed(),
-            "version": self.get_version(),
+            "version": self.version,
             "install_date_short": self.install_date_short,
             "install_date": self.install_date_human_short,
         }
