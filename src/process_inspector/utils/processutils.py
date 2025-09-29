@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 def debug_process_info(proc: psutil.Process) -> dict:
     return proc.as_dict(
-        attrs=["pid", "name", "exe", "cmdline", "create_time", "ppid", "status"]
+        attrs=["pid", "name", "exe", "cmdline", "create_time", "status"]
     )
 
 
