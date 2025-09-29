@@ -14,6 +14,9 @@ class Teamviewer:
         else:
             self._instance = NativeApp(get_teamviewer_path())
 
+    def get_pid(self) -> int | None:
+        return self._instance.get_pid()
+
     def is_running(self) -> bool:
         return self._instance.is_running()
 
