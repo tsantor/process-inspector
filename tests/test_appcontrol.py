@@ -98,10 +98,7 @@ def app_if_needed(
 @pytest.fixture
 def app():
     if sys.platform == "win32":
-        return NativeApp(
-            Path("C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
-            # Path("C:/Windows/System32/notepad.exe")
-        )
+        return NativeApp(Path("C:/Program Files/Sublime Text/sublime_text.exe"))
     return NativeApp(Path("/Applications/Safari.app"))
 
 
