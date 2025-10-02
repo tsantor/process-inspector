@@ -1,6 +1,9 @@
 import logging
 import shlex
 import subprocess
+import sys
+from functools import cached_property
+from pathlib import Path
 
 from process_inspector.servicecontrol.interface import ServiceInterface
 
@@ -29,6 +32,18 @@ class SupervisorCtl(ServiceInterface):
             self._cached_process = self._get_process_for_pid(current_pid)
 
         logger.info("Service: %s | Status: %s", name, self.status())
+
+    @cached_property
+    def service_control_path(self) -> Path:
+        # Check if any of the possible paths contain the executable
+        if sys.platform == "darwin":
+            possible_paths = [
+                Path("/opt/homebrew/bin/supervisorctl"),
+                Path("/usr/local/bin/supervisorctl"),
+            ]
+        else:
+            possible_paths = [Path("/usr/bin/supervisorctl")]
+        return next((path for path in possible_paths if path.is_file()), False)
 
     def get_pid(self) -> int | None:
         """Get PID of the service if running, else None."""

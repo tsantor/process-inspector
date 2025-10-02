@@ -15,85 +15,36 @@ from .utils import wait_for_condition
 
 
 @contextlib.contextmanager
-def running_service(  # noqa: C901, PLR0912
-    service: Service, startup_timeout: float = 15, shutdown_timeout: float = 10
-):
-    """Context manager to ensure service is running and properly cleaned up."""
-    # Store original state to restore later
-    original_was_running = service.is_running()
+def running_service(service: Service, startup_timeout: float = 15):
+    """Context manager to ensure service is running (but do not stop it after)."""
+    # If already running, just yield
+    if service.is_running():
+        yield service
+        return
 
-    # Ensure clean state before starting
-    try:
-        if service.is_running():
-            service.stop()
-            wait_for_condition(
-                lambda: not service.is_running(),
-                timeout=shutdown_timeout,
-                description="Pre-test service cleanup",
-            )
-    except Exception:  # noqa: BLE001
-        # If we can't clean up, skip this iteration
-        pytest.skip("Could not clean up service before test")
-
-    # Start the service
+    # Otherwise, start it and wait for it to be running
     start_result = service.start()
     if not start_result:
         pytest.fail("Failed to initiate service startup")
 
     try:
-        # Wait for service to be fully running
         wait_for_condition(
             lambda: service.is_running(),
             timeout=startup_timeout,
             description="Service startup",
         )
-
-        # Yield the running service
         yield service
-
     except Exception:
-        # If something goes wrong, still try to clean up
+        # Try to stop if something goes wrong during startup
         with contextlib.suppress(Exception):
-            if service.is_running() and not original_was_running:
+            if service.is_running():
                 service.stop()
-        # Raise the original exception
         raise
-
-    finally:
-        # Restore original state
-        try:
-            current_state = service.is_running()
-            if current_state != original_was_running:
-                if original_was_running:
-                    # Should be running but isn't - start it
-                    if not current_state:
-                        start_result = service.start()
-                        if start_result:
-                            wait_for_condition(
-                                lambda: service.is_running(),
-                                timeout=startup_timeout,
-                                description="Service restoration to running state",
-                            )
-                # Should be stopped but isn't - stop it
-                elif current_state:
-                    stop_result = service.stop()
-                    if stop_result:
-                        wait_for_condition(
-                            lambda: not service.is_running(),
-                            timeout=shutdown_timeout,
-                            description="Service restoration to stopped state",
-                        )
-        except Exception as cleanup_error:  # noqa: BLE001
-            # Log cleanup failure but don't fail the test
-            print(f"Warning: Service cleanup failed: {cleanup_error}")  # noqa: T201
 
 
 @contextlib.contextmanager
 def stopped_service(service: Service, shutdown_timeout: float = 10):
-    """Context manager to ensure service is stopped and restore original state."""
-    # Store original state to restore later
-    original_was_running = service.is_running()
-
+    """Context manager to ensure service is stopped."""
     # Ensure service is stopped
     try:
         if service.is_running():
@@ -106,37 +57,7 @@ def stopped_service(service: Service, shutdown_timeout: float = 10):
     except Exception:  # noqa: BLE001
         pytest.skip("Could not stop service for test")
 
-    try:
-        yield service
-    finally:
-        # Restore original state
-        try:
-            if original_was_running and not service.is_running():
-                start_result = service.start()
-                if start_result:
-                    wait_for_condition(
-                        lambda: service.is_running(),
-                        timeout=15,
-                        description="Service restoration to original running state",
-                    )
-        except Exception as cleanup_error:  # noqa: BLE001
-            print(f"Warning: Service restoration failed: {cleanup_error}")  # noqa: T201
-
-
-@contextlib.contextmanager
-def service_if_needed(
-    service: Service,
-    need_running: bool = True,
-    startup_timeout: float = 15,
-    shutdown_timeout: float = 10,
-):
-    """Context manager that manages service state as needed."""
-    if need_running:
-        with running_service(service, startup_timeout, shutdown_timeout) as running:
-            yield running
-    else:
-        with stopped_service(service, shutdown_timeout) as stopped:
-            yield stopped
+    yield service
 
 
 @pytest.fixture

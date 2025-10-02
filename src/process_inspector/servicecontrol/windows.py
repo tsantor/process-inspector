@@ -1,8 +1,8 @@
 import logging
 import shlex
 import subprocess
-from functools import cached_property
 
+# from functools import cached_property
 import psutil
 
 from .interface import ServiceInterface
@@ -24,10 +24,6 @@ class Service(ServiceInterface):
             self._cached_process = self._get_process_for_pid(current_pid)
 
         logger.info("Service: %s | Status: %s", name, self.status())
-
-    @cached_property
-    def service_control_path(self):
-        """Not applicable for Windows services."""
 
     def get_pid(self) -> int | None:
         return self._service.pid() if self._service else None

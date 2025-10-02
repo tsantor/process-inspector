@@ -26,3 +26,8 @@ All notable changes to this project will be documented in this file. This projec
 ## 0.1.5 (2025-09-29)
 
 - CHANGED - `get_process_info` can fail if the process was killed by the user within Windows/Mac. This fix handles that by resetting the cache so the process is looked up again.
+
+## 0.1.6 (2025-10-02)
+
+- CHANGED - `Service` class on Mac/Linux defaults to `supervisorctl`
+- ADDED - If you want to use `systemctl` on Linux you can do `from process_inspector.servicecontrol import service_class_factory` and then instantiate with `Service = service_class_factory('systemctl')`.

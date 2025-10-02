@@ -1,36 +1,23 @@
-from functools import cached_property
-from pathlib import Path
-
 from .implementations import SupervisorCtl
-
-# from .implementations import SystemCtl
+from .implementations import SystemCtl
 
 
 class Service(SupervisorCtl):
     """Linux Supervisor Control"""
 
-    # def get_controller(name, impl="supervisor"):
-    #     if impl == "supervisor":
-    #         return SupervisorCtl(name)
-    #     if impl == "systemctl":
-    #         return SystemCtl(name)
+    # We default to SupervisorCtl for backward compatibility
+    # If you want SystemCtl, use the factory function below
 
-    #     msg = f"Unknown implementation: {impl}"
-    #     raise ValueError(msg)
 
-    @cached_property
-    def supervisor_path(self) -> Path:
-        # Check if any of the possible paths contain the executable
-        possible_paths = [Path("/usr/bin/supervisorctl")]
-        return next((path for path in possible_paths if path.is_file()), False)
-
-    @cached_property
-    def systemctl_path(self) -> Path:
-        # Check if any of the possible paths contain the executable
-        possible_paths = [Path("/usr/bin/systemctl")]
-        return next((path for path in possible_paths if path.is_file()), False)
-
-    @cached_property
-    def service_control_path(self) -> Path:
-        """Get path to the service executable if available."""
-        return self.supervisor_path
+def service_class_factory(impl="supervisor"):
+    """
+    Factory to return the desired service control class for Linux.
+    :param impl: "supervisor" or "systemctl"
+    :return: Class (not instance)
+    """
+    if impl == "supervisor":
+        return SupervisorCtl
+    if impl == "systemctl":
+        return SystemCtl
+    msg = f"Invalid implementation: {impl}"
+    raise ValueError(msg)

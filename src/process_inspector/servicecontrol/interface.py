@@ -1,7 +1,6 @@
 import logging
 from abc import ABC
 from abc import abstractmethod
-from pathlib import Path
 
 import psutil
 
@@ -17,11 +16,6 @@ class ServiceInterface(ABC):
         self.name: str = name
         self._cached_pid: int = None
         self._cached_process: psutil.Process = None
-
-    @abstractmethod
-    def service_control_path(self) -> Path | None:
-        """Get path to service control executable, else None."""
-        ...
 
     def reset_cache(self):
         """Clear cached PID and process info."""
@@ -63,10 +57,6 @@ class ServiceInterface(ABC):
         except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
             logger.warning("Failed to get process for PID %d: %s", pid, e)
             return None
-
-    # @abstractmethod
-    # def is_running(self) -> bool:
-    #     """Determine if service is running"""
 
     def is_running(self) -> bool:
         """Check if service is running."""

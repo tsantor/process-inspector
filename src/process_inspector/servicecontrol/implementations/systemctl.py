@@ -1,6 +1,8 @@
 import logging
 import shlex
 import subprocess
+from functools import cached_property
+from pathlib import Path
 
 from process_inspector.servicecontrol.interface import ServiceInterface
 
@@ -16,6 +18,12 @@ class SystemCtl(ServiceInterface):
             msg = "service control executable not found"  # pragma: no cover
             raise FileNotFoundError(msg)  # pragma: no cover
 
+    @cached_property
+    def service_control_path(self) -> Path:
+        # Check if any of the possible paths contain the executable
+        possible_paths = [Path("/usr/bin/systemctl")]
+        return next((path for path in possible_paths if path.is_file()), False)
+
     def get_pid(self) -> int | None:
         """Get PID of the service if running, else None."""
         cmd = f"sudo {self.service_control_path} show --property MainPID --value {self.name}".strip()
@@ -27,26 +35,6 @@ class SystemCtl(ServiceInterface):
         if output.isdigit():
             return int(output)
         return None
-
-    # def is_running(self) -> bool:
-    #     """Determine if service is running."""
-    #     cmd = f"sudo {self.service_control_path} status {self.name}".strip()
-    #     # logger.debug("Execute command: %s", cmd)
-    #     proc = subprocess.run(
-    #         shlex.split(cmd), check=False, text=True, capture_output=True
-    #     )
-    #     return "active (running)" in proc.stdout.strip().lower()
-
-    def is_running(self) -> bool:
-        """Check if service is running."""
-        # This will refresh PID/process if needed
-        current_process = self.get_process()
-
-        if not current_process:
-            logger.debug("No process found for service '%s'", self.name)
-            return False
-
-        return self.status() == "RUNNING"
 
     def start(self) -> bool:
         """Start service"""
