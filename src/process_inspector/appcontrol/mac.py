@@ -2,6 +2,7 @@ import logging
 import re
 import shlex
 import subprocess
+import time
 
 from .interface import AppInterface
 
@@ -27,8 +28,17 @@ class App(AppInterface):
             logger.exception("App path not found: %s", self.app_path)
             return False
         except Exception:
-            logger.exception("Failed to start app: %s", self.app_path)
+            logger.exception("Failed to start app: %s", self.app_name)
             return False
+
+        # Wait for process to start so we can get its PID
+        start_time = time.time()
+        timeout = 10
+        while not self.is_running():
+            if time.time() - start_time > timeout:
+                logger.warnning("Timed out waiting for app to start: %s", self.app_name)
+                return False
+            time.sleep(0.1)
 
         return True
 

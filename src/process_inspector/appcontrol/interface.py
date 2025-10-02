@@ -37,7 +37,6 @@ class AppInterface(ABC):
         self.is_running()
 
     def reset_cache(self) -> None:
-        logger.debug("Resetting cached process info for app '%s'", self.app_name)
         self._process = None
         self._pid = None
         self._create_time = None
@@ -54,11 +53,11 @@ class AppInterface(ABC):
             # Fallback: check if the app is running (first run or manual restart)
             proc = get_process_by_name(self.app_path, newest=True)
             if not proc:
-                logger.debug("No running process found for app '%s'", self.app_name)
                 self.reset_cache()
                 return False
 
             # Found a running instance, adopt it
+            logger.debug("Found running process: %s (PID: %s)", proc.name(), proc.pid)
             self._process = proc
             self._pid = proc.pid
             try:
@@ -101,15 +100,17 @@ class AppInterface(ABC):
         # Try graceful terminate (SIGTERM), then escalate (SIGKILL)
         try:
             p.terminate()
-            p.wait(timeout=2.0)
-            logger.debug("Terminated %s process PID=%s", self.app_exe, self._pid)
+            p.wait(timeout=2)
+            logger.debug("Terminated process: %s (PID: %s)", self.app_name, self._pid)
         except (psutil.NoSuchProcess, psutil.TimeoutExpired):
             try:
                 p.kill()
-                p.wait(timeout=3.0)
-                logger.debug("Killed %s process PID=%s", self.app_exe, self._pid)
+                p.wait(timeout=3)
+                logger.debug("Killed process: %s (PID: %s)", self.app_name, self._pid)
             except (psutil.NoSuchProcess, psutil.TimeoutExpired):
-                logger.warning("Failed to kill process PID=%s", self._pid)
+                logger.warning(
+                    "Failed to kill process: %s (PID: %s)", self.app_name, self._pid
+                )
 
         self.reset_cache()
         return True
