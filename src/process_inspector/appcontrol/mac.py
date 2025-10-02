@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class App(AppInterface):
     """Basic control of a Mac App using Popen and psutil."""
 
-    def open(self) -> bool:
+    def open(self, timeout: float = 3.0) -> bool:
         """
         The `open` command is the standard way to launch .app bundles via CLI.
         """
@@ -22,8 +22,8 @@ class App(AppInterface):
         # Use the 'open' command to launch the .app bundle
         try:
             cmd = ["open", str(self.app_path)]
-            proc = subprocess.Popen(cmd)  # noqa: S603
-            proc.wait(timeout=1.0)
+            subprocess.Popen(cmd)  # noqa: S603
+            # proc.wait(timeout=1.0)
         except FileNotFoundError:
             logger.exception("App path not found: %s", self.app_path)
             return False
@@ -33,7 +33,6 @@ class App(AppInterface):
 
         # Wait for process to start so we can get its PID
         start_time = time.time()
-        timeout = 10
         while not self.is_running():
             if time.time() - start_time > timeout:
                 logger.warnning("Timed out waiting for app to start: %s", self.app_name)
