@@ -44,9 +44,6 @@ class AppInterface(ABC):
     def is_installed(self) -> bool:
         return self.app_path.exists()
 
-    # @abstractmethod
-    # def is_running(self) -> bool: ...
-
     def is_running(self) -> bool:
         """Check if the *specific* app instance is running."""
         if self._pid is None:
@@ -81,9 +78,6 @@ class AppInterface(ABC):
 
     @abstractmethod
     def open(self) -> bool: ...
-
-    # @abstractmethod
-    # def close(self) -> bool: ...
 
     def close(self) -> bool:
         """Close the running app we launched (terminate -> kill) and wait."""

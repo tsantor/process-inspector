@@ -13,9 +13,7 @@ class App(AppInterface):
     """Basic control of a Mac App using Popen and psutil."""
 
     def open(self, timeout: float = 3.0) -> bool:
-        """
-        The `open` command is the standard way to launch .app bundles via CLI.
-        """
+        """Open app and wait to grab its PID if possible."""
         if self.is_running():
             return True
 
@@ -23,7 +21,6 @@ class App(AppInterface):
         try:
             cmd = ["open", str(self.app_path)]
             subprocess.Popen(cmd)  # noqa: S603
-            # proc.wait(timeout=1.0)
         except FileNotFoundError:
             logger.exception("App path not found: %s", self.app_path)
             return False
@@ -47,6 +44,7 @@ class App(AppInterface):
         doesn't use AppleScript.
         """
         cmd = f'mdls -name kMDItemVersion "{self.app_path}"'
+        # logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
             shlex.split(cmd), check=False, capture_output=True, text=True
         )

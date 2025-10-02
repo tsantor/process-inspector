@@ -20,6 +20,7 @@ def debug_process_info(proc: psutil.Process) -> dict:
 
 def get_process_by_name(name, *, newest: bool = True) -> psutil.Process | None:
     """Return a Process by name or None. If newest=True, return the most recently created."""
+    # Set name based on platform conventions (stem for macOS, name for others)
     if isinstance(name, Path):
         name = name.stem if sys.platform == "darwin" else name.name
 
