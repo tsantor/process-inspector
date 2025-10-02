@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 def debug_process_info(proc: psutil.Process) -> dict:
     return proc.as_dict(
-        attrs=["pid", "name", "exe", "cmdline", "create_time", "ppid", "status"]
+        attrs=["pid", "name", "exe", "cmdline", "create_time", "status"]
     )
 
 
@@ -30,7 +30,10 @@ class App(AppInterface):
             # Fallback (first run, or after a manual kill outside our code)
             proc = get_process_by_name(self.app_path, newest=True)
             if not proc:
+                self.reset_cache()
                 return False
+
+            # Found a running instance, adopt it
             self._process = proc
             self._pid = proc.pid
             logger.debug("Process: %s", debug_process_info(proc))
@@ -81,21 +84,7 @@ class App(AppInterface):
         #     return False
         # self._process = proc
         # self._pid = proc.pid
-        # self._create_time = proc.create_time()
         # logger.debug("Spawned %s with PID=%s", self.app_exe, self._pid)
-
-        # self._pid = proc.pid
-        # logger.debug("Spawned %s with PID=%s", self.app_exe, self._pid)
-        # try:
-        #     self._process = psutil.Process(self._pid)
-        #     logger.debug("Process info: %s", debug_process_info(self._process))
-        #     logger.debug("Parent info: %s", debug_process_info(self._process.parent()))
-        #     self._create_time = self._process.create_time()
-        # except (psutil.NoSuchProcess, psutil.AccessDenied):
-        #     logger.warning("Process disappeared or access denied after launch")
-        #     # Very unlikely right after spawn; handle gracefully
-        #     self.reset_cache()
-        #     return False
 
         return True
 

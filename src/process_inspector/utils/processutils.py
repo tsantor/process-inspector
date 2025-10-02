@@ -18,7 +18,7 @@ def debug_process_info(proc: psutil.Process) -> dict:
     )
 
 
-def get_process_by_name(name, *, newest: bool = True) -> psutil.Process | None:  # noqa: C901
+def get_process_by_name(name, *, newest: bool = True) -> psutil.Process | None:
     """Return a Process by name or None. If newest=True, return the most recently created."""
     if isinstance(name, Path):
         name = name.stem if sys.platform == "darwin" else name.name
@@ -48,9 +48,6 @@ def get_process_by_name(name, *, newest: bool = True) -> psutil.Process | None: 
         return None
 
     logger.debug("Found %d processes matching name '%s'", len(matches), name)
-
-    for proc in matches:
-        logger.debug("Match: %s", debug_process_info(proc))
 
     if newest:
         # Return the process with the latest create_time
