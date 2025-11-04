@@ -23,7 +23,7 @@ help:
 
 PYTHON_VERSION=3.13.1
 package_name=process_inspector
-package_version=0.1.6
+package_version=0.1.8
 aws_profile=xstudios
 s3_bucket=xstudios-pypi
 wheel_name=${package_name}-${package_version}-py3-none-any.whl
@@ -77,6 +77,9 @@ pytest:  ## Run tests
 
 pytest_verbose:  ## Run tests in verbose mode
 	pytest -vvs --cov --cov-report=html
+
+pytest_failed_first:  ## Run failed tests first
+	pytest -vx --ff --cov --cov-report=html
 
 coverage:  ## Run tests with coverage
 	coverage run -m pytest && coverage html
@@ -193,19 +196,23 @@ rsync_to_pi:	## Sync files to Raspberry Pi
 		--exclude='.vscode' --exclude='node_modules' --exclude='dist' --exclude='*.egg-info'
 
 uv_add_dev_dependencies:  ## Add dev dependencies
-	uv add twine wheel build ruff pipdeptree pre-commit --group dev
+	uv add twine wheel build setuptools ruff pipdeptree pre-commit --group dev
 
 uv_add_test_dependencies:  ## Add test dependencies
-	uv add pytest pytest-cov pytest-mock coverage --group test
+	uv add pytest pytest-cov pytest-mock pytest-asyncio coverage --group test
 
 uv_add_basic:  ## Install basic dependencies
-	uv add click pydantic rich toml psutil setuptools setproctitle humanize
+	uv add click pydantic rich toml sentry-sdk psutil
 
 uv_add_async:  ## Install async dependencies
 	uv add aiomqtt httpx aiofiles
 
 uv_add_rpi:	## Install Raspberry Pi specific dependencies
 	uv add RPi.GPIO
+
+uv_upgrade_and_sync:	## Upgrade all dependencies and sync
+	uv lock --upgrade
+	uv sync --all-groups
 
 install_uv:	## Install uv
 	curl -LsSf https://astral.sh/uv/install.sh | sh

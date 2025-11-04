@@ -1,6 +1,7 @@
 import logging
 from abc import ABC
 from abc import abstractmethod
+from datetime import UTC
 from datetime import datetime
 from functools import cached_property
 from pathlib import Path
@@ -32,6 +33,7 @@ class AppInterface(ABC):
         self._process: psutil.Process | None = None
         self._pid: int | None = None
         self._create_time: float | None = None
+        self._last_seen: datetime | None = None
 
         # Initialize PID and process (if already running)
         self.is_running()
@@ -65,13 +67,20 @@ class AppInterface(ABC):
 
         try:
             # Use cached process or look it up again
-            p = self._process or psutil.Process(self._pid)
+            if self._process:
+                p = self._process
+            else:
+                p = psutil.Process(self._pid)
+                self._process = p  # Cache the successful lookup
             if abs(p.create_time() - self._create_time) > PID_CREATE_TIME_TOLERANCE:
                 self.reset_cache()
                 return False
 
             # Check status
-            return p.is_running() and p.status() != psutil.STATUS_ZOMBIE
+            running = p.is_running() and p.status() != psutil.STATUS_ZOMBIE
+            if running:
+                self._last_seen = datetime.now(tz=UTC)
+            return running
         except psutil.NoSuchProcess:
             self.reset_cache()
             return False
@@ -154,11 +163,20 @@ class AppInterface(ABC):
         """We want to preserve this method for backward compatibility."""
         return self._cached_dict
 
+    def get_last_seen_str(self) -> str | None:
+        """Return last seen datetime as string or None."""
+        if self._last_seen is None:
+            return None
+        return self._last_seen.isoformat()
+
     def process_info(self) -> dict:
         """Safely return process info dict or empty dict."""
         if proc := self._process:
             try:
-                return get_process_info(proc)
+                return {
+                    **get_process_info(proc),
+                    "last_seen": self.get_last_seen_str(),
+                }
             except psutil.NoSuchProcess:
                 logger.warning(
                     "Process for app '%s' with PID %s no longer exists.",
@@ -167,4 +185,7 @@ class AppInterface(ABC):
                 )
                 self.reset_cache()
         # We can reach here if the process was killed by the user
-        return {"is_running": False}
+        return {
+            "is_running": False,
+            "last_seen": self.get_last_seen_str(),
+        }

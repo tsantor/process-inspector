@@ -64,9 +64,15 @@ class Service(ServiceInterface):
 
     def stop(self) -> bool:
         """Stop Service"""
-        cmd = f'''powershell -command "Stop-Service '{self.name}' -Force"'''
-        logger.debug("Execute command: %s", cmd)
-        proc = subprocess.run(shlex.split(cmd), check=False, capture_output=True)  # noqa: S603
+        # cmd = f'''powershell -command "Stop-Service '{self.name}' -Force"'''
+        cmd = [
+            "powershell",
+            "-command",
+            f"Stop-Service '{self.name}'",
+            "-Force",
+        ]
+        logger.debug("Execute command: %s", " ".join(cmd))
+        proc = subprocess.run(cmd, check=False, capture_output=True)  # noqa: S603
 
         # Clear cache after stop attempt since process will be gone
         if proc.returncode == 0:

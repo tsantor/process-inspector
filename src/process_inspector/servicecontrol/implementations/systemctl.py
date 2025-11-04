@@ -36,6 +36,12 @@ class SystemCtl(ServiceInterface):
             return int(output)
         return None
 
+    def is_running(self) -> bool:
+        """Check if service is running."""
+        # This seems to be faster than checking the process
+        status = self.status()
+        return status == "RUNNING"
+
     def start(self) -> bool:
         """Start service"""
         cmd = f"sudo {self.service_control_path} start {self.name}".strip()

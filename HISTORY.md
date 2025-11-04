@@ -31,3 +31,12 @@ All notable changes to this project will be documented in this file. This projec
 
 - CHANGED - `Service` class on Mac/Linux defaults to `supervisorctl`
 - ADDED - If you want to use `systemctl` on Linux you can do `from process_inspector.servicecontrol import service_class_factory` and then instantiate with `Service = service_class_factory('systemctl')`.
+
+### 0.1.8 (2025-10-10)
+
+- ADDED - Added `UnityApp` class which is just an extended `NativeApp` class with some additional getters to make things easier when working with Unity builds.
+- Added `last_seen` to `process_info` for `Service` and `NativeApp`
+
+### 0.1.8 (2025-11-04)
+
+- ADDED - `ScheduledTask` basic control (start, stop) for Windows only.

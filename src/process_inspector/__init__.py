@@ -9,4 +9,4 @@ from .teamviewer import Teamviewer  # noqa: F401
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
-__version__ = "0.1.6"
+__version__ = "0.1.8"

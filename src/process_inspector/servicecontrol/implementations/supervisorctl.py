@@ -31,7 +31,7 @@ class SupervisorCtl(ServiceInterface):
             self._cached_pid = current_pid
             self._cached_process = self._get_process_for_pid(current_pid)
 
-        logger.info("Service: %s | Status: %s", name, self.status())
+        # logger.info("Service: %s | Status: %s", name, self.status())
 
     @cached_property
     def service_control_path(self) -> Path:
@@ -56,6 +56,11 @@ class SupervisorCtl(ServiceInterface):
         if output.isdigit():
             return int(output)
         return None
+
+    def is_running(self):
+        # This seems to be faster than checking the process
+        status = self.status()
+        return status in ["RUNNING", "SLEEPING"]
 
     def start(self) -> bool:
         """Start service"""

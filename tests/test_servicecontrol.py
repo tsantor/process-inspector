@@ -217,6 +217,7 @@ def test_instantiate_invalid_service():
         "name": "InvalidServiceName",
         "is_running": False,
         "status": service.status(),
+        "last_seen": None,
     }
 
     invalid_pid = 999999

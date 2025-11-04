@@ -1,6 +1,8 @@
 import logging
 from abc import ABC
 from abc import abstractmethod
+from datetime import UTC
+from datetime import datetime
 
 import psutil
 
@@ -16,6 +18,7 @@ class ServiceInterface(ABC):
         self.name: str = name
         self._cached_pid: int = None
         self._cached_process: psutil.Process = None
+        self._last_seen: datetime = None
 
     def reset_cache(self):
         """Clear cached PID and process info."""
@@ -64,10 +67,14 @@ class ServiceInterface(ABC):
         current_process = self.get_process()
 
         if not current_process:
-            logger.debug("No process found for service '%s'", self.name)
+            # logger.debug("No process found for service '%s'", self.name)
+            self.reset_cache()
             return False
 
-        return self.status() in ["RUNNING", "SLEEPING"]
+        running = self.status() in ["RUNNING", "SLEEPING"]
+        if running:
+            self._last_seen = datetime.now(tz=UTC)
+        return running
 
     @abstractmethod
     def start(self) -> bool:
@@ -102,6 +109,7 @@ class ServiceInterface(ABC):
             "name": self.name,
             "is_running": self.is_running(),
             "status": self.status(),
+            "last_seen": self._last_seen.isoformat() if self._last_seen else None,
         }
 
     def process_info(self) -> dict:
