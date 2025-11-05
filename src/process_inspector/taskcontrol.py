@@ -11,7 +11,7 @@ def _run_powershell_command(
     """Executes a PowerShell command and returns the result."""
     full_command = ["powershell", "-Command"] + command
     try:
-        logger.debug("Executing PowerShell: %s", " ".join(full_command))
+        # logger.debug("Executing PowerShell: %s", " ".join(full_command))
         return subprocess.run(  # noqa: S603
             full_command,
             capture_output=True,

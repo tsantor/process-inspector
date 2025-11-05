@@ -1,8 +1,6 @@
 import logging
-import shlex
 import subprocess
 
-# from functools import cached_property
 import psutil
 
 from .interface import ServiceInterface
@@ -51,9 +49,13 @@ class Service(ServiceInterface):
 
     def start(self) -> bool:
         """Start Service"""
-        cmd = f'''powershell -command "Start-Service '{self.name}'"'''
-        logger.debug("Execute command: %s", cmd)
-        proc = subprocess.run(shlex.split(cmd), check=False, capture_output=True)  # noqa: S603
+        cmd = [
+            "powershell",
+            "-command",
+            f"Start-Service '{self.name}'",
+        ]
+        logger.debug("Execute command: %s", " ".join(cmd))
+        proc = subprocess.run(cmd, check=False, capture_output=True)  # noqa: S603
 
         # Refresh service info after start attempt
         if proc.returncode == 0:
@@ -64,7 +66,6 @@ class Service(ServiceInterface):
 
     def stop(self) -> bool:
         """Stop Service"""
-        # cmd = f'''powershell -command "Stop-Service '{self.name}' -Force"'''
         cmd = [
             "powershell",
             "-command",
@@ -83,9 +84,14 @@ class Service(ServiceInterface):
 
     def restart(self) -> bool:
         """Restart service"""
-        cmd = f'''powershell -command "Restart-Service '{self.name}' -Force"'''
-        logger.debug("Execute command: %s", cmd)
-        proc = subprocess.run(shlex.split(cmd), check=False, capture_output=True)  # noqa: S603
+        cmd = [
+            "powershell",
+            "-command",
+            f"Restart-Service '{self.name}'",
+            "-Force",
+        ]
+        logger.debug("Execute command: %s", " ".join(cmd))
+        proc = subprocess.run(cmd, check=False, capture_output=True)  # noqa: S603
 
         # Refresh service info after restart attempt
         if proc.returncode == 0:

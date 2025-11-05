@@ -1,6 +1,5 @@
 import logging
 import re
-import shlex
 import subprocess
 import time
 
@@ -39,10 +38,14 @@ class App(AppInterface):
 
     def get_version(self) -> str:
         escaped_path = str(self.app_path).replace("\\", "\\\\")
-        cmd = f"""powershell -Command '(Get-Item -Path "{escaped_path}").VersionInfo.ProductVersion'"""
+        cmd = [
+            "powershell",
+            "-command",
+            f"""(Get-Item -Path "{escaped_path}").VersionInfo.ProductVersion""",
+        ]
         # logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
-            shlex.split(cmd), check=False, capture_output=True, text=True
+            cmd, check=False, capture_output=True, text=True
         )
         result = proc.stdout.strip()
         regex = r"(\d{1,}\.?)+"
