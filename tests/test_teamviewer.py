@@ -68,3 +68,14 @@ def test_teamviewer_is_running(teamviewer):
 @pytest.mark.skip(reason="We don't want to close TeamViewer during tests")
 def test_teamviewer_close(teamviewer):
     assert teamviewer.close() is True
+
+
+@pytest.mark.skip(reason="We don't want to close TeamViewer during tests")
+def test_teamviewer_not_running(teamviewer):
+    assert teamviewer.close() is True
+    wait_for_condition(
+        lambda: not teamviewer.is_running(),
+        timeout=10,
+        description="TeamViewer to be closed",
+    )
+    assert teamviewer.is_running() is False

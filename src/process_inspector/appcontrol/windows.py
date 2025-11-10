@@ -30,7 +30,7 @@ class App(AppInterface):
         start_time = time.time()
         while not self.is_running():
             if time.time() - start_time > timeout:
-                logger.warnning("Timed out waiting for app to start: %s", self.app_exe)
+                logger.warning("Timed out waiting for app to start: %s", self.app_exe)
                 return False
             time.sleep(0.1)
 

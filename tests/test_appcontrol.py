@@ -212,23 +212,6 @@ def test_process_info_is_serializable(app):
         assert deserialized == proc_info
 
 
-# def test_multiple_operations_same_session(app):
-#     """Test multiple operations within the same app session."""
-#     with running_app(app) as running:
-#         # Multiple is_running checks
-#         assert running.is_running() is True
-#         assert running.is_running() is True
-
-#         # Get process info multiple times
-#         proc_info1 = running.process_info()
-#         time.sleep(0.1)
-#         proc_info2 = running.process_info()
-
-#         # PID should remain consistent
-#         assert proc_info1["pid"] == proc_info2["pid"]
-#         assert proc_info1["status"] == proc_info2["status"]
-
-
 def test_context_manager_exception_handling(app):
     """Test that context manager cleans up even if test fails."""
     with contextlib.suppress(ValueError), running_app(app) as running:
@@ -247,29 +230,3 @@ def test_context_manager_exception_handling(app):
 def test_app_not_running_between_tests(app):
     """Verify app is not running at start of test."""
     assert app.is_running() is False
-
-
-# def test_performance_timing(app):
-#     """Test and measure app startup/shutdown performance."""
-#     startup_max_time = 10
-#     shutdown_max_time = 5
-#     start_time = time.time()
-
-#     with running_app(app) as running:
-#         startup_time = time.time() - start_time
-#         assert running.is_running() is True
-
-#     total_time = time.time() - start_time
-#     shutdown_time = total_time - startup_time
-
-#     # These are loose bounds - adjust based on your app's characteristics
-#     assert startup_time < startup_max_time, (
-#         f"App took {startup_time:.2f}s to start (too slow)"
-#     )
-#     assert shutdown_time < shutdown_max_time, (
-#         f"App took {shutdown_time:.2f}s to shut down (too slow)"
-#     )
-
-#     print(
-#         f"Startup: {startup_time:.2f}s, Shutdown: {shutdown_time:.2f}s, Total: {total_time:.2f}s"
-#     )

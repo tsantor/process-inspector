@@ -39,6 +39,7 @@ class AppInterface(ABC):
         self.is_running()
 
     def reset_cache(self) -> None:
+        # logger.debug("Resetting cache for app: %s (PID: %s)", self.app_name, self._pid)
         self._process = None
         self._pid = None
         self._create_time = None
@@ -48,40 +49,47 @@ class AppInterface(ABC):
 
     def is_running(self) -> bool:
         """Check if the *specific* app instance is running."""
-        if self._pid is None:
-            # Fallback: check if the app is running (first run or manual restart)
-            proc = get_process_by_name(self.app_path, newest=True)
-            if not proc:
-                self.reset_cache()
-                return False
-
-            # Found a running instance, adopt it
-            logger.debug("Found running process: %s (PID: %s)", proc.name(), proc.pid)
-            self._process = proc
-            self._pid = proc.pid
-            try:
-                self._create_time = proc.create_time()
-            except (psutil.NoSuchProcess, psutil.AccessDenied):
-                self.reset_cache()
-                return False
-
         try:
-            # Use cached process or look it up again
-            if self._process:
-                p = self._process
-            else:
-                p = psutil.Process(self._pid)
-                self._process = p  # Cache the successful lookup
-            if abs(p.create_time() - self._create_time) > PID_CREATE_TIME_TOLERANCE:
+            # If we don't have a process yet, try to find one
+            if self._process is None:
+                if self._pid is None:
+                    # First run: find the process by name
+                    proc = get_process_by_name(self.app_path, newest=True)
+                    if not proc:
+                        return False
+                    logger.debug(
+                        "Found running process: %s (PID: %s)", proc.name(), proc.pid
+                    )
+                else:
+                    # We have a PID but no process object, recreate it
+                    proc = psutil.Process(self._pid)
+
+                # Cache the process and its metadata
+                self._process = proc
+                self._pid = proc.pid
+                self._create_time = proc.create_time()
+
+            # Now verify the cached process is still valid
+            if (
+                not self._process.is_running()
+                or self._process.status() == psutil.STATUS_ZOMBIE
+                or abs(self._process.create_time() - self._create_time)
+                > PID_CREATE_TIME_TOLERANCE
+            ):
+                logger.debug(
+                    "Process %s (PID: %s) no longer valid. Resetting cache.",
+                    self.app_name,
+                    self._pid,
+                )
                 self.reset_cache()
                 return False
 
-            # Check status
-            running = p.is_running() and p.status() != psutil.STATUS_ZOMBIE
-            if running:
-                self._last_seen = datetime.now(tz=UTC)
-            return running
-        except psutil.NoSuchProcess:
+            self._last_seen = datetime.now(tz=UTC)
+            # logger.debug("Running: %s (PID: %s): True", self.app_name, self._pid)
+            return True
+
+        except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
+            logger.error("Process error for %s: %s ", self.app_name, e)  # noqa: TRY400
             self.reset_cache()
             return False
 
@@ -103,9 +111,9 @@ class AppInterface(ABC):
         # Try graceful terminate (SIGTERM), then escalate (SIGKILL)
         try:
             p.terminate()
-            p.wait(timeout=2)
+            p.wait(timeout=5)
             logger.debug("Terminated process: %s (PID: %s)", self.app_name, self._pid)
-        except (psutil.NoSuchProcess, psutil.TimeoutExpired):
+        except psutil.TimeoutExpired:
             try:
                 p.kill()
                 p.wait(timeout=3)
@@ -114,6 +122,12 @@ class AppInterface(ABC):
                 logger.warning(
                     "Failed to kill process: %s (PID: %s)", self.app_name, self._pid
                 )
+        except psutil.NoSuchProcess:
+            logger.debug(
+                "Process already exited during termination: %s (PID: %s)",
+                self.app_name,
+                self._pid,
+            )
 
         self.reset_cache()
         return True

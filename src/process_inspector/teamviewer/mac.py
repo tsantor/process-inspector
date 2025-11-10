@@ -56,7 +56,7 @@ def get_teamviewer_path() -> Path:
 
 @cache
 def is_teamviewer_installed() -> bool:
-    """Check if TeamViewer is installed on a Mac."""
+    """Check if TeamViewer is installed."""
     teamviewer_path = get_teamviewer_path()
     return teamviewer_path.exists()
 
