@@ -34,6 +34,7 @@ class AppInterface(ABC):
         self._pid: int | None = None
         self._create_time: float | None = None
         self._last_seen: datetime | None = None
+        self._last_running_state: bool | None = None
 
         # Initialize PID and process (if already running)
         self.is_running()
@@ -56,6 +57,7 @@ class AppInterface(ABC):
                     # First run: find the process by name
                     proc = get_process_by_name(self.app_path, newest=True)
                     if not proc:
+                        self._update_running_state(is_running=False)
                         return False
                     logger.debug(
                         "Found running process: %s (PID: %s)", proc.name(), proc.pid
@@ -76,22 +78,34 @@ class AppInterface(ABC):
                 or abs(self._process.create_time() - self._create_time)
                 > PID_CREATE_TIME_TOLERANCE
             ):
-                logger.debug(
-                    "Process %s (PID: %s) no longer valid. Resetting cache.",
-                    self.app_name,
-                    self._pid,
-                )
+                logger.debug("Process no longer valid. Resetting cache.")
                 self.reset_cache()
+                self._update_running_state(is_running=False)
                 return False
 
             self._last_seen = datetime.now(tz=UTC)
             # logger.debug("Running: %s (PID: %s): True", self.app_name, self._pid)
+            self._update_running_state(is_running=True)
             return True
 
-        except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
-            logger.error("Process error for %s: %s ", self.app_name, e)  # noqa: TRY400
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            logger.debug("Process error for app: %s", self.app_name)
             self.reset_cache()
+            self._update_running_state(is_running=False)
             return False
+
+    def _update_running_state(self, is_running: bool) -> None:
+        """Track and notify on running state changes."""
+        if self._last_running_state != is_running:
+            # if self._last_running_state is not None:  # Skip first check
+            self._on_running_state_changed(self._last_running_state, is_running)
+            self._last_running_state = is_running
+
+    def _on_running_state_changed(self, was_running: bool, is_running: bool) -> None:
+        """Called when the running state changes."""
+        logger.info(
+            "App %s (PID: %s) running: %s", self.app_name, self._pid, is_running
+        )
 
     @abstractmethod
     def open(self) -> bool: ...
