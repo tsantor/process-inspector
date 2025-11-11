@@ -52,7 +52,7 @@ class App(AppInterface):
                     logger.warning("Timed out waiting for '%s' to stop", self.app_name)
                     return super().close()
                 time.sleep(0.1)
-            # log how many seconds it took
+
             elapsed = time.time() - start_time
             logger.debug(
                 "'%s' quit successfully in %.2f seconds.",

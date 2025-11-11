@@ -1,5 +1,4 @@
 import logging
-import shlex
 import subprocess
 import sys
 from functools import cached_property
@@ -22,7 +21,7 @@ class SupervisorCtl(ServiceInterface):
     def __init__(self, name):
         super().__init__(name)
         if not self.service_control_path:
-            msg = "service control executable not found"  # pragma: no cover
+            msg = "'supervisorctl' executable not found"  # pragma: no cover
             raise FileNotFoundError(msg)  # pragma: no cover
 
         # Initialize with current PID if available
@@ -47,10 +46,11 @@ class SupervisorCtl(ServiceInterface):
 
     def get_pid(self) -> int | None:
         """Get PID of the service if running, else None."""
-        cmd = f"sudo {self.service_control_path} pid {self.name}".strip()
+        # cmd = f"sudo {self.service_control_path} pid {self.name}".strip()
+        cmd = ["sudo", str(self.service_control_path), "pid", self.name]
         # logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
-            shlex.split(cmd), check=False, text=True, capture_output=True
+            cmd, check=False, text=True, capture_output=True
         )
         output = proc.stdout.strip()
         if output.isdigit():
@@ -64,10 +64,11 @@ class SupervisorCtl(ServiceInterface):
 
     def start(self) -> bool:
         """Start service"""
-        cmd = f"sudo {self.service_control_path} start {self.name}".strip()
-        logger.debug("Execute command: %s", cmd)
+        # cmd = f"sudo {self.service_control_path} start {self.name}".strip()
+        cmd = ["sudo", str(self.service_control_path), "start", self.name]
+        # logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
-            shlex.split(cmd), check=False, text=True, capture_output=True
+            cmd, check=False, text=True, capture_output=True
         )
         matches = ["started", "already started"]
         output = proc.stdout.strip().lower()
@@ -78,10 +79,11 @@ class SupervisorCtl(ServiceInterface):
 
     def stop(self) -> bool:
         """Stop service"""
-        cmd = f"sudo {self.service_control_path} stop {self.name}".strip()
-        logger.debug("Execute command: %s", cmd)
+        # cmd = f"sudo {self.service_control_path} stop {self.name}".strip()
+        cmd = ["sudo", str(self.service_control_path), "stop", self.name]
+        # logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
-            shlex.split(cmd), check=False, text=True, capture_output=True
+            cmd, check=False, text=True, capture_output=True
         )
         matches = ["stopped", "not running"]
         output = proc.stdout.strip().lower()
@@ -92,10 +94,11 @@ class SupervisorCtl(ServiceInterface):
 
     def restart(self) -> bool:
         """Restart service"""
-        cmd = f"sudo {self.service_control_path} restart {self.name}".strip()
-        logger.debug("Execute command: %s", cmd)
+        # cmd = f"sudo {self.service_control_path} restart {self.name}".strip()
+        cmd = ["sudo", str(self.service_control_path), "restart", self.name]
+        # logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
-            shlex.split(cmd), check=False, text=True, capture_output=True
+            cmd, check=False, text=True, capture_output=True
         )
         matches = ["started"]
         output = proc.stdout.strip().lower()
@@ -106,10 +109,11 @@ class SupervisorCtl(ServiceInterface):
 
     def status(self) -> str:
         """Get service status (e.g., RUNNING, STOPPED, etc.)"""
-        cmd = f"sudo {self.service_control_path} status {self.name}".strip()
+        # cmd = f"sudo {self.service_control_path} status {self.name}".strip()
+        cmd = ["sudo", str(self.service_control_path), "status", self.name]
         # logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
-            shlex.split(cmd), check=False, text=True, capture_output=True
+            cmd, check=False, text=True, capture_output=True
         )
         output = proc.stdout.strip()
         parts = output.split()

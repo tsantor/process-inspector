@@ -40,6 +40,9 @@ class AppInterface(ABC):
         # Initialize PID and process (if already running)
         self.is_running()
 
+    def __str__(self) -> str:
+        return f"'{self.app_name} (PID: {self._pid})"
+
     def reset_cache(self) -> None:
         # logger.debug("Resetting cache for app: %s (PID: %s)", self.app_name, self._pid)
         self._process = None
@@ -50,9 +53,6 @@ class AppInterface(ABC):
     def pid(self) -> int | None:
         """Return the PID of the running app"""
         return self._pid
-
-    def __str__(self) -> str:
-        return f"'{self.app_name} (PID: {self._pid})"
 
     def is_installed(self) -> bool:
         return self.app_path.exists()
@@ -68,9 +68,6 @@ class AppInterface(ABC):
                     if not proc:
                         self._update_running_state(is_running=False)
                         return False
-                    logger.debug(
-                        "Found running process '%s' (PID: %s)", proc.name(), proc.pid
-                    )
                 else:
                     # We have a PID but no process object, recreate it
                     proc = psutil.Process(self._pid)

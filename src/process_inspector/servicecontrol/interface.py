@@ -20,6 +20,9 @@ class ServiceInterface(ABC):
         self._cached_process: psutil.Process = None
         self._last_seen: datetime = None
 
+    def __str__(self) -> str:
+        return f"'{self.name} (PID: {self._cached_pid})"
+
     def reset_cache(self):
         """Clear cached PID and process info."""
         self._cached_pid = None
@@ -58,7 +61,7 @@ class ServiceInterface(ABC):
         try:
             return psutil.Process(pid)
         except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
-            logger.warning("Failed to get process for PID %d: %s", pid, e)
+            logger.warning("Failed to get process %s: %s", self, e)
             return None
 
     def is_running(self) -> bool:

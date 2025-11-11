@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. This projec
 ### 0.1.9 (2025-11-10)
 
 - ADDED - Remove log event for `ScheduledTask` commands. Too verbose.
+- ADDED - On macOS, "ask" the app to quit gracefully via `osascript`, then if it does not, force kill the process via `psutil`. This addresses an issue where apps like TeamViewer, which have watchdog processes, will try to restart the app if killed via `SIGTERM/SIGKILL`.
 - FIXED - Bug with invalidating stale PID/Process cache
 
 ### 0.1.8 (2025-11-04)

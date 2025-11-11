@@ -21,7 +21,7 @@ class Service(ServiceInterface):
             self._cached_pid = current_pid
             self._cached_process = self._get_process_for_pid(current_pid)
 
-        logger.info("Service: %s | Status: %s", name, self.status())
+        logger.info("Service: %s | Status: %s", self, self.status())
 
     def get_pid(self) -> int | None:
         return self._service.pid() if self._service else None
@@ -37,7 +37,7 @@ class Service(ServiceInterface):
         try:
             return psutil.win_service_get(self.name)
         except Exception as e:  # noqa: BLE001
-            logger.error("Failed to get service '%s': %s", self.name, e)  # noqa: TRY400
+            logger.error("Failed to get service %s: %s", self, e)  # noqa: TRY400
             return None
 
     def is_running(self) -> bool:
@@ -54,7 +54,7 @@ class Service(ServiceInterface):
             "-command",
             f"Start-Service '{self.name}'",
         ]
-        logger.debug("Execute command: %s", " ".join(cmd))
+        # logger.debug("Execute command: %s", " ".join(cmd))
         proc = subprocess.run(cmd, check=False, capture_output=True)  # noqa: S603
 
         # Refresh service info after start attempt
@@ -72,7 +72,7 @@ class Service(ServiceInterface):
             f"Stop-Service '{self.name}'",
             "-Force",
         ]
-        logger.debug("Execute command: %s", " ".join(cmd))
+        # logger.debug("Execute command: %s", " ".join(cmd))
         proc = subprocess.run(cmd, check=False, capture_output=True)  # noqa: S603
 
         # Clear cache after stop attempt since process will be gone
@@ -90,7 +90,7 @@ class Service(ServiceInterface):
             f"Restart-Service '{self.name}'",
             "-Force",
         ]
-        logger.debug("Execute command: %s", " ".join(cmd))
+        # logger.debug("Execute command: %s", " ".join(cmd))
         proc = subprocess.run(cmd, check=False, capture_output=True)  # noqa: S603
 
         # Refresh service info after restart attempt
@@ -108,5 +108,5 @@ class Service(ServiceInterface):
         try:
             return self._service.status().upper()
         except Exception as e:  # noqa: BLE001
-            logger.error("Failed to get status for service '%s': %s", self.name, e)  # noqa: TRY400
+            logger.error("Failed to get status for service %s: %s", self, e)  # noqa: TRY400
             return "--"
