@@ -115,6 +115,7 @@ class AppInterface(ABC):
         """Close the running app we launched (terminate -> kill) and wait."""
         if not self.is_running():
             self.reset_cache()
+            self._update_running_state(is_running=False)
             return True
 
         start_time = time.perf_counter()
@@ -123,6 +124,7 @@ class AppInterface(ABC):
             p = self._process or psutil.Process(self._pid)
         except psutil.NoSuchProcess:
             self.reset_cache()
+            self._update_running_state(is_running=False)
             return True
 
         # Try graceful terminate (SIGTERM), then escalate (SIGKILL)
@@ -141,10 +143,9 @@ class AppInterface(ABC):
             logger.debug("Process %s already exited during termination", self)
 
         # Wait a moment for the quit to complete
-        while not self.is_running():
+        while self.is_running():
             if time.perf_counter() - start_time > timeout:
                 logger.warning("Timed out waiting for %s to stop", self)
-                return super().close()
             time.sleep(0.1)
 
         elapsed = time.perf_counter() - start_time
@@ -153,8 +154,8 @@ class AppInterface(ABC):
             self.app_name,
             elapsed,
         )
-
         self.reset_cache()
+        self._update_running_state(is_running=False)
         return True
 
     @abstractmethod
@@ -219,6 +220,7 @@ class AppInterface(ABC):
             except psutil.NoSuchProcess:
                 logger.warning("Process %s no longer exists.", self)
                 self.reset_cache()
+                self._update_running_state(is_running=False)
         # We can reach here if the process was killed by the user
         return {
             "is_running": False,

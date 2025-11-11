@@ -45,6 +45,8 @@ class App(AppInterface):
             elapsed,
         )
 
+        # Manually update running state to immediately reflect change
+        self._update_running_state(is_running=True)
         return True
 
     def close(self, timeout: float = 3.0) -> bool:
@@ -72,7 +74,7 @@ class App(AppInterface):
             )
 
         # Wait a moment for the quit to complete
-        while not self.is_running():
+        while self.is_running():
             if time.perf_counter() - start_time > timeout:
                 logger.warning("Timed out waiting for %s to stop", self)
                 return super().close()
@@ -85,6 +87,8 @@ class App(AppInterface):
             elapsed,
         )
 
+        # Manually update running state to immediately reflect change
+        self._update_running_state(is_running=False)
         return True
 
     def get_version(self) -> str:

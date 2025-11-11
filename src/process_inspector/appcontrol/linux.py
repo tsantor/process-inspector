@@ -25,6 +25,8 @@ class App(AppInterface):
         logger.warning(
             "Linux App control is experimental and may not work as expected."
         )
+        # Manually update running state to immediately reflect change
+        # self._update_running_state(is_running=True)
         return False
 
     def close(self) -> bool:
@@ -32,6 +34,8 @@ class App(AppInterface):
         logger.warning(
             "Linux App control is experimental and may not work as expected."
         )
+        # Manually update running state to immediately reflect change
+        # self._update_running_state(is_running=False)
         return False
 
     def get_version(self) -> str:

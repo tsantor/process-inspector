@@ -44,6 +44,8 @@ class App(AppInterface):
             elapsed,
         )
 
+        # Manually update running state to immediately reflect change
+        self._update_running_state(is_running=True)
         return True
 
     def get_version(self) -> str:
