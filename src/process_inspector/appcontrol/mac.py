@@ -43,28 +43,28 @@ class App(AppInterface):
         applescript_command = f'tell application "{self.app_name}" to quit'
         try:
             subprocess.run(["osascript", "-e", applescript_command], check=True)  # noqa: S603, S607
-            logger.debug("%s application sent clean quit signal.", self.app_name)
+            logger.debug("'%s' sent clean quit signal.", self.app_name)
 
             # Wait a moment for the quit to complete
             start_time = time.time()
             while not self.is_running():
                 if time.time() - start_time > timeout:
-                    logger.warning(
-                        "Timed out waiting for app to stop: %s", self.app_name
-                    )
+                    logger.warning("Timed out waiting for '%s' to stop", self.app_name)
                     return super().close()
                 time.sleep(0.1)
             # log how many seconds it took
             elapsed = time.time() - start_time
             logger.debug(
-                "%s application quit successfully in %.2f seconds.",
+                "'%s' quit successfully in %.2f seconds.",
                 self.app_name,
                 elapsed,
             )
 
         except subprocess.CalledProcessError as e:
             logger.error(  # noqa: TRY400
-                "Failed to send quit signal to %s via AppleScript. %s", self.app_name, e
+                "Failed to send quit signal to '%s' via AppleScript. %s",
+                self.app_name,
+                e,
             )
         except FileNotFoundError:
             logger.error(  # noqa: TRY400

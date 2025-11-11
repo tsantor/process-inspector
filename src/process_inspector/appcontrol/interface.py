@@ -51,6 +51,9 @@ class AppInterface(ABC):
         """Return the PID of the running app"""
         return self._pid
 
+    def __str__(self) -> str:
+        return f"'{self.app_name} (PID: {self._pid})"
+
     def is_installed(self) -> bool:
         return self.app_path.exists()
 
@@ -66,7 +69,7 @@ class AppInterface(ABC):
                         self._update_running_state(is_running=False)
                         return False
                     logger.debug(
-                        "Found running process: %s (PID: %s)", proc.name(), proc.pid
+                        "Found running process '%s' (PID: %s)", proc.name(), proc.pid
                     )
                 else:
                     # We have a PID but no process object, recreate it
@@ -84,18 +87,17 @@ class AppInterface(ABC):
                 or abs(self._process.create_time() - self._create_time)
                 > PID_CREATE_TIME_TOLERANCE
             ):
-                logger.debug("Process no longer valid. Resetting cache.")
+                logger.debug("Process %s no longer valid. Resetting cache.", self)
                 self.reset_cache()
                 self._update_running_state(is_running=False)
                 return False
 
             self._last_seen = datetime.now(tz=UTC)
-            # logger.debug("Running: %s (PID: %s): True", self.app_name, self._pid)
             self._update_running_state(is_running=True)
             return True
 
         except (psutil.NoSuchProcess, psutil.AccessDenied):
-            logger.debug("Process error for app: %s", self.app_name)
+            logger.debug("Process %s error", self)
             self.reset_cache()
             self._update_running_state(is_running=False)
             return False
@@ -106,17 +108,7 @@ class AppInterface(ABC):
             # if self._last_running_state is not None:  # Skip first check
             if self.state_change_callback:
                 self.state_change_callback(app=self, is_running=is_running)
-                # self._on_running_state_changed(self._last_running_state, is_running)
             self._last_running_state = is_running
-
-    # def _on_running_state_changed(self, was_running: bool, is_running: bool) -> None:
-    #     """Called when the running state changes."""
-    #     logger.info(
-    #         "internal callback: App '%s' (PID: %s) running: %s",
-    #         self.app_name,
-    #         self._pid,
-    #         is_running,
-    #     )
 
     @abstractmethod
     def open(self) -> bool: ...
@@ -137,22 +129,16 @@ class AppInterface(ABC):
         try:
             p.terminate()
             p.wait(timeout=5)
-            logger.debug("Terminated process: %s (PID: %s)", self.app_name, self._pid)
+            logger.debug("Terminated process %s", self)
         except psutil.TimeoutExpired:
             try:
                 p.kill()
                 p.wait(timeout=3)
-                logger.debug("Killed process: %s (PID: %s)", self.app_name, self._pid)
+                logger.debug("Killed process %s", self)
             except (psutil.NoSuchProcess, psutil.TimeoutExpired):
-                logger.warning(
-                    "Failed to kill process: %s (PID: %s)", self.app_name, self._pid
-                )
+                logger.warning("Failed to kill process %s", self)
         except psutil.NoSuchProcess:
-            logger.debug(
-                "Process already exited during termination: %s (PID: %s)",
-                self.app_name,
-                self._pid,
-            )
+            logger.debug("Process %s already exited during termination", self)
 
         self.reset_cache()
         return True
@@ -217,11 +203,7 @@ class AppInterface(ABC):
                     "last_seen": self.get_last_seen_str(),
                 }
             except psutil.NoSuchProcess:
-                logger.warning(
-                    "Process for app '%s' with PID %s no longer exists.",
-                    self.app_name,
-                    self._pid,
-                )
+                logger.warning("Process %s no longer exists.", self)
                 self.reset_cache()
         # We can reach here if the process was killed by the user
         return {
