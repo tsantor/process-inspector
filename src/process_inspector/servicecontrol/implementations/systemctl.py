@@ -1,5 +1,4 @@
 import logging
-import shlex
 import subprocess
 from functools import cached_property
 from pathlib import Path
@@ -15,7 +14,7 @@ class SystemCtl(ServiceInterface):
     def __init__(self, name):
         super().__init__(name)
         if not self.service_control_path:
-            msg = "service control executable not found"  # pragma: no cover
+            msg = "'systemctl' executable not found"  # pragma: no cover
             raise FileNotFoundError(msg)  # pragma: no cover
 
     @cached_property
@@ -26,10 +25,19 @@ class SystemCtl(ServiceInterface):
 
     def get_pid(self) -> int | None:
         """Get PID of the service if running, else None."""
-        cmd = f"sudo {self.service_control_path} show --property MainPID --value {self.name}".strip()
+        # cmd = f"sudo {self.service_control_path} show --property MainPID --value {self.name}".strip()
+        cmd = [
+            "sudo",
+            str(self.service_control_path),
+            "show",
+            "--property",
+            "MainPID",
+            "--value",
+            self.name,
+        ]
         # logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
-            shlex.split(cmd), check=False, text=True, capture_output=True
+            cmd, check=False, text=True, capture_output=True
         )
         output = proc.stdout.strip()
         if output.isdigit():
@@ -44,36 +52,39 @@ class SystemCtl(ServiceInterface):
 
     def start(self) -> bool:
         """Start service"""
-        cmd = f"sudo {self.service_control_path} start {self.name}".strip()
-        logger.debug("Execute command: %s", cmd)
+        logger.info("Start service '%s'", self.name)
+        cmd = ["sudo", str(self.service_control_path), "start", self.name]
+        # logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
-            shlex.split(cmd), check=False, text=True, capture_output=True
+            cmd, check=False, text=True, capture_output=True
         )
         return proc.returncode == 0
 
     def stop(self) -> bool:
         """Stop service"""
-        cmd = f"sudo {self.service_control_path} stop {self.name}".strip()
-        logger.debug("Execute command: %s", cmd)
+        logger.info("Stop service '%s'", self.name)
+        cmd = ["sudo", str(self.service_control_path), "stop", self.name]
+        # logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
-            shlex.split(cmd), check=False, text=True, capture_output=True
+            cmd, check=False, text=True, capture_output=True
         )
         return proc.returncode == 0
 
     def restart(self) -> bool:
         """Restart service"""
-        cmd = f"sudo {self.service_control_path} restart {self.name}".strip()
-        logger.debug("Execute command: %s", cmd)
+        logger.info("Restart service '%s'", self.name)
+        cmd = ["sudo", str(self.service_control_path), "restart", self.name]
+        # logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
-            shlex.split(cmd), check=False, text=True, capture_output=True
+            cmd, check=False, text=True, capture_output=True
         )
         return proc.returncode == 0
 
     def status(self) -> str:
         """Get service status"""
-        cmd = f"sudo {self.service_control_path} status {self.name}".strip()
+        cmd = ["sudo", str(self.service_control_path), "status", self.name]
         proc = subprocess.run(  # noqa: S603
-            shlex.split(cmd), check=False, text=True, capture_output=True
+            cmd, check=False, text=True, capture_output=True
         )
         output = proc.stdout.strip().lower()
 

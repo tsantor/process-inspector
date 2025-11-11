@@ -49,6 +49,7 @@ class Service(ServiceInterface):
 
     def start(self) -> bool:
         """Start Service"""
+        logger.info("Start service '%s'", self.name)
         cmd = [
             "powershell",
             "-command",
@@ -66,6 +67,7 @@ class Service(ServiceInterface):
 
     def stop(self) -> bool:
         """Stop Service"""
+        logger.info("Stop service '%s'", self.name)
         cmd = [
             "powershell",
             "-command",
@@ -84,6 +86,7 @@ class Service(ServiceInterface):
 
     def restart(self) -> bool:
         """Restart service"""
+        logger.info("Restart service '%s'", self.name)
         cmd = [
             "powershell",
             "-command",

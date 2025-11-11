@@ -1,4 +1,5 @@
 import logging
+import time
 from abc import ABC
 from abc import abstractmethod
 from datetime import UTC
@@ -110,11 +111,13 @@ class AppInterface(ABC):
     @abstractmethod
     def open(self) -> bool: ...
 
-    def close(self) -> bool:
+    def close(self, timeout: float = 3.0) -> bool:
         """Close the running app we launched (terminate -> kill) and wait."""
         if not self.is_running():
             self.reset_cache()
             return True
+
+        start_time = time.perf_counter()
 
         try:
             p = self._process or psutil.Process(self._pid)
@@ -136,6 +139,20 @@ class AppInterface(ABC):
                 logger.warning("Failed to kill process %s", self)
         except psutil.NoSuchProcess:
             logger.debug("Process %s already exited during termination", self)
+
+        # Wait a moment for the quit to complete
+        while not self.is_running():
+            if time.perf_counter() - start_time > timeout:
+                logger.warning("Timed out waiting for %s to stop", self)
+                return super().close()
+            time.sleep(0.1)
+
+        elapsed = time.perf_counter() - start_time
+        logger.debug(
+            "App '%s' quit successfully in %.3f seconds.",
+            self.app_name,
+            elapsed,
+        )
 
         self.reset_cache()
         return True

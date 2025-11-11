@@ -185,7 +185,8 @@ dependency_urls: requirements_dependency pyproject_dependency ## Generate depend
 # -----------------------------------------------------------------------------
 
 user=pi
-host=raspberrypi.local
+# host=raspberrypi.local
+host=raspi3b-2.local
 remote_dir=/home/pi/Sandbox/Python/my-pypi-packages/process-inspector
 
 rsync_to_pi:	## Sync files to Raspberry Pi

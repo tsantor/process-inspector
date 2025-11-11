@@ -1,5 +1,4 @@
 import logging
-import shlex
 import subprocess
 
 from .interface import OperatingSystemInterface
@@ -12,7 +11,8 @@ class OperatingSystem(OperatingSystemInterface):
 
     def reboot(self, name="Dashboard") -> bool:  # pragma: no cover
         """Reboot computer"""
-        cmd = "sudo shutdown -r now"
-        logger.debug("Execute command: %s", cmd)
-        proc = subprocess.run(shlex.split(cmd), check=True, capture_output=True)  # noqa: S603
+        logger.info("Reboot requested")
+        cmd = ["sudo", "shutdown", "-r", "now"]
+        # logger.debug("Execute command: %s", cmd)
+        proc = subprocess.run(cmd, check=True, capture_output=True)  # noqa: S603
         return proc.returncode == 0

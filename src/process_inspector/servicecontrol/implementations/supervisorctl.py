@@ -46,7 +46,6 @@ class SupervisorCtl(ServiceInterface):
 
     def get_pid(self) -> int | None:
         """Get PID of the service if running, else None."""
-        # cmd = f"sudo {self.service_control_path} pid {self.name}".strip()
         cmd = ["sudo", str(self.service_control_path), "pid", self.name]
         # logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
@@ -64,7 +63,7 @@ class SupervisorCtl(ServiceInterface):
 
     def start(self) -> bool:
         """Start service"""
-        # cmd = f"sudo {self.service_control_path} start {self.name}".strip()
+        logger.info("Start service '%s'", self.name)
         cmd = ["sudo", str(self.service_control_path), "start", self.name]
         # logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
@@ -79,7 +78,7 @@ class SupervisorCtl(ServiceInterface):
 
     def stop(self) -> bool:
         """Stop service"""
-        # cmd = f"sudo {self.service_control_path} stop {self.name}".strip()
+        logger.info("Stop service '%s'", self.name)
         cmd = ["sudo", str(self.service_control_path), "stop", self.name]
         # logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
@@ -94,7 +93,7 @@ class SupervisorCtl(ServiceInterface):
 
     def restart(self) -> bool:
         """Restart service"""
-        # cmd = f"sudo {self.service_control_path} restart {self.name}".strip()
+        logger.info("Restart service '%s'", self.name)
         cmd = ["sudo", str(self.service_control_path), "restart", self.name]
         # logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
@@ -109,7 +108,6 @@ class SupervisorCtl(ServiceInterface):
 
     def status(self) -> str:
         """Get service status (e.g., RUNNING, STOPPED, etc.)"""
-        # cmd = f"sudo {self.service_control_path} status {self.name}".strip()
         cmd = ["sudo", str(self.service_control_path), "status", self.name]
         # logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603

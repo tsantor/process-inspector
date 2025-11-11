@@ -16,23 +16,33 @@ class App(AppInterface):
         if self.is_running():
             return True
 
+        logger.info("Open app '%s'", self.app_exe)
+
+        start_time = time.perf_counter()
+
         # Launch the executable directly
         try:
             subprocess.Popen([str(self.app_path)])  # noqa: S603
         except FileNotFoundError:
-            logger.exception("App not found: %s", self.app_path)
+            logger.exception("App '%s' not found", self.app_path)
             return False
         except Exception:
-            logger.exception("Failed to start app: %s", self.app_exe)
+            logger.exception("Failed to start app '%s'", self.app_exe)
             return False
 
         # Wait for process to start so we can get its PID
-        start_time = time.time()
         while not self.is_running():
-            if time.time() - start_time > timeout:
-                logger.warning("Timed out waiting for app to start: %s", self.app_exe)
+            if time.perf_counter() - start_time > timeout:
+                logger.warning("Timed out waiting for app '%s' to start", self.app_exe)
                 return False
             time.sleep(0.1)
+
+        elapsed = time.perf_counter() - start_time
+        logger.debug(
+            "App '%s' started successfully in %.3f seconds.",
+            self.app_exe,
+            elapsed,
+        )
 
         return True
 
