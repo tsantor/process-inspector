@@ -20,10 +20,11 @@ PID_CREATE_TIME_TOLERANCE = 0.001
 class AppInterface(ABC):
     """Basic control of an App"""
 
-    def __init__(self, app_path: Path):
+    def __init__(self, app_path: Path, state_change_callback=None) -> None:
         self.app_path = app_path
         self.app_exe = app_path.name
         self.app_name = app_path.stem
+        self.state_change_callback = state_change_callback
 
         if not self.is_installed():
             logger.warning(
@@ -44,6 +45,11 @@ class AppInterface(ABC):
         self._process = None
         self._pid = None
         self._create_time = None
+
+    @property
+    def pid(self) -> int | None:
+        """Return the PID of the running app"""
+        return self._pid
 
     def is_installed(self) -> bool:
         return self.app_path.exists()
@@ -98,14 +104,19 @@ class AppInterface(ABC):
         """Track and notify on running state changes."""
         if self._last_running_state != is_running:
             # if self._last_running_state is not None:  # Skip first check
-            self._on_running_state_changed(self._last_running_state, is_running)
+            if self.state_change_callback:
+                self.state_change_callback(app=self, is_running=is_running)
+                # self._on_running_state_changed(self._last_running_state, is_running)
             self._last_running_state = is_running
 
-    def _on_running_state_changed(self, was_running: bool, is_running: bool) -> None:
-        """Called when the running state changes."""
-        logger.info(
-            "App %s (PID: %s) running: %s", self.app_name, self._pid, is_running
-        )
+    # def _on_running_state_changed(self, was_running: bool, is_running: bool) -> None:
+    #     """Called when the running state changes."""
+    #     logger.info(
+    #         "internal callback: App '%s' (PID: %s) running: %s",
+    #         self.app_name,
+    #         self._pid,
+    #         is_running,
+    #     )
 
     @abstractmethod
     def open(self) -> bool: ...
