@@ -44,7 +44,7 @@ test=[
 
 [project.urls]
 # Homepage = "https://xstudios.com"
-# Documentation = "https://readthedocs.org//process-inspector"
+# Documentation = "https://readthedocs.org/process-inspector"
 Repository = "https://bitbucket.org/xstudios/process-inspector.git"
 Issues = "https://bitbucket.org/xstudios/process-inspector/issues"
 Changelog = "https://bitbucket.org/xstudios/process-inspector/blob/master/HISTORY.md"

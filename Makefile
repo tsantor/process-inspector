@@ -40,14 +40,15 @@ env:  ## Create virtual environment (uses `uv`)
 env_remove:  ## Remove virtual environment
 	rm -rf .venv/
 
-env_recreate: env_remove env pip_install_editable  ## Recreate environment from scratch
+env_recreate: env_remove env pip_install_editable pip_install_dev  ## Recreate environment from scratch
 
 # -----------------------------------------------------------------------------
 # Pip
 # -----------------------------------------------------------------------------
 
 pip_install_editable:  ## Install in editable mode
-	uv pip install -e . --extra-index-url https://www.piwheels.org/simple
+	uv pip install -e .
+	# --extra-index-url https://www.piwheels.org/simple
 
 pip_list:  ## Run pip list
 	uv pip list
@@ -59,7 +60,7 @@ pipdeptree:  ## # Run pipdeptree
 	uv run pipdeptree
 
 pip_install_dev:  ## Sync dependencies [production, dev, test]
-	uv sync --no-default-groups --group test --group dev --extra-index-url https://www.piwheels.org/simple
+	uv sync --no-default-groups --group test --group dev
 
 uv_lock:	## Match lock file to current dependencies in pyproject.toml
 	uv lock
@@ -68,7 +69,7 @@ uv_lock_check:	## Check if lock file is up to date
 	uv lock --check
 
 uv_sync:	## Sync dependencies from lock file
-	uv sync --extra-index-url https://www.piwheels.org/simple
+	uv sync
 
 # -----------------------------------------------------------------------------
 # Testing

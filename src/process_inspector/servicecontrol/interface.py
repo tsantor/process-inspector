@@ -16,10 +16,10 @@ class ServiceInterface(ABC):
 
     def __init__(self, name, state_change_callback=None):
         self.name: str = name
+        self._on_state_change_cb = state_change_callback
         self._cached_pid: int = None
         self._cached_process: psutil.Process = None
         self._last_seen: datetime = None
-        self.state_change_callback = state_change_callback
 
     def __str__(self) -> str:
         return f"'{self.name} (PID: {self._cached_pid})"

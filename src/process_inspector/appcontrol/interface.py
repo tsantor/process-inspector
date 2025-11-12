@@ -25,7 +25,7 @@ class AppInterface(ABC):
         self.app_path = app_path
         self.app_exe = app_path.name
         self.app_name = app_path.stem
-        self.state_change_callback = state_change_callback
+        self._on_state_change_cb = state_change_callback
 
         if not self.is_installed():
             logger.warning(
@@ -104,8 +104,8 @@ class AppInterface(ABC):
         """Track and notify on running state changes."""
         if self._last_running_state != is_running:
             # if self._last_running_state is not None:  # Skip first check
-            if self.state_change_callback:
-                self.state_change_callback(app=self, is_running=is_running)
+            if self._on_state_change_cb:
+                self._on_state_change_cb(app=self, is_running=is_running)
             self._last_running_state = is_running
 
     @abstractmethod
