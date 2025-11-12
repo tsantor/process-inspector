@@ -47,11 +47,7 @@ env_recreate: env_remove env pip_install_editable  ## Recreate environment from 
 # -----------------------------------------------------------------------------
 
 pip_install_editable:  ## Install in editable mode
-	uv sync --all-groups
-	uv pip install --no-deps -e .
-
-pip_install_build_tools:  ## Install build tools
-	uv pip install --upgrade twine pkginfo setuptools wheel build
+	uv pip install -e . --extra-index-url https://www.piwheels.org/simple
 
 pip_list:  ## Run pip list
 	uv pip list
@@ -62,33 +58,36 @@ pip_tree: ## Run pip tree
 pipdeptree:  ## # Run pipdeptree
 	uv run pipdeptree
 
-uv_sync:  ## Sync dependencies [production, dev, test]
-	uv sync --all-groups
+pip_install_dev:  ## Sync dependencies [production, dev, test]
+	uv sync --no-default-groups --group test --group dev --extra-index-url https://www.piwheels.org/simple
+
+uv_lock:	## Match lock file to current dependencies in pyproject.toml
+	uv lock
 
 uv_lock_check:	## Check if lock file is up to date
 	uv lock --check
+
+uv_sync:	## Sync dependencies from lock file
+	uv sync --extra-index-url https://www.piwheels.org/simple
 
 # -----------------------------------------------------------------------------
 # Testing
 # -----------------------------------------------------------------------------
 
 pytest:  ## Run tests
-	pytest -vx --cov --cov-report=html
+	uv run pytest -vx --cov --cov-report=html
 
 pytest_verbose:  ## Run tests in verbose mode
-	pytest -vvs --cov --cov-report=html
-
-pytest_failed_first:  ## Run failed tests first
-	pytest -vx --ff --cov --cov-report=html
+	uv run pytest -vvs --cov --cov-report=html
 
 coverage:  ## Run tests with coverage
-	coverage run -m pytest && coverage html
+	uv run coverage run -m pytest && coverage html
 
 coverage_verbose:  ## Run tests with coverage in verbose mode
-	coverage run -m pytest -vss && coverage html
+	uv run coverage run -m pytest -vss && coverage html
 
 coverage_skip:  ## Run tests with coverage and skip covered
-	coverage run -m pytest -vs && coverage html --skip-covered
+	uv run coverage run -m pytest -vs && coverage html --skip-covered
 
 open_coverage:  ## Open coverage report
 	open htmlcov/index.html
@@ -98,13 +97,13 @@ open_coverage:  ## Open coverage report
 # -----------------------------------------------------------------------------
 
 ruff_format: ## Run ruff format
-	ruff format src/process_inspector
+	uv run ruff format
 
 ruff_check: ## Run ruff check
-	ruff check src/process_inspector
+	uv run ruff check
 
 ruff_clean: ## Run ruff clean
-	ruff clean
+	uv run ruff clean
 
 # -----------------------------------------------------------------------------
 # Cleanup
@@ -218,6 +217,6 @@ uv_upgrade_and_sync:	## Upgrade all dependencies and sync
 install_uv:	## Install uv
 	curl -LsSf https://astral.sh/uv/install.sh | sh
 
-kickstart: uv_add_basic uv_add_dev_dependencies uv_add_test_dependencies  uv_add_async ## Kickstart project setup
+kickstart: uv_add_basic uv_add_dev_dependencies uv_add_test_dependencies uv_add_async ## Kickstart project setup from nothing
 
 # Add your project specific commands here

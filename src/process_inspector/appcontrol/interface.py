@@ -21,7 +21,7 @@ PID_CREATE_TIME_TOLERANCE = 0.001
 class AppInterface(ABC):
     """Basic control of an App"""
 
-    def __init__(self, app_path: Path, state_change_callback=None) -> None:
+    def __init__(self, app_path: Path, state_change_callback=None):
         self.app_path = app_path
         self.app_exe = app_path.name
         self.app_name = app_path.stem

@@ -7,33 +7,31 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "process-inspector"
 description = "A Python package for cross-platform process management, providing process data as dicts/JSON and allowing process control (start, stop, kill) on Windows, Mac, and Linux."
+dynamic = ["version", "readme"]
+requires-python = ">=3.11"
+authors = [
+  { name = "Tim Santor", email = "tsantor@xstudios.com" },
+]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Environment :: Console",
   "Intended Audience :: Developers",
   "Natural Language :: English",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
-    "humanize>=4.13.0",
-    "psutil>=7.1.0",
-]
-
-dynamic = ["version", "readme"]
-requires-python = ">=3.10"
-authors = [
-  { name = "Tim Santor", email = "tsantor@xstudios.com" },
+    "humanize>=4.14.0",
+    "psutil>=7.1.3",
 ]
 
 [dependency-groups]
 dev=[
     "build>=1.3.0",
-    "pipdeptree>=2.29.0",
-    "pre-commit>=4.3.0",
-    "ruff>=0.14.0",
+    "pipdeptree>=2.30.0",
+    "pre-commit>=4.4.0",
+    "ruff>=0.14.4",
     "twine>=6.2.0",
     "wheel>=0.45.1",
 ]
@@ -47,9 +45,9 @@ test=[
 [project.urls]
 # Homepage = "https://xstudios.com"
 # Documentation = "https://readthedocs.org//process-inspector"
-Repository = "https://github.com/tsantor/process-inspector.git"
-Issues = "https://github.com/tsantor/process-inspector/issues"
-Changelog = "https://github.com/tsantor/process-inspector/blob/master/HISTORY.md"
+Repository = "https://bitbucket.org/xstudios/process-inspector.git"
+Issues = "https://bitbucket.org/xstudios/process-inspector/issues"
+Changelog = "https://bitbucket.org/xstudios/process-inspector/blob/master/HISTORY.md"
 
 [tool.setuptools.packages.find]
 # https://setuptools.pypa.io/en/latest/userguide/datafiles.html

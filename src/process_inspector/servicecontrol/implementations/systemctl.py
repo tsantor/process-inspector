@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 class SystemCtl(ServiceInterface):
     """Linux System Ctl Service"""
 
-    def __init__(self, name):
-        super().__init__(name)
+    def __init__(self, name, state_change_callback=None):
+        super().__init__(name, state_change_callback)
         if not self.service_control_path:
             msg = "'systemctl' executable not found"  # pragma: no cover
             raise FileNotFoundError(msg)  # pragma: no cover

@@ -11,14 +11,22 @@ logger = logging.getLogger(__name__)
 class Teamviewer:
     """Basic control of TeamViewer across platforms"""
 
-    def __init__(self):
+    def __init__(self, state_change_callback=None):
         if sys.platform == "linux":
-            self._instance = SystemCtl("teamviewerd.service")
+            self._instance = SystemCtl(
+                "teamviewerd.service",
+                state_change_callback=state_change_callback,
+            )
         else:
             self._instance = NativeApp(
                 get_teamviewer_path(),
-                state_change_callback=self._on_running_state_changed,
+                state_change_callback=state_change_callback,
+                # state_change_callback=self._on_running_state_changed,
             )
+
+    @property
+    def app(self) -> NativeApp:
+        return self._instance
 
     def get_pid(self) -> int | None:
         return self._instance.get_pid()
@@ -32,6 +40,6 @@ class Teamviewer:
     def close(self) -> bool:
         return self._instance.close()
 
-    def _on_running_state_changed(self, app, is_running: bool) -> None:
-        """Called when the running state changes."""
-        logger.info("Teamviewer: App %s running: %s", app, is_running)
+    # def _on_running_state_changed(self, app, is_running: bool) -> None:
+    #     """Called when the running state changes."""
+    #     logger.info("Teamviewer: App %s running: %s", app, is_running)
