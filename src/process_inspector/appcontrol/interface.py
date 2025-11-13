@@ -45,6 +45,7 @@ class AppInterface(ABC):
         return f"'{self.app_name} (PID: {self._pid})"
 
     def reset_cache(self) -> None:
+        """Clear cached PID and process info."""
         # logger.debug("Resetting cache for app: %s (PID: %s)", self.app_name, self._pid)
         self._process = None
         self._pid = None
@@ -221,6 +222,7 @@ class AppInterface(ABC):
                 logger.warning("Process %s no longer exists.", self)
                 self.reset_cache()
                 self._update_running_state(is_running=False)
+        # logger.warning("No process info available for %s.", self)
         # We can reach here if the process was killed by the user
         return {
             "is_running": False,

@@ -27,10 +27,10 @@ class SupervisorCtl(ServiceInterface):
         # Initialize with current PID if available
         current_pid = self.get_pid()
         if current_pid:
-            self._cached_pid = current_pid
-            self._cached_process = self._get_process_for_pid(current_pid)
+            self._pid = current_pid
+            self._process = self._get_process_for_pid(current_pid)
 
-        # logger.info("Service: %s | Status: %s", name, self.status())
+        logger.info("Service: %s | Status: %s", name, self.status())
 
     @cached_property
     def service_control_path(self) -> Path:
@@ -56,10 +56,16 @@ class SupervisorCtl(ServiceInterface):
             return int(output)
         return None
 
-    def is_running(self):
-        # This seems to be faster than checking the process
-        status = self.status()
-        return status in ["RUNNING", "SLEEPING"]
+    # TODO: Causing issues with is_running caching?
+    # def is_running(self) -> bool:
+    #     """Check if service is running."""
+    #     # NOTE: We override the base class method here to use supervisorctl
+    #     # This seems to be faster than checking the process
+    #     status = self.status()
+    #     running = status in ["RUNNING", "SLEEPING"]
+    #     self._last_seen = datetime.now(tz=UTC)
+    #     self._update_running_state(is_running=running)
+    #     return running
 
     def start(self) -> bool:
         """Start service"""
@@ -74,6 +80,7 @@ class SupervisorCtl(ServiceInterface):
         result = any(x in output for x in matches)
 
         self.reset_cache()
+        self._update_running_state(is_running=result)
         return result
 
     def stop(self) -> bool:
@@ -89,6 +96,7 @@ class SupervisorCtl(ServiceInterface):
         result = any(x in output for x in matches)
 
         self.reset_cache()
+        self._update_running_state(is_running=result)
         return result
 
     def restart(self) -> bool:
@@ -104,6 +112,7 @@ class SupervisorCtl(ServiceInterface):
         result = any(x in output for x in matches)
 
         self.reset_cache()
+        self._update_running_state(is_running=False)
         return result
 
     def status(self) -> str:

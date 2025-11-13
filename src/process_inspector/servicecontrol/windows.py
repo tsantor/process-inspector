@@ -18,8 +18,8 @@ class Service(ServiceInterface):
         # Initialize with current PID if available
         current_pid = self.get_pid()
         if current_pid:
-            self._cached_pid = current_pid
-            self._cached_process = self._get_process_for_pid(current_pid)
+            self._pid = current_pid
+            self._process = self._get_process_for_pid(current_pid)
 
         logger.info("Service: %s | Status: %s", self, self.status())
 

@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
+### 0.2.0 (2025-11-13)
+
+- ADDED - Allow `Service` to accept a `state_change_callback` which is called when the `is_running` status changes (if monitoring).
+
 ### 0.1.9 (2025-11-10)
 
 - ADDED - Remove log event for `ScheduledTask` commands. Too verbose.

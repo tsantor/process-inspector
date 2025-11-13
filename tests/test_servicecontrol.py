@@ -210,14 +210,17 @@ def test_instantiate_invalid_service():
     service = Service("InvalidServiceName")
     assert service.pid() is None
     assert service.status() in ["--", "ERROR"]
-    assert service.process_info() == {}
+    assert service.process_info() == {
+        "is_running": False,
+        "last_seen": None,
+    }
     assert service.is_running() is False
     assert service.as_dict() == {
-        "pid": None,
         "name": "InvalidServiceName",
+        "pid": None,
         "is_running": False,
         "status": service.status(),
-        "last_seen": None,
+        # "last_seen": None,
     }
 
     invalid_pid = 999999
