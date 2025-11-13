@@ -134,6 +134,8 @@ clean_coverage:  ## Clear coverage cache
 
 clean_tests: clean_pytest_cache clean_ruff_cache clean_tox_cache clean_coverage  ## Clear pytest, ruff, tox, and coverage caches
 
+clean_all: clean clean_tests  ## Full cleanup
+
 # -----------------------------------------------------------------------------
 # Miscellaneous
 # -----------------------------------------------------------------------------
@@ -168,16 +170,6 @@ push_to_s3:  ## Push distro to S3 bucket
 	aws s3 sync --profile=${aws_profile} --acl public-read ./dist/ s3://${s3_bucket}/ \
         --exclude "*" --include "*.whl"
 	echo "${package_url}"
-
-requirements_dependency:	## Generate secure URL
-	@sha256=$$(openssl sha256 dist/${wheel_name} | awk '{print $$2}'); \
-	echo "${package_name} @ ${package_url}?sha256=$$sha256"
-
-pyproject_dependency:	## Dependency line for pyproject.toml
-	@sha256=$$(openssl sha256 dist/${wheel_name} | awk '{print $$2}'); \
-	echo "${package_name}" = { url = "${package_url}", hash = "sha256=$$sha256" }
-
-dependency_urls: requirements_dependency pyproject_dependency ## Generate dependency URLs
 
 # END - Generic commands
 # -----------------------------------------------------------------------------
