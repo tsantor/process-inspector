@@ -149,13 +149,13 @@ dist: clean ## Builds source and wheel package
 	uv run python3 -m build
 
 twine_upload_test: dist ## Upload package to pypi test
-	twine upload dist/* -r pypitest
+	uv run twine upload dist/* -r pypitest
 
 twine_upload: dist ## Package and upload a release
-	twine upload dist/*
+	uv run twine upload dist/*
 
 twine_check: dist ## Twine check
-	twine check dist/*
+	uv run twine check dist/*
 
 # -----------------------------------------------------------------------------
 # X Studios S3 PyPi
