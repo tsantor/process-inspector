@@ -108,7 +108,6 @@ class ServiceInterface(ABC):
                 self.name,
                 is_running,
             )
-            # if self._last_running_state is not None:  # Skip first check
             if self._on_state_change_cb:
                 self._on_state_change_cb(service=self, is_running=is_running)
             self._last_running_state = is_running
@@ -137,30 +136,6 @@ class ServiceInterface(ABC):
         """Alias so we can use a service like an app."""
         return self.stop()  # pragma: no cover
 
-    def __repr__(self):
-        return f"Service('{self.name}')"
-
-    def get_last_seen_str(self) -> str | None:
-        """Return last seen datetime as string or None."""
-        if self._last_seen is None:
-            return None
-        return self._last_seen.isoformat()
-
-    # @cached_property
-    # def _cached_dict(self) -> dict:
-    #     return {
-    #         "name": self.name,
-    #         # "path": str(self.app_path),
-    #         # "is_installed": self.is_installed(),
-    #         # "version": self.version,
-    #         # "install_date_short": self.install_date_short,
-    #         # "install_date": self.install_date_human_short,
-    #     }
-
-    # def as_dict(self) -> dict:
-    #     """We want to preserve this method for backward compatibility."""
-    #     return self._cached_dict
-
     def as_dict(self) -> dict:
         # NOTE: We include the pid, is_running, and status here for services
         # but we don't do that for apps. Why?
@@ -172,22 +147,24 @@ class ServiceInterface(ABC):
             # "status": self.status(),
         }
 
+    def get_last_seen_str(self) -> str | None:
+        """Return last seen datetime as string or None."""
+        if self._last_seen is None:
+            return None
+        return self._last_seen.isoformat()
+
     def process_info(self) -> dict:
         if proc := self._process:
             try:
                 return {
                     **get_process_info(proc),
-                    # We override these fields to use values from supervisorctl
-                    # "pid": self.pid(),
-                    # "is_running": self.is_running(),
-                    # "status": self.status(),
                     "last_seen": self.get_last_seen_str(),
                 }
             except psutil.NoSuchProcess:
                 logger.warning("Process %s no longer exists.", self)
                 self.reset_cache()
                 self._update_running_state(is_running=False)
-        logger.warning("No process info available for %s.", self)
+        # logger.warning("No process info available for service %s.", self)
         # We can reach here if the process was killed by the user
         return {
             "is_running": False,

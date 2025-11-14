@@ -104,16 +104,16 @@ class AppInterface(ABC):
     def _update_running_state(self, is_running: bool) -> None:
         """Track and notify on running state changes."""
         if self._last_running_state != is_running:
-            # if self._last_running_state is not None:  # Skip first check
             if self._on_state_change_cb:
                 self._on_state_change_cb(app=self, is_running=is_running)
             self._last_running_state = is_running
 
     @abstractmethod
-    def open(self) -> bool: ...
+    def open(self) -> bool:
+        """Open app"""
 
     def close(self, timeout: float = 3.0) -> bool:
-        """Close the running app we launched (terminate -> kill) and wait."""
+        """Close app"""
         if not self.is_running():
             self.reset_cache()
             self._update_running_state(is_running=False)
@@ -211,7 +211,6 @@ class AppInterface(ABC):
         return self._last_seen.isoformat()
 
     def process_info(self) -> dict:
-        """Safely return process info dict or empty dict."""
         if proc := self._process:
             try:
                 return {
@@ -222,7 +221,7 @@ class AppInterface(ABC):
                 logger.warning("Process %s no longer exists.", self)
                 self.reset_cache()
                 self._update_running_state(is_running=False)
-        # logger.warning("No process info available for %s.", self)
+        # logger.warning("No process info available for app %s.", self)
         # We can reach here if the process was killed by the user
         return {
             "is_running": False,
