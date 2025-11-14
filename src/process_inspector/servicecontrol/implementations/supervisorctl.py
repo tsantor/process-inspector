@@ -1,6 +1,7 @@
 import logging
 import subprocess
 import sys
+import time
 from functools import cached_property
 from pathlib import Path
 
@@ -67,9 +68,11 @@ class SupervisorCtl(ServiceInterface):
     #     self._update_running_state(is_running=running)
     #     return running
 
-    def start(self) -> bool:
+    def start(self, timeout: float = 3.0) -> bool:
         """Start service"""
         logger.info("Start service '%s'", self.name)
+
+        start_time = time.perf_counter()
         cmd = ["sudo", str(self.service_control_path), "start", self.name]
         # logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
@@ -79,13 +82,29 @@ class SupervisorCtl(ServiceInterface):
         output = proc.stdout.strip().lower()
         result = any(x in output for x in matches)
 
+        # Wait for process to start so we can get its PID
+        while not self.is_running():
+            if time.perf_counter() - start_time > timeout:
+                logger.warning("Timed out waiting for app '%s' to start", self.app_name)
+                return False
+            time.sleep(0.1)
+
+        elapsed = time.perf_counter() - start_time
+        logger.debug(
+            "Service '%s' started successfully in %.3f seconds.",
+            self.name,
+            elapsed,
+        )
+
         self.reset_cache()
         self._update_running_state(is_running=result)
         return result
 
-    def stop(self) -> bool:
+    def stop(self, timeout: float = 3.0) -> bool:
         """Stop service"""
         logger.info("Stop service '%s'", self.name)
+
+        start_time = time.perf_counter()
         cmd = ["sudo", str(self.service_control_path), "stop", self.name]
         # logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
@@ -95,6 +114,20 @@ class SupervisorCtl(ServiceInterface):
         output = proc.stdout.strip().lower()
         result = any(x in output for x in matches)
 
+        # Wait a moment for the quit to complete
+        while self.is_running():
+            if time.perf_counter() - start_time > timeout:
+                logger.warning("Timed out waiting for %s to stop", self)
+                return super().close()
+            time.sleep(0.1)
+
+        elapsed = time.perf_counter() - start_time
+        logger.debug(
+            "Service '%s' quit successfully in %.3f seconds.",
+            self.name,
+            elapsed,
+        )
+
         self.reset_cache()
         self._update_running_state(is_running=result)
         return result
@@ -102,6 +135,8 @@ class SupervisorCtl(ServiceInterface):
     def restart(self) -> bool:
         """Restart service"""
         logger.info("Restart service '%s'", self.name)
+
+        start_time = time.perf_counter()
         cmd = ["sudo", str(self.service_control_path), "restart", self.name]
         # logger.debug("Execute command: %s", cmd)
         proc = subprocess.run(  # noqa: S603
@@ -110,6 +145,13 @@ class SupervisorCtl(ServiceInterface):
         matches = ["started"]
         output = proc.stdout.strip().lower()
         result = any(x in output for x in matches)
+
+        elapsed = time.perf_counter() - start_time
+        logger.debug(
+            "Service '%s' restarted successfully in %.3f seconds.",
+            self.name,
+            elapsed,
+        )
 
         self.reset_cache()
         self._update_running_state(is_running=False)

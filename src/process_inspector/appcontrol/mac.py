@@ -12,7 +12,7 @@ class App(AppInterface):
     """Basic control of a Mac App using Popen and psutil."""
 
     def open(self, timeout: float = 3.0) -> bool:
-        """Open app and wait to grab its PID if possible."""
+        """Open app."""
         if self.is_running():
             return True
 
@@ -50,7 +50,7 @@ class App(AppInterface):
         return True
 
     def close(self, timeout: float = 3.0) -> bool:
-        """Close the running app we launched (terminate -> kill) and wait."""
+        """Close app."""
         if not self.is_running():
             return True
 
