@@ -46,7 +46,6 @@ class AppInterface(ABC):
 
     def reset_cache(self) -> None:
         """Clear cached PID and process info."""
-        # logger.debug("Resetting cache for app: %s (PID: %s)", self.app_name, self._pid)
         self._process = None
         self._pid = None
         self._create_time = None

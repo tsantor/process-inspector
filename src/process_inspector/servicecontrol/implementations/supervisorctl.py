@@ -25,14 +25,6 @@ class SupervisorCtl(ServiceInterface):
             msg = "'supervisorctl' executable not found"  # pragma: no cover
             raise FileNotFoundError(msg)  # pragma: no cover
 
-        # Initialize with current PID if available
-        current_pid = self.get_pid()
-        if current_pid:
-            self._pid = current_pid
-            self._process = self._get_process_for_pid(current_pid)
-
-        logger.info("Service: %s | Status: %s", name, self.status())
-
     @cached_property
     def service_control_path(self) -> Path:
         # Check if any of the possible paths contain the executable
@@ -53,7 +45,7 @@ class SupervisorCtl(ServiceInterface):
             cmd, check=False, text=True, capture_output=True
         )
         output = proc.stdout.strip()
-        if output.isdigit():
+        if output.isdigit() and int(output) > 0:
             return int(output)
         return None
 
