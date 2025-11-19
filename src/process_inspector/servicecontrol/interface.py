@@ -89,11 +89,6 @@ class ServiceInterface(ABC):
     def _update_running_state(self, is_running: bool) -> None:
         """Track and notify on running state changes."""
         if self._last_running_state != is_running:
-            logger.debug(
-                "ServiceInterface: Service %s running state changed: %s",
-                self.name,
-                is_running,
-            )
             if self._on_state_change_cb:
                 self._on_state_change_cb(service=self, is_running=is_running)
             self._last_running_state = is_running
