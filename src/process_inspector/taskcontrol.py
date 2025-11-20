@@ -79,8 +79,6 @@ class ScheduledTask:
 
         # Initial data fetch using the efficient method
         self._fetch_task_data()
-        if not self._task_exists():
-            logger.warning("Task does not exist: '%s'", name)
 
     def _fetch_task_data(self) -> None:
         """
@@ -113,17 +111,13 @@ class ScheduledTask:
                 )
         elif result and "No MSFT_ScheduledTask objects found" in result.stderr:
             # Task not found
-            logger.warning("Scheduled Task '%s' not found")
+            logger.warning("Scheduled Task '%s' not found", self.name)
         else:
             logger.warning(
                 "Could not fetch task data for '%s'. Task may not exist or PowerShell failed. Raw STDOUT: %s",
                 self.name,
                 raw_output,
             )
-
-    def _task_exists(self) -> bool:
-        """Checks if task data was successfully fetched."""
-        return self._task_data is not None
 
     def _get_task_status(self) -> str:
         """Helper to fetch the current status from cached data, mapping the integer index to a string."""
