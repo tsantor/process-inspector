@@ -102,7 +102,7 @@ class ScheduledTask:
         raw_output = result.stdout.strip() if result else "No Result"
 
         if result and result.returncode == 0 and raw_output:
-            logger.debug(result)
+            # logger.debug(result)
             try:
                 self._task_data = json.loads(raw_output)
             except json.JSONDecodeError:
