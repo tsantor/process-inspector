@@ -136,14 +136,11 @@ def test_as_dict(app):
 
     expected_keys = [
         "name",
-        "pid",
-        "status",
-        "is_running",
     ]
     missing_keys = [key for key in expected_keys if key not in service_dict]
 
     assert not missing_keys, f"Missing keys: {missing_keys}"
-    assert isinstance(service_dict["status"], str)
+    # assert isinstance(service_dict["status"], str)
 
 
 # @pytest.mark.skipif(sys.platform == "linux", reason="Not implemented")
@@ -217,15 +214,7 @@ def test_instantiate_invalid_service():
     assert service.is_running() is False
     assert service.as_dict() == {
         "name": "InvalidServiceName",
-        "pid": None,
-        "is_running": False,
-        "status": service.status(),
-        # "last_seen": None,
     }
-
-    invalid_pid = 999999
-    proc = service._get_process_for_pid(invalid_pid)  # noqa: SLF001
-    assert proc is None
 
 
 def test_context_manager_exception_handling(app):

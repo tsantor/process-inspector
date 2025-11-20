@@ -16,11 +16,7 @@ class Service(ServiceInterface):
         self._service = self.get_service()
 
         # Initialize with current PID if available
-        current_pid = self.get_pid()
-        if current_pid:
-            self._pid = current_pid
-            self._process = self._get_process_for_pid(current_pid)
-
+        self._sync_process_cache()
         logger.info("Service: %s | Status: %s", self, self.status())
 
     def get_pid(self) -> int | None:
