@@ -60,7 +60,7 @@ class SupervisorCtl(ServiceInterface):
     #     self._update_running_state(is_running=running)
     #     return running
 
-    def start(self, timeout: float = 3.0) -> bool:
+    def start(self, timeout: float = 5.0) -> bool:
         """Start service"""
         logger.info("Start service '%s'", self.name)
 
@@ -77,7 +77,11 @@ class SupervisorCtl(ServiceInterface):
         # Wait for process to start so we can get its PID
         while not self.is_running():
             if time.perf_counter() - start_time > timeout:
-                logger.warning("Timed out waiting for app '%s' to start", self.app_name)
+                logger.warning(
+                    "Timed out (%s secs) waiting for service '%s' to start",
+                    timeout,
+                    self.name,
+                )
                 return False
             time.sleep(0.1)
 
@@ -92,7 +96,7 @@ class SupervisorCtl(ServiceInterface):
         self._update_running_state(is_running=result)
         return result
 
-    def stop(self, timeout: float = 3.0) -> bool:
+    def stop(self, timeout: float = 5.0) -> bool:
         """Stop service"""
         logger.info("Stop service '%s'", self.name)
 
@@ -109,7 +113,11 @@ class SupervisorCtl(ServiceInterface):
         # Wait a moment for the quit to complete
         while self.is_running():
             if time.perf_counter() - start_time > timeout:
-                logger.warning("Timed out waiting for %s to stop", self)
+                logger.warning(
+                    "Timed out (%s secs) waiting for service '%s' to stop",
+                    timeout,
+                    self.name,
+                )
                 return super().close()
             time.sleep(0.1)
 

@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class App(AppInterface):
     """Basic control of a Mac App using Popen and psutil."""
 
-    def open(self, timeout: float = 3.0) -> bool:
+    def open(self, timeout: float = 5.0) -> bool:  # noqa: PLR0911
         """Open app."""
         if self.is_running():
             return True
@@ -23,7 +23,20 @@ class App(AppInterface):
 
         # Use the 'open' command to launch the .app bundle
         try:
-            subprocess.Popen(cmd)  # noqa: S603
+            proc = subprocess.Popen(  # noqa: S603
+                cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE, text=True
+            )
+            _, stderr = proc.communicate(timeout=5)
+            if stderr:
+                logger.error("Error while opening app '%s': %s", self.app_name, stderr)
+                return False
+        except subprocess.TimeoutExpired:
+            logger.error(  # noqa: TRY400
+                "Timeout expired while opening app '%s'.",
+                self.app_name,
+            )
+            proc.kill()  # Ensure the process is terminated
+            return False
         except FileNotFoundError:
             logger.exception("App path not found '%s'", self.app_path)
             return False
@@ -34,7 +47,11 @@ class App(AppInterface):
         # Wait for process to start so we can get its PID
         while not self.is_running():
             if time.perf_counter() - start_time > timeout:
-                logger.warning("Timed out waiting for app '%s' to start", self.app_name)
+                logger.warning(
+                    "Timed out (%s secs) waiting for %s to open",
+                    timeout,
+                    self,
+                )
                 return False
             time.sleep(0.1)
 
@@ -76,7 +93,11 @@ class App(AppInterface):
         # Wait a moment for the quit to complete
         while self.is_running():
             if time.perf_counter() - start_time > timeout:
-                logger.warning("Timed out waiting for %s to stop", self)
+                logger.warning(
+                    "Timed out (%s secs) waiting for %s to close",
+                    timeout,
+                    self,
+                )
                 return super().close()
             time.sleep(0.1)
 

@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class App(AppInterface):
     """Basic control of a Windows App"""
 
-    def open(self, timeout: float = 3.0) -> bool:
+    def open(self, timeout: float = 5.0) -> bool:
         """Open app and wait to grab its PID if possible."""
         if self.is_running():
             return True
@@ -33,7 +33,11 @@ class App(AppInterface):
         # Wait for process to start so we can get its PID
         while not self.is_running():
             if time.perf_counter() - start_time > timeout:
-                logger.warning("Timed out waiting for app '%s' to start", self.app_exe)
+                logger.warning(
+                    "Timed out (%s secs) waiting for app '%s' to open",
+                    timeout,
+                    self.app_exe,
+                )
                 return False
             time.sleep(0.1)
 

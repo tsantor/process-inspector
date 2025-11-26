@@ -111,7 +111,7 @@ class AppInterface(ABC):
     def open(self) -> bool:
         """Open app"""
 
-    def close(self, timeout: float = 3.0) -> bool:
+    def close(self, timeout: float = 5.0) -> bool:
         """Close app"""
         if not self.is_running():
             self.reset_cache()
@@ -145,7 +145,11 @@ class AppInterface(ABC):
         # Wait a moment for the quit to complete
         while self.is_running():
             if time.perf_counter() - start_time > timeout:
-                logger.warning("Timed out waiting for %s to stop", self)
+                logger.warning(
+                    "Timed out (%s secs) waiting for %s to close",
+                    timeout,
+                    self,
+                )
             time.sleep(0.1)
 
         elapsed = time.perf_counter() - start_time
