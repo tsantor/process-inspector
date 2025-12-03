@@ -1,8 +1,11 @@
+import os
 import subprocess
 import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock
 from unittest.mock import patch
+
+import pytest
 
 import process_inspector.scriptcontrol.mac as scriptcontrol
 from process_inspector.scriptcontrol import Script
@@ -57,4 +60,23 @@ def test_script_execution():
         result = script.run()
         assert result is True
     finally:
+        temp_script_path.unlink()
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows-specific test")
+def test_script_execution_windows():
+    """Test the Script class with an actual PowerShell script."""
+    # Create a temporary PowerShell script
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".ps1") as temp_script:
+        temp_script.write(b"Start-Sleep -Seconds 1\nWrite-Output 'Script executed'")
+        temp_script.flush()
+        temp_script_path = Path(temp_script.name)
+
+    try:
+        # Run the PowerShell script using the Script class
+        script = Script(temp_script_path)
+        result = script.run()
+        assert result is True
+    finally:
+        # Clean up the temporary script
         temp_script_path.unlink()
