@@ -44,6 +44,7 @@ def test_run_script_failure():
         )
 
 
+@pytest.mark.skipif(os.name == "nt", reason="Mac/Linux specific test")
 def test_script_execution():
     """Test the Script class with an actual bash script."""
     # Create a temporary bash script
