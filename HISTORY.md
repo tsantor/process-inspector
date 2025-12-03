@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. This projec
 ### 0.2.2 (2025-12-03)
 
 - ADDED - More test coverage and tox
+- ADDED - `Script` basic control (run) of a script file. Currently only supports bash on Mac/Linux and Powershell on Windows.
 
 ### 0.2.1 (2025-11-26)
 
