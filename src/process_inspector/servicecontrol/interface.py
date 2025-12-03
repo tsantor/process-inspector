@@ -134,8 +134,8 @@ class ServiceInterface(ABC):
                     **get_process_info(proc),
                     "last_seen": self.get_last_seen_str(),
                 }
-            except psutil.NoSuchProcess:
-                logger.warning("Process %s no longer exists.", self)
+            except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
+                logger.warning("Failed to get process for %s: %s", self, e)
                 self.reset_cache()
                 self._update_running_state(is_running=False)
 

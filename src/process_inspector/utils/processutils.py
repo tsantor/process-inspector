@@ -18,7 +18,7 @@ def debug_process_info(proc: psutil.Process) -> dict:
     )
 
 
-def get_process_by_name(name, *, newest: bool = True) -> psutil.Process | None:
+def get_process_by_name(name) -> psutil.Process | None:
     """Return a Process by name or None. If newest=True, return the most recently created."""
     # Set name based on platform conventions (stem for macOS, name for others)
     if isinstance(name, Path):
@@ -50,12 +50,8 @@ def get_process_by_name(name, *, newest: bool = True) -> psutil.Process | None:
 
     logger.debug("Found %d processes matching name '%s'", len(matches), name)
 
-    if newest:
-        # Return the process with the latest create_time
-        return max(matches, key=lambda p: p.info.get("create_time", 0))
-
-    # Return the first match (original behavior)
-    return matches[0]
+    # Return the process with the latest create_time
+    return max(matches, key=lambda p: p.info.get("create_time", 0))
 
 
 def get_process_by_pid(pid: int) -> psutil.Process | None:

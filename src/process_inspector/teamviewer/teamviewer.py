@@ -29,7 +29,7 @@ class Teamviewer:
         return self._instance
 
     def get_pid(self) -> int | None:
-        return self._instance.get_pid()
+        return self._instance.pid
 
     def is_running(self) -> bool:
         return self._instance.is_running()

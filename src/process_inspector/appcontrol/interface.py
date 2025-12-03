@@ -65,7 +65,7 @@ class AppInterface(ABC):
             if self._process is None:
                 if self._pid is None:
                     # First run: find the process by name
-                    proc = get_process_by_name(self.app_path, newest=True)
+                    proc = get_process_by_name(self.app_path)
                     if not proc:
                         self._update_running_state(is_running=False)
                         return False
@@ -95,8 +95,12 @@ class AppInterface(ABC):
             return True
 
         except (psutil.NoSuchProcess, psutil.AccessDenied):
-            logger.debug("Process %s error", self)
+            logger.error("Process %s error", self)  # noqa: TRY400
             self.reset_cache()
+            self._update_running_state(is_running=False)
+            return False
+        except OSError as e:
+            logger.error("Error checking process state for %s: %s", self, e)  # noqa: TRY400
             self._update_running_state(is_running=False)
             return False
 

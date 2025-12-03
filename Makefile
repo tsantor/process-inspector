@@ -22,11 +22,9 @@ help:
 # -----------------------------------------------------------------------------
 
 PYTHON_VERSION=3.13.1
-package_name=process_inspector
-package_version=0.2.1
 aws_profile=xstudios
 s3_bucket=xstudios-pypi
-wheel_name=${package_name}-${package_version}-py3-none-any.whl
+wheel_name=$(shell ls dist/*.whl | head -n 1 | xargs -n 1 basename)
 package_url=https://${s3_bucket}.s3.amazonaws.com/${wheel_name}
 
 # START - Generic commands
@@ -48,7 +46,6 @@ env_recreate: env_remove env pip_install_editable pip_install_dev  ## Recreate e
 
 pip_install_editable:  ## Install in editable mode
 	uv pip install -e .
-	# --extra-index-url https://www.piwheels.org/simple
 
 pip_list:  ## Run pip list
 	uv pip list
@@ -92,6 +89,9 @@ coverage_skip:  ## Run tests with coverage and skip covered
 
 open_coverage:  ## Open coverage report
 	open htmlcov/index.html
+
+tox:  ## Run tox
+	uv run tox
 
 # -----------------------------------------------------------------------------
 # Ruff
@@ -162,9 +162,6 @@ twine_check: dist ## Twine check
 # -----------------------------------------------------------------------------
 # X Studios S3 PyPi
 # -----------------------------------------------------------------------------
-
-create_latest_copy: dist  ## Create latest copy of distro
-	cp dist/*.whl dist/${package_name}-latest-py3-none-any.whl
 
 push_to_s3:  ## Push distro to S3 bucket
 	aws s3 sync --profile=${aws_profile} --acl public-read ./dist/ s3://${s3_bucket}/ \

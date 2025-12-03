@@ -75,15 +75,15 @@ class SupervisorCtl(ServiceInterface):
         result = any(x in output for x in matches)
 
         # Wait for process to start so we can get its PID
-        while not self.is_running():
-            if time.perf_counter() - start_time > timeout:
-                logger.warning(
-                    "Timed out (%s secs) waiting for service '%s' to start",
-                    timeout,
-                    self.name,
-                )
-                return False
-            time.sleep(0.1)
+        # while not self.is_running():
+        #     if time.perf_counter() - start_time > timeout:
+        #         logger.warning(
+        #             "Timed out (%s secs) waiting for service '%s' to start",
+        #             timeout,
+        #             self.name,
+        #         )
+        #         return False
+        #     time.sleep(0.1)
 
         elapsed = time.perf_counter() - start_time
         logger.debug(
@@ -111,15 +111,15 @@ class SupervisorCtl(ServiceInterface):
         result = any(x in output for x in matches)
 
         # Wait a moment for the quit to complete
-        while self.is_running():
-            if time.perf_counter() - start_time > timeout:
-                logger.warning(
-                    "Timed out (%s secs) waiting for service '%s' to stop",
-                    timeout,
-                    self.name,
-                )
-                return super().close()
-            time.sleep(0.1)
+        # while self.is_running():
+        #     if time.perf_counter() - start_time > timeout:
+        #         logger.warning(
+        #             "Timed out (%s secs) waiting for service '%s' to stop",
+        #             timeout,
+        #             self.name,
+        #         )
+        #         return super().close()
+        #     time.sleep(0.1)
 
         elapsed = time.perf_counter() - start_time
         logger.debug(

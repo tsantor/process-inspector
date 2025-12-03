@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from process_inspector.appcontrol import NativeApp
 from process_inspector.teamviewer import Teamviewer
 from process_inspector.teamviewer import get_teamviewer_info
 from process_inspector.teamviewer import get_teamviewer_path
@@ -49,6 +50,16 @@ def test_get_teamviewer_info_is_serializable(teamviewer):
 def test_get_teamviewer_path():
     path = get_teamviewer_path()
     assert isinstance(path, Path)
+
+
+def test_get_teamviewer_app(teamviewer):
+    app = teamviewer.app
+    assert isinstance(app, NativeApp)
+
+
+def test_get_teamviewer_pid(teamviewer):
+    pid = teamviewer.get_pid()
+    assert isinstance(pid, int)
 
 
 def test_teamviewer_open(teamviewer):

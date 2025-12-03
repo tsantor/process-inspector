@@ -2,16 +2,29 @@ import contextlib
 import json
 import sys
 from pathlib import Path
+from unittest.mock import patch
 
+import psutil
 import pytest
 
 from process_inspector.appcontrol import NativeApp
+from process_inspector.appcontrol.interface import AppInterface
 
 from .utils import wait_for_condition
 
 pytestmark = pytest.mark.skipif(
     sys.platform == "linux", reason="Linux not supported yet"
 )
+
+
+class MockApp(AppInterface):
+    """Mock implementation of AppInterface for testing."""
+
+    def open(self) -> bool:
+        return True
+
+    def get_version(self) -> str:
+        return "1.0.0"
 
 
 @contextlib.contextmanager
@@ -100,6 +113,12 @@ def app():
     if sys.platform == "win32":
         return NativeApp(Path("C:/Program Files/Sublime Text/sublime_text.exe"))
     return NativeApp(Path("/Applications/Safari.app"))
+
+
+@pytest.fixture
+def mock_app():
+    """Fixture to create a mock app instance."""
+    return MockApp(Path("/path/to/app"))
 
 
 def test_app_open_close(app):
@@ -227,6 +246,27 @@ def test_context_manager_exception_handling(app):
     )
 
 
-def test_app_not_running_between_tests(app):
+def test_app_not_running_between_tests(mock_app):
     """Verify app is not running at start of test."""
-    assert app.is_running() is False
+    assert mock_app.is_running() is False
+
+
+def test_is_running_no_such_process(mock_app):
+    """Test is_running when psutil.NoSuchProcess is raised."""
+    with patch("psutil.Process", side_effect=psutil.NoSuchProcess(pid=1234)):
+        result = mock_app.is_running()
+        assert result is False
+
+
+def test_is_running_access_denied(mock_app):
+    """Test is_running when psutil.AccessDenied is raised."""
+    with patch("psutil.Process", side_effect=psutil.AccessDenied(pid=1234)):
+        result = mock_app.is_running()
+        assert result is False
+
+
+def test_is_running_os_error(mock_app):
+    """Test is_running when OSError is raised."""
+    with patch("psutil.Process", side_effect=OSError("Test OSError")):
+        result = mock_app.is_running()
+        assert result is False
