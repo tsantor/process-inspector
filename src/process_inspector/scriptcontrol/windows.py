@@ -1,6 +1,9 @@
+import logging
 import subprocess
 
-from process_inspector.appcontrol.interface import AppInterface
+from process_inspector.scriptcontrol.interface import ScriptInterface
+
+logger = logging.getLogger(__name__)
 
 
 def run_script(path: str) -> int | None:
@@ -18,18 +21,9 @@ def run_script(path: str) -> int | None:
         return None
 
 
-class Script(AppInterface):
+class Script(ScriptInterface):
     """Basic control of a Script which launches a child process."""
 
-    def is_running(self) -> bool:
-        """Check if the script is running."""
-        msg = "is_running not implemented for Windows scripts."
-        raise NotImplementedError(msg)
-
-    def open(self):
-        """Open the application."""
-        msg = "open not implemented for Windows scripts."
-        raise NotImplementedError(msg)
-
-    def get_version(self) -> str:
-        return "--"
+    def get_script_result(self) -> bool:
+        """Get the boolean result of the script run."""
+        return run_script(self.app_path)
