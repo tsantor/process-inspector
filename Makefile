@@ -175,14 +175,16 @@ push_to_s3:  ## Push distro to S3 bucket
 
 user=pi
 # host=raspberrypi.local
-host=raspi3b-2.local
+# host=raspi3b-2.local
+host=192.168.1.161
+
 remote_dir=/home/pi/Sandbox/Python/my-pypi-packages/process-inspector
 
 rsync_to_pi:	## Sync files to Raspberry Pi
 	rsync -avz . ${user}@${host}:${remote_dir} --delete \
 		--exclude=".DS_Store" --exclude='.git' --exclude='.venv' \
 		--exclude=".coverage" --exclude='htmlcov' --exclude='__pycache__' \
-		--exclude='.pytest_cache' --exclude='.ruff_cache' \
+		--exclude='.pytest_cache' --exclude='.ruff_cache' --exclude='.tox' \
 		--exclude='.vscode' --exclude='node_modules' --exclude='dist' --exclude='*.egg-info'
 
 uv_add_dev_dependencies:  ## Add dev dependencies

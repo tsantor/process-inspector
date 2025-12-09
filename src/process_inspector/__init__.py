@@ -7,7 +7,7 @@ from .servicecontrol import Service
 from .taskcontrol import ScheduledTask
 from .teamviewer import Teamviewer
 
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 
 __all__ = [
     "NativeApp",

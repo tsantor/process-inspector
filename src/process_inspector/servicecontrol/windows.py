@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 class Service(ServiceInterface):
     """Basic control of a Windows Service."""
 
-    def __init__(self, name):
-        super().__init__(name)
+    def __init__(self, name, state_change_callback=None):
+        super().__init__(name, state_change_callback)
         self._service = self.get_service()
 
         # Initialize with current PID if available
