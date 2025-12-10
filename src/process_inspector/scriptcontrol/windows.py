@@ -9,18 +9,15 @@ logger = logging.getLogger(__name__)
 
 def run_script(path: Path) -> bool:
     try:
-        cmd = [
-            "powershell",
-            "-ExecutionPolicy",
-            "Bypass",
-            "-File",
-            str(path),
-        ]
-        result = subprocess.run(  # noqa: S603
+        # Use the file path directly as the command
+        cmd = [str(path)]
+
+        result = subprocess.run(  # noqa: S602
             cmd,
             check=True,
             capture_output=True,
             text=True,
+            shell=True,
         )
         logger.info("Script executed successfully. Output: %s", result.stdout)
         return True
@@ -30,6 +27,9 @@ def run_script(path: Path) -> bool:
             e.returncode,
             e.stderr,
         )
+        return False
+    except FileNotFoundError:
+        logger.warning("Script not found: %s", path)
         return False
 
 
