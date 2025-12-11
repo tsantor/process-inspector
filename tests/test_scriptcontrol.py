@@ -2,46 +2,11 @@ import os
 import subprocess
 import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock
 from unittest.mock import patch
 
 import pytest
 
-import process_inspector.scriptcontrol.mac as scriptcontrol
 from process_inspector.scriptcontrol import Script
-
-
-def test_run_script_success():
-    """Test run_script when the script executes successfully."""
-    mock_result = MagicMock()
-    mock_result.stdout = "Script output"
-    mock_result.returncode = 0
-
-    with patch("subprocess.run", return_value=mock_result) as mock_run:
-        result = scriptcontrol.run_script(Path("/path/to/script.sh"))
-        assert result is True
-        mock_run.assert_called_once_with(
-            ["/opt/homebrew/bin/bash", Path("/path/to/script.sh")],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-
-
-def test_run_script_failure():
-    """Test run_script when the script execution fails."""
-    with patch(
-        "subprocess.run",
-        side_effect=subprocess.CalledProcessError(1, "cmd", stderr="Error"),
-    ) as mock_run:
-        result = scriptcontrol.run_script(Path("/path/to/script.sh"))
-        assert result is False
-        mock_run.assert_called_once_with(
-            ["/opt/homebrew/bin/bash", Path("/path/to/script.sh")],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
 
 
 @pytest.mark.skipif(os.name == "nt", reason="Mac/Linux specific test")
@@ -81,3 +46,20 @@ def test_script_execution_windows():
     finally:
         # Clean up the temporary script
         temp_script_path.unlink()
+
+
+def test_run_script_failure():
+    """Test run_script when the script execution fails."""
+    with patch(
+        "subprocess.run",
+        side_effect=subprocess.CalledProcessError(1, "cmd", stderr="Error"),
+    ):
+        result = Script(Path("/path/to/script.sh")).run()
+        assert result is False
+
+
+def test_file_not_found_failure():
+    """Test run_script when the script execution fails."""
+    with patch("subprocess.run", side_effect=FileNotFoundError()):
+        result = Script(Path("/path/to/script.sh")).run()
+        assert result is False

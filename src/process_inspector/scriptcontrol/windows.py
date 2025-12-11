@@ -7,29 +7,32 @@ from process_inspector.scriptcontrol.interface import ScriptInterface
 logger = logging.getLogger(__name__)
 
 
-def run_script(path: Path) -> bool:
+def run_script(
+    path: Path,
+) -> bool:
     try:
         # Use the file path directly as the command
         cmd = [str(path)]
 
-        result = subprocess.run(  # noqa: S602
+        subprocess.run(  # noqa: S602
             cmd,
             check=True,
             capture_output=True,
             text=True,
             shell=True,
         )
-        logger.info("Script executed successfully. Output: %s", result.stdout)
+        logger.info("Script '%s' executed successfully.", path)
         return True
     except subprocess.CalledProcessError as e:
         logger.info(
-            "Script execution failed with return code %s. Error: %s",
+            "Script '%s' execution failed with return code %s. Error: %s",
+            path,
             e.returncode,
-            e.stderr,
+            e.stderr.strip(),
         )
         return False
     except FileNotFoundError:
-        logger.warning("Script not found: %s", path)
+        logger.warning("Script '%s' not found", path)
         return False
 
 

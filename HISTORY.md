@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
+### 0.2.4 (2025-12-11)
+
+- FIXED - `run_script` on Windows.
+
 ### 0.2.3 (2025-12-09)
 
 - FIXED - Wrong Service **init** signature for Windows.

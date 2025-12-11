@@ -7,19 +7,39 @@ from process_inspector.scriptcontrol.interface import ScriptInterface
 logger = logging.getLogger(__name__)
 
 
+def get_bash_path() -> str:
+    """Find the path to the bash executable."""
+    # Order is important here
+    possible_paths = [
+        "/bin/bash",
+        "/usr/bin/bash",
+    ]
+    return next(
+        (path for path in possible_paths if Path(path).exists()),
+        None,
+    ) or FileNotFoundError("Bash executable not found on this system.")
+
+
 def run_script(path: Path) -> bool:
     try:
-        result = subprocess.run(  # noqa: S603
-            ["/usr/bin/bash", path], check=True, capture_output=True, text=True
+        subprocess.run(  # noqa: S603
+            [get_bash_path(), path],
+            check=True,
+            capture_output=True,
+            text=True,
         )
-        logger.info("Script executed successfully. Output: %s", result.stdout)
+        logger.info("Script '%s' executed successfully.", path)
         return True
     except subprocess.CalledProcessError as e:
         logger.info(
-            "Script execution failed with return code %s. Error: %s",
+            "Script '%s' execution failed with return code %s. Error: %s",
+            path,
             e.returncode,
-            e.stderr,
+            e.stderr.strip(),
         )
+        return False
+    except FileNotFoundError:
+        logger.warning("Script '%s' not found", path)
         return False
 
 
