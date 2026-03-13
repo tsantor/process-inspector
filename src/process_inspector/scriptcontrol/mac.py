@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_bash_path() -> str:
-    """Find the path to the bash executable on macOS."""
+    """Find the path to the bash executable."""
     # Order is important here (we prefer Homebrew installations)
     possible_paths = [
         "/opt/homebrew/bin/bash",  # Homebrew on Apple Silicon

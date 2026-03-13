@@ -115,3 +115,7 @@ Use `sudo visudo` to add the following lines:
 ```
 
 Save and exit the file (`:wq!`).
+
+## Issues
+
+Report issues at: https://bitbucket.org/xstudios/process-inspector/issues

@@ -1,0 +1,12 @@
+{
+  "modules": {
+    "process_inspector": [
+      "NativeApp",
+      "OperatingSystem",
+      "ScheduledTask",
+      "Script",
+      "Service",
+      "Teamviewer"
+    ]
+  }
+}
