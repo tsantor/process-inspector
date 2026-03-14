@@ -2,9 +2,12 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
-### 0.2.4 (2025-12-11)
+### 0.2.4 (2026-03-14)
 
-- FIXED - `run_script` on Windows.
+- CHANGED - Refactored subdomains into layered DDD/SRP structure (`domain`, `application`, `infrastructure`, `interface`) while preserving public API contract symbols.
+- ADDED - Contract-driven release checks for public API stability via `api/public_api.contract.json` and snapshot verification.
+- ADDED - Expanded test coverage for layered subdomain services and adapters.
+- CHANGED - Updated README development/testing workflow to use `just` commands instead of legacy `make` commands.
 
 ### 0.2.3 (2025-12-09)
 
