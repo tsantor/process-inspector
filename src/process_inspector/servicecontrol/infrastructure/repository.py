@@ -18,3 +18,6 @@ class PsutilServiceRuntimeRepository:
 
     def now_utc(self) -> datetime:
         return datetime.now(tz=UTC)
+
+    def is_process_error(self, exc: Exception) -> bool:
+        return isinstance(exc, (psutil.NoSuchProcess, psutil.AccessDenied))

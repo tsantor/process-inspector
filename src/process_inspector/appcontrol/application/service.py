@@ -5,8 +5,6 @@ import time
 from typing import TYPE_CHECKING
 from typing import Any
 
-import psutil
-
 from process_inspector.appcontrol.domain.entities import AppRuntimeState
 
 if TYPE_CHECKING:
@@ -72,7 +70,7 @@ class AppRuntimeService:
 
             if (
                 not self._runtime_port.is_process_running(process)
-                or self._runtime_port.process_status(process) == psutil.STATUS_ZOMBIE
+                or self._runtime_port.is_process_zombie(process)
                 or abs(
                     self._runtime_port.process_create_time(process)
                     - float(self._state.create_time)
@@ -88,17 +86,19 @@ class AppRuntimeService:
             self.update_running_state(app, is_running=True)
             return True
 
-        except (psutil.NoSuchProcess, psutil.AccessDenied):
-            logger.error("Process %s error", app)  # noqa: TRY400
-            self.reset_cache()
-            self.update_running_state(app, is_running=False)
-            return False
+        except Exception as exc:
+            if self._runtime_port.is_process_error(exc):
+                logger.error("Process %s error", app)  # noqa: TRY400
+                self.reset_cache()
+                self.update_running_state(app, is_running=False)
+                return False
+            raise
         except OSError as e:
             logger.error("Error checking process state for %s: %s", app, e)  # noqa: TRY400
             self.update_running_state(app, is_running=False)
             return False
 
-    def close(self, app_path: Path, app: Any, *, timeout: float = 5.0) -> bool:
+    def close(self, app_path: Path, app: Any, *, timeout: float = 5.0) -> bool:  # noqa: C901
         if not self.is_running(app_path, app):
             self.reset_cache()
             self.update_running_state(app, is_running=False)
@@ -110,24 +110,34 @@ class AppRuntimeService:
             process = self._state.process or self._runtime_port.load_process(
                 self._state.pid
             )
-        except psutil.NoSuchProcess:
-            self.reset_cache()
-            self.update_running_state(app, is_running=False)
-            return True
+        except Exception as exc:
+            if self._runtime_port.is_process_error(exc):
+                self.reset_cache()
+                self.update_running_state(app, is_running=False)
+                return True
+            raise
 
         try:
             self._runtime_port.terminate_process(process)
             self._runtime_port.wait_process(process, timeout=5)
             logger.debug("Terminated process %s", app)
-        except psutil.TimeoutExpired:
+        except Exception as exc:
+            if not self._runtime_port.is_timeout_error(exc):
+                if self._runtime_port.is_process_error(exc):
+                    logger.debug("Process %s already exited during termination", app)
+                    return True
+                raise
             try:
                 self._runtime_port.kill_process(process)
                 self._runtime_port.wait_process(process, timeout=3)
                 logger.debug("Killed process %s", app)
-            except (psutil.NoSuchProcess, psutil.TimeoutExpired):
-                logger.warning("Failed to kill process %s", app)
-        except psutil.NoSuchProcess:
-            logger.debug("Process %s already exited during termination", app)
+            except Exception as inner_exc:
+                if self._runtime_port.is_process_error(
+                    inner_exc
+                ) or self._runtime_port.is_timeout_error(inner_exc):
+                    logger.warning("Failed to kill process %s", app)
+                else:
+                    raise
 
         while self.is_running(app_path, app):
             if time.perf_counter() - start_time > timeout:
@@ -159,10 +169,13 @@ class AppRuntimeService:
                     **self._runtime_port.get_process_info(process),
                     "last_seen": self.get_last_seen_str(),
                 }
-            except psutil.NoSuchProcess:
-                logger.warning("Process %s no longer exists.", app)
-                self.reset_cache()
-                self.update_running_state(app, is_running=False)
+            except Exception as exc:
+                if self._runtime_port.is_process_error(exc):
+                    logger.warning("Process %s no longer exists.", app)
+                    self.reset_cache()
+                    self.update_running_state(app, is_running=False)
+                else:
+                    raise
 
         return {
             "is_running": False,

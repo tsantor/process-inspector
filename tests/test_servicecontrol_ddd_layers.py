@@ -26,6 +26,9 @@ class DummyRuntimePort:
     def now_utc(self):
         return datetime.now(tz=UTC)
 
+    def is_process_error(self, exc):
+        return False
+
 
 class DummyService:
     name = "dummy"

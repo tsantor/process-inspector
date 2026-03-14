@@ -3,13 +3,15 @@ from __future__ import annotations
 import logging
 import subprocess
 
+from process_inspector.taskcontrol.application.dtos import CommandResult
+
 logger = logging.getLogger(__name__)
 
 
 class PowerShellRunner:
     def run_powershell_command(
         self, command: list[str], check: bool = True
-    ) -> subprocess.CompletedProcess | None:
+    ) -> CommandResult | None:
         command_str = " ".join(command)
         full_command = [
             "powershell",
@@ -33,7 +35,11 @@ class PowerShellRunner:
                     result.returncode,
                     result.stdout.strip(),
                 )
-            return result
+            return CommandResult(
+                returncode=result.returncode,
+                stdout=result.stdout,
+                stderr=result.stderr,
+            )
         except subprocess.CalledProcessError as exc:
             logger.error(  # noqa: TRY400
                 "PowerShell command failed with exit code %d: %s\nStderr: %s",

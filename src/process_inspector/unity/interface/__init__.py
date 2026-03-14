@@ -1,3 +1,3 @@
-from process_inspector.unity.base import UnityAppBase
+from process_inspector.unity.interface.router import UnityFacade
 
-__all__ = ["UnityAppBase"]
+__all__ = ["UnityFacade"]

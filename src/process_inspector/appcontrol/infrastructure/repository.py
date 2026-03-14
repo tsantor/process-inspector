@@ -30,6 +30,9 @@ class PsutilRuntimeRepository:
     def process_status(self, process: psutil.Process) -> str:
         return process.status()
 
+    def is_process_zombie(self, process: psutil.Process) -> bool:
+        return process.status() == psutil.STATUS_ZOMBIE
+
     def process_create_time(self, process: psutil.Process) -> float:
         return process.create_time()
 
@@ -50,3 +53,9 @@ class PsutilRuntimeRepository:
 
     def now_utc(self) -> datetime:
         return datetime.now(tz=UTC)
+
+    def is_process_error(self, exc: Exception) -> bool:
+        return isinstance(exc, (psutil.NoSuchProcess, psutil.AccessDenied))
+
+    def is_timeout_error(self, exc: Exception) -> bool:
+        return isinstance(exc, psutil.TimeoutExpired)

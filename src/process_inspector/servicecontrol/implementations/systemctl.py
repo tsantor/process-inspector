@@ -3,12 +3,14 @@ import subprocess
 from functools import cached_property
 from pathlib import Path
 
-from process_inspector.servicecontrol.interface import ServiceInterface
+from process_inspector.servicecontrol.infrastructure.base_controller import (
+    ServiceControllerBase,
+)
 
 logger = logging.getLogger(__name__)
 
 
-class SystemCtl(ServiceInterface):
+class SystemCtl(ServiceControllerBase):
     """Linux System Ctl Service"""
 
     def __init__(self, name, state_change_callback=None):

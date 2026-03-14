@@ -50,6 +50,9 @@ class DummyRuntimePort:
     def process_status(self, process):
         return process.status()
 
+    def is_process_zombie(self, process):
+        return process.status().lower() == "zombie"
+
     def process_create_time(self, process):
         return process.create_time()
 
@@ -70,6 +73,12 @@ class DummyRuntimePort:
 
     def now_utc(self):
         return datetime.now(tz=UTC)
+
+    def is_process_error(self, exc):
+        return False
+
+    def is_timeout_error(self, exc):
+        return False
 
 
 class DummyApp:

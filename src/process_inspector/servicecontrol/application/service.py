@@ -4,8 +4,6 @@ import logging
 from typing import TYPE_CHECKING
 from typing import Any
 
-import psutil
-
 from process_inspector.servicecontrol.domain.entities import ServiceRuntimeState
 
 if TYPE_CHECKING:
@@ -52,10 +50,12 @@ class ServiceRuntimeService:
         try:
             self._state.process = self._runtime_port.load_process(current_pid)
             return self._state.process
-        except (psutil.NoSuchProcess, psutil.AccessDenied) as exc:
-            logger.warning("Failed to get process for %s: %s", service, exc)
-            self._state.process = None
-            return None
+        except Exception as exc:
+            if self._runtime_port.is_process_error(exc):
+                logger.warning("Failed to get process for %s: %s", service, exc)
+                self._state.process = None
+                return None
+            raise
 
     def evaluate_running(
         self,
@@ -89,10 +89,13 @@ class ServiceRuntimeService:
                     **self._runtime_port.get_process_info(process),
                     "last_seen": self.get_last_seen_str(),
                 }
-            except (psutil.NoSuchProcess, psutil.AccessDenied) as exc:
-                logger.warning("Failed to get process for %s: %s", service, exc)
-                self.reset_cache()
-                self.update_running_state(service, is_running=False)
+            except Exception as exc:
+                if self._runtime_port.is_process_error(exc):
+                    logger.warning("Failed to get process for %s: %s", service, exc)
+                    self.reset_cache()
+                    self.update_running_state(service, is_running=False)
+                else:
+                    raise
 
         return {
             "is_running": False,
