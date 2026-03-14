@@ -65,3 +65,21 @@ def test_unity_interface_init_is_not_backpointing_to_base_module():
     init_file = Path("src/process_inspector/unity/interface/__init__.py")
     content = init_file.read_text(encoding="utf-8")
     assert "process_inspector.unity.base" not in content
+
+
+def test_interface_layer_do_not_import_system_libraries():
+    base = Path("src/process_inspector")
+    violations: list[str] = []
+
+    for subdomain in SUBDOMAINS:
+        layer_root = base / subdomain / "interface"
+        for file_path in _iter_python_files(layer_root):
+            content = file_path.read_text(encoding="utf-8")
+            matches = [
+                f"{file_path}: {snippet}"
+                for snippet in BANNED_INFRA_IMPORT_SNIPPETS
+                if snippet in content
+            ]
+            violations.extend(matches)
+
+    assert not violations, "Interface boundary violations:\n" + "\n".join(violations)

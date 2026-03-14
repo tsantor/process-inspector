@@ -51,16 +51,11 @@ class SupervisorCtl(ServiceControllerBase):
             return int(output)
         return None
 
-    # TODO: Causing issues with is_running caching?
-    # def is_running(self) -> bool:
-    #     """Check if service is running."""
-    #     # NOTE: We override the base class method here to use supervisorctl
-    #     # This seems to be faster than checking the process
-    #     status = self.status()
-    #     running = status in ["RUNNING", "SLEEPING"]
-    #     self._last_seen = datetime.now(tz=UTC)
-    #     self._update_running_state(is_running=running)
-    #     return running
+    def _refresh_running_state(self) -> bool:
+        """Refresh cached state from current supervisor status output."""
+        running = self.status() in ["RUNNING", "SLEEPING"]
+        self._update_running_state(is_running=running)
+        return running
 
     def start(self, timeout: float = 5.0) -> bool:
         """Start service"""
@@ -95,7 +90,7 @@ class SupervisorCtl(ServiceControllerBase):
         )
 
         self.reset_cache()
-        self._update_running_state(is_running=result)
+        self._refresh_running_state()
         return result
 
     def stop(self, timeout: float = 5.0) -> bool:
@@ -131,7 +126,7 @@ class SupervisorCtl(ServiceControllerBase):
         )
 
         self.reset_cache()
-        self._update_running_state(is_running=result)
+        self._refresh_running_state()
         return result
 
     def restart(self) -> bool:
@@ -156,7 +151,7 @@ class SupervisorCtl(ServiceControllerBase):
         )
 
         self.reset_cache()
-        self._update_running_state(is_running=False)
+        self._refresh_running_state()
         return result
 
     def status(self) -> str:
