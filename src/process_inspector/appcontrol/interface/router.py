@@ -7,8 +7,8 @@ from datetime import datetime
 from functools import cached_property
 from typing import TYPE_CHECKING
 
+from process_inspector.appcontrol.application.dtos import AppInfoDTO
 from process_inspector.appcontrol.domain.value_objects import AppIdentity
-from process_inspector.appcontrol.infrastructure.mappers import to_app_info_dto
 from process_inspector.appcontrol.interface.dependencies import get_runtime_service
 
 if TYPE_CHECKING:
@@ -89,16 +89,14 @@ class AppInterface(ABC):
 
     @cached_property
     def _cached_dict(self) -> dict:
-        dto = to_app_info_dto(
-            {
-                "exe": self.app_exe,
-                "name": self.app_name,
-                "path": str(self.app_path),
-                "is_installed": self.is_installed(),
-                "version": self.version,
-                "install_date_short": self.install_date_short,
-                "install_date": self.install_date_human_short,
-            }
+        dto = AppInfoDTO(
+            exe=self.app_exe,
+            name=self.app_name,
+            path=str(self.app_path),
+            is_installed=self.is_installed(),
+            version=self.version,
+            install_date_short=self.install_date_short,
+            install_date=self.install_date_human_short,
         )
         return dto.as_dict()
 
