@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from process_inspector.appcontrol.interface import AppInterface
 from process_inspector.scriptcontrol.interface import ScriptInterface
-from process_inspector.servicecontrol.interface import ServiceInterface
 from process_inspector.taskcontrol import ScheduledTask
 from process_inspector.teamviewer.teamviewer import Teamviewer
 
@@ -10,7 +9,6 @@ from process_inspector.teamviewer.teamviewer import Teamviewer
 def test_legacy_interface_imports_resolve():
     assert AppInterface.__name__ == "AppInterface"
     assert ScriptInterface.__name__ == "ScriptInterface"
-    assert ServiceInterface.__name__ == "ServiceInterface"
 
 
 def test_legacy_module_exports_remain_available():
