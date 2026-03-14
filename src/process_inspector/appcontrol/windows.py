@@ -1,7 +1,12 @@
 import logging
-import re
-import subprocess
 import time
+
+from process_inspector.appcontrol.infrastructure.platform_commands import (
+    launch_windows_app,
+)
+from process_inspector.appcontrol.infrastructure.platform_commands import (
+    read_windows_app_version,
+)
 
 from .interface import AppInterface
 
@@ -22,7 +27,7 @@ class App(AppInterface):
 
         # Launch the executable directly
         try:
-            subprocess.Popen([str(self.app_path)])  # noqa: S603
+            launch_windows_app(self.app_path)
         except FileNotFoundError:
             logger.exception("App '%s' not found", self.app_path)
             return False
@@ -53,17 +58,4 @@ class App(AppInterface):
         return True
 
     def get_version(self) -> str:
-        escaped_path = str(self.app_path).replace("\\", "\\\\")
-        cmd = [
-            "powershell",
-            "-command",
-            f"""(Get-Item -Path "{escaped_path}").VersionInfo.ProductVersion""",
-        ]
-        # logger.debug("Execute command: %s", cmd)
-        proc = subprocess.run(  # noqa: S603
-            cmd, check=False, capture_output=True, text=True
-        )
-        result = proc.stdout.strip()
-        regex = r"(\d{1,}\.?)+"
-        matches = re.search(regex, result)
-        return matches[0] if matches else "--"
+        return read_windows_app_version(self.app_path)

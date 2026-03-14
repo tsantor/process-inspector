@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 
+from process_inspector.taskcontrol.application.dtos import TaskInfoDTO
 from process_inspector.taskcontrol.interface.dependencies import get_task_service
 
 logger = logging.getLogger(__name__)
@@ -84,10 +85,10 @@ class ScheduledTask:
         return f"ScheduledTask('{self.name}')"
 
     def as_dict(self) -> dict:
-        return {
-            "name": self.name,
-            "status": self._get_task_status(),
-            "is_running": self.is_running(),
-            "last_run_time": self._get_last_run_time(),
-            "last_run_result": self._get_last_run_result(),
-        }
+        return TaskInfoDTO(
+            name=self.name,
+            status=self._get_task_status(),
+            is_running=self.is_running(),
+            last_run_time=self._get_last_run_time(),
+            last_run_result=self._get_last_run_result(),
+        ).as_dict()

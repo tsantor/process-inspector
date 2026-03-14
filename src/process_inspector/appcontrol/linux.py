@@ -1,8 +1,9 @@
 import logging
-import shlex
 import subprocess
 
-from process_inspector.utils.stringutils import extract_version
+from process_inspector.appcontrol.infrastructure.platform_commands import (
+    read_linux_app_version,
+)
 
 from .interface import AppInterface
 
@@ -40,14 +41,8 @@ class App(AppInterface):
 
     def get_version(self) -> str:
         """Get the application's version."""
-        cmd = f"{self.app_path} --version"
-        logger.debug("Execute command: %s", cmd)
         try:
-            proc = subprocess.run(  # noqa: S603
-                shlex.split(cmd), check=True, text=True, capture_output=True
-            )
-            version = proc.stdout.strip()
-            return extract_version(version)
+            return read_linux_app_version(self.app_path)
         except (FileNotFoundError, subprocess.CalledProcessError):
             logger.warning("FileNotFoundError: Unable to get application version.")
         return "--"

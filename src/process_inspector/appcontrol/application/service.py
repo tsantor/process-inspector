@@ -5,6 +5,7 @@ import time
 from typing import TYPE_CHECKING
 from typing import Any
 
+from process_inspector.appcontrol.application.dtos import ProcessInfoDTO
 from process_inspector.appcontrol.domain.entities import AppRuntimeState
 
 if TYPE_CHECKING:
@@ -165,10 +166,12 @@ class AppRuntimeService:
         process = self._state.process
         if process:
             try:
-                return {
-                    **self._runtime_port.get_process_info(process),
-                    "last_seen": self.get_last_seen_str(),
-                }
+                return ProcessInfoDTO(
+                    {
+                        **self._runtime_port.get_process_info(process),
+                        "last_seen": self.get_last_seen_str(),
+                    }
+                ).as_dict()
             except Exception as exc:
                 if self._runtime_port.is_process_error(exc):
                     logger.warning("Process %s no longer exists.", app)
@@ -177,10 +180,12 @@ class AppRuntimeService:
                 else:
                     raise
 
-        return {
-            "is_running": False,
-            "last_seen": self.get_last_seen_str(),
-        }
+        return ProcessInfoDTO(
+            {
+                "is_running": False,
+                "last_seen": self.get_last_seen_str(),
+            }
+        ).as_dict()
 
     def install_date_human_short(self, install_date) -> str | None:
         if install_date is None:
