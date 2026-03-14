@@ -385,16 +385,16 @@ twine-fix:
 # Project Specific
 # -----------------------------------------------------------------------------
 
-# user := "pi"
-# host := "192.168.1.48"
-# remote_dir := "/home/pi/Sandbox/Python/my-pypi-packages/xapp-core"
+user := "pi"
+host := "192.168.0.193"
+remote_dir := "/home/pi/Sandbox/Python/my-pypi-packages/process-inspector"
 
-# # Sync files to Raspberry Pi
-# [group('project')]
-# rsync-to-pi:
-#     rsync -avz . {{user}}@{{host}}:{{remote_dir}} --delete \
-#         --exclude=".DS_Store" --exclude='.git' --exclude='.venv' \
-#         --exclude=".coverage" --exclude='htmlcov' --exclude='__pycache__' \
-#         --exclude='.pytest_cache' --exclude='.ruff_cache' --exclude='.tox' \
-#         --exclude='.vscode' --exclude='node_modules' --exclude='dist' \
-#         --exclude='*.egg-info' --exclude=".tmp"
+# Sync files to Raspberry Pi
+[group('project')]
+rsync-to-pi:
+    rsync -avz . {{user}}@{{host}}:{{remote_dir}} --delete \
+        --exclude=".DS_Store" --exclude='.git' --exclude='.venv' \
+        --exclude=".coverage" --exclude='htmlcov' --exclude='__pycache__' \
+        --exclude='.pytest_cache' --exclude='.ruff_cache' --exclude='.tox' \
+        --exclude='.vscode' --exclude='node_modules' --exclude='dist' \
+        --exclude='*.egg-info' --exclude=".tmp"
