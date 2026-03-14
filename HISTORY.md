@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
+### 0.2.5 (2026-03-14)
+
+- CHANGED - Continued DDD/SOA/SRP refactor pass across subdomains with stricter layer boundaries and architecture guard tests for import direction.
+- CHANGED - Rebalanced platform-specific execution concerns into infrastructure adapters (`appcontrol`/`scriptcontrol`) and removed internal shim-style imports in favor of direct internal module imports.
+- CHANGED - Standardized DTO usage in `servicecontrol` and tightened interface schema definitions for clearer, explicit contracts.
+- CHANGED - Centralized TeamViewer platform wiring in infrastructure factory composition.
+- FIXED - Release pipeline now passes strict lint/test gates and builds validated `sdist`/`wheel` artifacts for this version.
+
 ### 0.2.4 (2026-03-14)
 
 - CHANGED - Refactored subdomains into layered DDD/SRP structure (`domain`, `application`, `infrastructure`, `interface`) while preserving public API contract symbols.
