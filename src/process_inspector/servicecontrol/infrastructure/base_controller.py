@@ -3,11 +3,11 @@ from __future__ import annotations
 from abc import ABC
 from abc import abstractmethod
 
+from process_inspector.servicecontrol.application.dtos import ServiceInfoDTO
 from process_inspector.servicecontrol.domain.value_objects import ServiceIdentity
 from process_inspector.servicecontrol.infrastructure.factory import (
     build_runtime_service,
 )
-from process_inspector.servicecontrol.infrastructure.mappers import to_service_info
 
 
 class ServiceControllerBase(ABC):
@@ -73,7 +73,7 @@ class ServiceControllerBase(ABC):
         return self.stop()  # pragma: no cover
 
     def as_dict(self) -> dict:
-        return to_service_info(name=self.name)
+        return ServiceInfoDTO(name=self.name).as_dict()
 
     def get_last_seen_str(self) -> str | None:
         return self._runtime.get_last_seen_str()

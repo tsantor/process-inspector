@@ -4,6 +4,7 @@ import logging
 from typing import TYPE_CHECKING
 from typing import Any
 
+from process_inspector.servicecontrol.application.dtos import ServiceProcessInfoDTO
 from process_inspector.servicecontrol.domain.entities import ServiceRuntimeState
 
 if TYPE_CHECKING:
@@ -85,10 +86,12 @@ class ServiceRuntimeService:
         process = self._state.process
         if process:
             try:
-                return {
-                    **self._runtime_port.get_process_info(process),
-                    "last_seen": self.get_last_seen_str(),
-                }
+                return ServiceProcessInfoDTO(
+                    {
+                        **self._runtime_port.get_process_info(process),
+                        "last_seen": self.get_last_seen_str(),
+                    }
+                ).as_dict()
             except Exception as exc:
                 if self._runtime_port.is_process_error(exc):
                     logger.warning("Failed to get process for %s: %s", service, exc)
@@ -97,7 +100,9 @@ class ServiceRuntimeService:
                 else:
                     raise
 
-        return {
-            "is_running": False,
-            "last_seen": self.get_last_seen_str(),
-        }
+        return ServiceProcessInfoDTO(
+            {
+                "is_running": False,
+                "last_seen": self.get_last_seen_str(),
+            }
+        ).as_dict()
