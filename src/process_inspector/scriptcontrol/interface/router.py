@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import abstractmethod
 
-from process_inspector.appcontrol.interface import AppInterface
+from process_inspector.appcontrol.interface.router import AppInterface
 from process_inspector.scriptcontrol.interface.dependencies import (
     get_script_execution_service,
 )

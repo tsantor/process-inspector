@@ -3,7 +3,7 @@ import logging
 from process_inspector.scriptcontrol.infrastructure.platform_runners import (
     run_windows_script,
 )
-from process_inspector.scriptcontrol.interface import ScriptInterface
+from process_inspector.scriptcontrol.interface.router import ScriptInterface
 
 logger = logging.getLogger(__name__)
 

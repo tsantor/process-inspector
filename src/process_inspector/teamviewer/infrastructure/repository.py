@@ -2,9 +2,17 @@ from __future__ import annotations
 
 import sys
 
-from process_inspector.appcontrol import NativeApp
 from process_inspector.servicecontrol.implementations import SystemCtl
-from process_inspector.teamviewer import get_teamviewer_path
+
+if sys.platform == "darwin":
+    from process_inspector.appcontrol.mac import App as NativeApp
+    from process_inspector.teamviewer.mac import get_teamviewer_path
+elif sys.platform == "win32":
+    from process_inspector.appcontrol.windows import App as NativeApp
+    from process_inspector.teamviewer.windows import get_teamviewer_path
+else:
+    from process_inspector.appcontrol.linux import App as NativeApp
+    from process_inspector.teamviewer.linux import get_teamviewer_path
 
 
 def build_teamviewer_controller(*, state_change_callback=None):

@@ -1,12 +1,20 @@
 # import json
 import logging
+import sys
 from pathlib import Path
 
-from process_inspector.appcontrol import NativeApp
 from process_inspector.unity.infrastructure.factory import build_unity_path_service
 from process_inspector.unity.infrastructure.repository import read_text_file
 
 logger = logging.getLogger(__name__)
+
+
+if sys.platform == "darwin":
+    from process_inspector.appcontrol.mac import App as NativeApp
+elif sys.platform == "win32":
+    from process_inspector.appcontrol.windows import App as NativeApp
+else:
+    from process_inspector.appcontrol.linux import App as NativeApp
 
 
 class UnityAppBase(NativeApp):
