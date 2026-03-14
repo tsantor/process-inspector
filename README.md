@@ -1,6 +1,6 @@
 # Process Inspector
 
-![Coverage](https://img.shields.io/badge/coverage-72%25-brightgreen)
+![Coverage](https://img.shields.io/badge/coverage-61.69%25-yellow)
 
 ## Overview
 
@@ -17,24 +17,26 @@ python3 -m pip install process-inspector
 
 ## Development
 
-To get a list of all commands with descriptions simply run `make`.
+To get a list of all commands with descriptions simply run `just`.
 
 ```bash
-make env
-make pip_install_editable
+just env
+just pip-install-editable
+just check
+just api-check
 ```
 
 ## Testing
 
 ```bash
-make pytest
-make coverage
-make open_coverage
+just pytest
+just coverage
+just open-coverage
 ```
 
 ## Issues
 
-If you experience any issues, please create an [issue](https://github.com/tsantor/process-inspector/issues) on Github.
+If you experience any issues, please create an [issue](https://bitbucket.org/xstudios/process-inspector/issues).
 
 ## Example Usage
 
@@ -42,10 +44,12 @@ If you experience any issues, please create an [issue](https://github.com/tsanto
 from process_inspector import NativeApp
 from process_inspector import Service
 from process_inspector import Teamviewer
-from process_inpsector import OperatingSystem
+from process_inspector import OperatingSystem
+from process_inspector.teamviewer import get_teamviewer_info
+from pathlib import Path
 
 # App control
-app = NativeApp('C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe')
+app = NativeApp(Path("C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"))
 app.open()
 app.is_running()
 app.get_version()
@@ -58,16 +62,16 @@ tv = Teamviewer()
 tv.open()
 tv.is_running()
 tv.close()
-tv.get_teamviewer_info()
+get_teamviewer_info()
 
-# This operation requires sudo priveleges on Linux and Mac
+# This operation requires sudo privileges on Linux and Mac
 # Service control
 service = Service("Spooler")
 service.start()
 service.is_running()
 service.stop()
 
-# This operation requires sudo priveleges on Linux and Mac
+# This operation requires sudo privileges on Linux and Mac
 OperatingSystem().reboot()
 ```
 
@@ -115,7 +119,3 @@ Use `sudo visudo` to add the following lines:
 ```
 
 Save and exit the file (`:wq!`).
-
-## Issues
-
-Report issues at: https://bitbucket.org/xstudios/process-inspector/issues
