@@ -53,7 +53,7 @@ def running_app(
     try:
         # Wait for app to be fully running
         wait_for_condition(
-            lambda: app.is_running(),
+            app.is_running,
             timeout=startup_timeout,
             description="App startup",
         )

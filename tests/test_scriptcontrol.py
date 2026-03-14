@@ -76,20 +76,22 @@ def test_run_windows_script_uses_powershell_file_mode():
         result = run_windows_script(script_path)
 
         assert result is True
-        mock_run.assert_called_once_with(
-            [
-                "powershell",
-                "-NoProfile",
-                "-NonInteractive",
-                "-ExecutionPolicy",
-                "Bypass",
-                "-File",
-                str(script_path),
-            ],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
+        assert mock_run.call_count == 1
+        args, kwargs = mock_run.call_args
+        assert args[0][0].lower().endswith("powershell.exe")
+        assert args[0][1:] == [
+            "-NoProfile",
+            "-NonInteractive",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            str(script_path),
+        ]
+        assert kwargs == {
+            "check": True,
+            "capture_output": True,
+            "text": True,
+        }
 
 
 def test_run_windows_script_called_process_error_returns_false():

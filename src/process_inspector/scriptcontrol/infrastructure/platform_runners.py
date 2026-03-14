@@ -11,6 +11,13 @@ def _resolve_bash_path(possible_paths: list[str]) -> str | None:
     return next((path for path in possible_paths if Path(path).exists()), None)
 
 
+def _resolve_powershell_path(possible_paths: list[str]) -> str | None:
+    return next(
+        (path for path in possible_paths if Path(path).exists()),
+        possible_paths[0] if possible_paths else None,
+    )
+
+
 def run_bash_script(path: Path, *, possible_paths: list[str]) -> bool:
     bash_path = _resolve_bash_path(possible_paths)
     if not bash_path:
@@ -40,10 +47,17 @@ def run_bash_script(path: Path, *, possible_paths: list[str]) -> bool:
 
 
 def run_windows_script(path: Path) -> bool:
+    powershell_path = _resolve_powershell_path(
+        [
+            "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
+            "C:/Windows/SysWOW64/WindowsPowerShell/v1.0/powershell.exe",
+        ]
+    )
+
     try:
         subprocess.run(  # noqa: S603
             [
-                "powershell",
+                powershell_path,
                 "-NoProfile",
                 "-NonInteractive",
                 "-ExecutionPolicy",

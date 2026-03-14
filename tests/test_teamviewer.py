@@ -69,7 +69,7 @@ def test_teamviewer_open(teamviewer):
 def test_teamviewer_is_running(teamviewer):
     assert teamviewer.open() is True
     wait_for_condition(
-        lambda: teamviewer.is_running(),
+        teamviewer.is_running,
         timeout=10,
         description="TeamViewer to be running",
     )

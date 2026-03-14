@@ -29,7 +29,7 @@ def running_service(service: Service, startup_timeout: float = 15):
 
     try:
         wait_for_condition(
-            lambda: service.is_running(),
+            service.is_running,
             timeout=startup_timeout,
             description="Service startup",
         )
@@ -98,7 +98,7 @@ def test_service_start_when_stopped(app):
         assert stopped.is_running() is False
         assert stopped.start() is True
         wait_for_condition(
-            lambda: stopped.is_running(),
+            stopped.is_running,
             timeout=15,
             description="Service start",
         )
@@ -113,7 +113,7 @@ def test_service_restart(app):
 
         # Wait for service to be running again
         wait_for_condition(
-            lambda: running.is_running(),
+            running.is_running,
             timeout=20,  # Restart might take longer
             description="Service restart",
         )
