@@ -7,6 +7,9 @@ from unittest.mock import patch
 import pytest
 
 from process_inspector.scriptcontrol import Script
+from process_inspector.scriptcontrol.infrastructure.platform_runners import (
+    run_windows_script,
+)
 
 
 @pytest.mark.skipif(os.name == "nt", reason="Mac/Linux specific test")
@@ -62,4 +65,37 @@ def test_file_not_found_failure():
     """Test run_script when the script execution fails."""
     with patch("subprocess.run", side_effect=FileNotFoundError()):
         result = Script(Path("/path/to/script.sh")).run()
+        assert result is False
+
+
+def test_run_windows_script_uses_powershell_file_mode():
+    with patch("subprocess.run") as mock_run:
+        mock_run.return_value = subprocess.CompletedProcess(args=[], returncode=0)
+        script_path = Path(r"C:\temp\script.ps1")
+
+        result = run_windows_script(script_path)
+
+        assert result is True
+        mock_run.assert_called_once_with(
+            [
+                "powershell",
+                "-NoProfile",
+                "-NonInteractive",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                str(script_path),
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+
+def test_run_windows_script_called_process_error_returns_false():
+    with patch(
+        "subprocess.run",
+        side_effect=subprocess.CalledProcessError(1, "powershell", stderr="Boom"),
+    ):
+        result = run_windows_script(Path(r"C:\temp\script.ps1"))
         assert result is False

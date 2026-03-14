@@ -41,12 +41,19 @@ def run_bash_script(path: Path, *, possible_paths: list[str]) -> bool:
 
 def run_windows_script(path: Path) -> bool:
     try:
-        subprocess.run(  # noqa: S602
-            [str(path)],
+        subprocess.run(  # noqa: S603
+            [
+                "powershell",
+                "-NoProfile",
+                "-NonInteractive",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                str(path),
+            ],
             check=True,
             capture_output=True,
             text=True,
-            shell=True,
         )
         logger.info("Script '%s' executed successfully.", path)
         return True
