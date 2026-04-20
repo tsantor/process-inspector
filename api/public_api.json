@@ -7,7 +7,12 @@
       "Script",
       "Service",
       "Teamviewer"
-    ]
-  },
-  "schema_version": 2
+    ],
+    "process_inspector.appcontrol": ["NativeApp"],
+    "process_inspector.oscontrol": ["OperatingSystem"],
+    "process_inspector.scriptcontrol": ["Script"],
+    "process_inspector.servicecontrol": ["Service"],
+    "process_inspector.taskcontrol": ["ScheduledTask"],
+    "process_inspector.teamviewer": ["Teamviewer"]
+  }
 }
