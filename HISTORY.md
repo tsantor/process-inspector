@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
+### 0.2.6 (2026-04-20)
+
+- CHANGED - Updated build tooling stack and lock/config wiring for the current release workflow.
+- CHANGED - Refined `just` release/development commands and aligned README command references with the updated task flow.
+- CHANGED - Refreshed public API snapshot/contract support files as part of the build tooling update.
+
 ### 0.2.5 (2026-03-14)
 
 - CHANGED - Continued DDD/SOA/SRP refactor pass across subdomains with stricter layer boundaries and architecture guard tests for import direction.
