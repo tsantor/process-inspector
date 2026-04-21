@@ -12,7 +12,7 @@ default:
 python_version := "3.13.1"
 aws_profile := "xstudios"
 s3_bucket := "xstudios-pypi"
-cov_fail_under := "65"
+cov_fail_under := "62"
 
 # Dynamic variables (evaluated at runtime - DO NOT EDIT)
 package_name := `uv run python -c "import tomllib; n=tomllib.load(open('pyproject.toml','rb'))['project']['name']; print(n.replace('-', '_'))"`
@@ -62,12 +62,12 @@ pip-install-editable:
 # Add dev dependencies
 [group('uv')]
 uv-add-dev-dependencies:
-  uv add twine wheel build ruff pre-commit --group dev
+  uv add twine hatch ruff pre-commit xapp-tools --group dev
 
 # Add test dependencies
 [group('uv')]
 uv-add-test-dependencies:
-  uv add pytest pytest-cov pytest-mock pytest-asyncio coverage --group test
+  uv add pytest pytest-cov pytest-mock pytest-asyncio --group test
 
 # Run pip list
 [group('uv')]

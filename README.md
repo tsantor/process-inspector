@@ -1,6 +1,6 @@
 # Process Inspector
 
-![Coverage](https://img.shields.io/badge/coverage-62.59%25-yellow)
+![Coverage](https://img.shields.io/badge/coverage-62.64%25-yellow)
 
 ## Overview
 
@@ -22,8 +22,6 @@ To get a list of all commands with descriptions simply run `just`.
 ```bash
 just env
 just pip-install-editable
-just check
-just api-check
 ```
 
 ## Testing
