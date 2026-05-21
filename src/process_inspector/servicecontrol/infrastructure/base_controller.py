@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from abc import ABC
 from abc import abstractmethod
+from contextlib import suppress
 
 from process_inspector.servicecontrol.application.dtos import ServiceInfoDTO
 from process_inspector.servicecontrol.domain.value_objects import ServiceIdentity
@@ -39,12 +40,19 @@ class ServiceControllerBase(ABC):
 
     def reset_cache(self):
         self._runtime.reset_cache()
+        with suppress(AttributeError):
+            self._reset_command_cache()
 
     def is_running(self) -> bool:
+        status_value = self.status()
+        if status_value not in ["RUNNING", "SLEEPING"]:
+            self._runtime.reset_cache()
+            self._runtime.update_running_state(self, is_running=False)
+            return False
         return self._runtime.evaluate_running(
             self,
             process=self.get_process(),
-            status_value=self.status(),
+            status_value=status_value,
         )
 
     def _update_running_state(self, is_running: bool) -> None:

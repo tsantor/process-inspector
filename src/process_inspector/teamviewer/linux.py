@@ -66,6 +66,8 @@ def is_teamviewer_installed() -> bool:
 @cache
 def get_teamviewer_id() -> str:
     """Convenience method to do 3 method calls in one."""
+    if not is_teamviewer_installed():
+        return "--"
     result = _extract_teamviewer_id(_query_teamviewer_id())
     return f"{int(result):,}".replace(",", " ") if result != "" else "--"
 
@@ -73,6 +75,8 @@ def get_teamviewer_id() -> str:
 @cache
 def get_teamviewer_version() -> str:
     """Get TeamViewer version."""
+    if not is_teamviewer_installed():
+        return "--"
     return _query_teamviewer_version()
 
 

@@ -1,4 +1,5 @@
 import logging
+import re
 import subprocess
 import sys
 import time
@@ -7,6 +8,9 @@ from pathlib import Path
 
 from process_inspector.servicecontrol.infrastructure.base_controller import (
     ServiceControllerBase,
+)
+from process_inspector.servicecontrol.infrastructure.command_metrics import (
+    ServiceCommandMetrics,
 )
 
 logger = logging.getLogger(__name__)
@@ -21,11 +25,75 @@ class SupervisorCtl(ServiceControllerBase):
     instead.
     """
 
+    _command_cache_ttl_seconds = 3.0
+
     def __init__(self, name, state_change_callback=None):
         super().__init__(name, state_change_callback)
+        self._command_cache: dict[str, tuple[float, object]] = {}
         if not self.service_control_path:
             msg = "'supervisorctl' executable not found"  # pragma: no cover
             raise FileNotFoundError(msg)  # pragma: no cover
+
+    def _reset_command_cache(self) -> None:
+        self._command_cache.clear()
+
+    def _get_cached_output(self, cache_key: str) -> str | None:
+        cached = self._command_cache.get(cache_key)
+        if not cached:
+            return None
+        now = time.monotonic()
+        if now - cached[0] <= self._command_cache_ttl_seconds:
+            return str(cached[1])
+        return None
+
+    def _run_supervisorctl(self, *args: str, cache_key: str | None = None) -> str:
+        if cache_key:
+            cached_output = self._get_cached_output(cache_key)
+            if cached_output is not None:
+                logger.debug(
+                    "supervisorctl command=%s elapsed_ms=0.00 cache=hit",
+                    " ".join(args),
+                )
+                ServiceCommandMetrics.record(
+                    backend="supervisorctl",
+                    service_name=self.name,
+                    command=args[0],
+                    elapsed_ms=0.0,
+                    cache_state="hit",
+                )
+                return cached_output
+
+        if ".local/bin" in str(self.service_control_path):
+            logger.warning(
+                "Using supervisorctl from a local path (%s) may require elevated permissions and could lead to unexpected behavior.",
+                self.service_control_path,
+            )
+            cmd = [str(self.service_control_path), *args]
+        else:
+            cmd = ["sudo", str(self.service_control_path), *args]
+        started = time.perf_counter()
+        proc = subprocess.run(  # noqa: S603
+            cmd, check=False, text=True, capture_output=True
+        )
+        elapsed_ms = (time.perf_counter() - started) * 1000
+        output = proc.stdout.strip()
+        logger.debug(
+            "supervisorctl command=%s elapsed_ms=%.2f cache=%s",
+            " ".join(args),
+            elapsed_ms,
+            "miss" if cache_key else "bypass",
+        )
+        ServiceCommandMetrics.record(
+            backend="supervisorctl",
+            service_name=self.name,
+            command=args[0],
+            elapsed_ms=elapsed_ms,
+            cache_state="miss" if cache_key else "bypass",
+        )
+        if cache_key:
+            # Timestamp when the command completes so TTL measures staleness of data.
+            self._command_cache[cache_key] = (time.monotonic(), output)
+        return output
 
     @cached_property
     def service_control_path(self) -> Path:
@@ -34,6 +102,7 @@ class SupervisorCtl(ServiceControllerBase):
             possible_paths = [
                 Path("/opt/homebrew/bin/supervisorctl"),
                 Path("/usr/local/bin/supervisorctl"),
+                Path("~/.local/bin/supervisorctl").expanduser(),
             ]
         else:
             possible_paths = [Path("/usr/bin/supervisorctl")]
@@ -41,12 +110,15 @@ class SupervisorCtl(ServiceControllerBase):
 
     def get_pid(self) -> int | None:
         """Get PID of the service if running, else None."""
-        cmd = ["sudo", str(self.service_control_path), "pid", self.name]
-        # logger.debug("Execute command: %s", cmd)
-        proc = subprocess.run(  # noqa: S603
-            cmd, check=False, text=True, capture_output=True
-        )
-        output = proc.stdout.strip()
+        status_output = self._get_cached_output("status")
+        if status_output:
+            pid_match = re.search(
+                r"\bpid\s+(\d+)\b", status_output, flags=re.IGNORECASE
+            )
+            if pid_match and int(pid_match.group(1)) > 0:
+                return int(pid_match.group(1))
+
+        output = self._run_supervisorctl("pid", self.name, cache_key="pid")
         if output.isdigit() and int(output) > 0:
             return int(output)
         return None
@@ -62,14 +134,9 @@ class SupervisorCtl(ServiceControllerBase):
         logger.info("Start service '%s'", self.name)
 
         start_time = time.perf_counter()
-        cmd = ["sudo", str(self.service_control_path), "start", self.name]
-        # logger.debug("Execute command: %s", cmd)
-        proc = subprocess.run(  # noqa: S603
-            cmd, check=False, text=True, capture_output=True
-        )
+        output = self._run_supervisorctl("start", self.name)
         matches = ["started", "already started"]
-        output = proc.stdout.strip().lower()
-        result = any(x in output for x in matches)
+        result = any(x in output.lower() for x in matches)
 
         # Wait for process to start so we can get its PID
         # while not self.is_running():
@@ -98,14 +165,9 @@ class SupervisorCtl(ServiceControllerBase):
         logger.info("Stop service '%s'", self.name)
 
         start_time = time.perf_counter()
-        cmd = ["sudo", str(self.service_control_path), "stop", self.name]
-        # logger.debug("Execute command: %s", cmd)
-        proc = subprocess.run(  # noqa: S603
-            cmd, check=False, text=True, capture_output=True
-        )
+        output = self._run_supervisorctl("stop", self.name)
         matches = ["stopped", "not running"]
-        output = proc.stdout.strip().lower()
-        result = any(x in output for x in matches)
+        result = any(x in output.lower() for x in matches)
 
         # Wait a moment for the quit to complete
         # while self.is_running():
@@ -134,14 +196,9 @@ class SupervisorCtl(ServiceControllerBase):
         logger.info("Restart service '%s'", self.name)
 
         start_time = time.perf_counter()
-        cmd = ["sudo", str(self.service_control_path), "restart", self.name]
-        # logger.debug("Execute command: %s", cmd)
-        proc = subprocess.run(  # noqa: S603
-            cmd, check=False, text=True, capture_output=True
-        )
+        output = self._run_supervisorctl("restart", self.name)
         matches = ["started"]
-        output = proc.stdout.strip().lower()
-        result = any(x in output for x in matches)
+        result = any(x in output.lower() for x in matches)
 
         elapsed = time.perf_counter() - start_time
         logger.debug(
@@ -156,12 +213,7 @@ class SupervisorCtl(ServiceControllerBase):
 
     def status(self) -> str:
         """Get service status (e.g., RUNNING, STOPPED, etc.)"""
-        cmd = ["sudo", str(self.service_control_path), "status", self.name]
-        # logger.debug("Execute command: %s", cmd)
-        proc = subprocess.run(  # noqa: S603
-            cmd, check=False, text=True, capture_output=True
-        )
-        output = proc.stdout.strip()
+        output = self._run_supervisorctl("status", self.name, cache_key="status")
         parts = output.split()
         if len(parts) > 1:
             return parts[1].upper()
