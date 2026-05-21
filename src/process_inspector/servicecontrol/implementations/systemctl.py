@@ -36,9 +36,6 @@ class SystemCtl(ServiceControllerBase):
                 cached
                 and time.monotonic() - cached[0] <= self._command_cache_ttl_seconds
             ):
-                logger.debug(
-                    "systemctl command=%s elapsed_ms=0.00 cache=hit", " ".join(args)
-                )
                 ServiceCommandMetrics.record(
                     backend="systemctl",
                     service_name=self.name,
@@ -55,12 +52,6 @@ class SystemCtl(ServiceControllerBase):
         )
         elapsed_ms = (time.perf_counter() - started) * 1000
         output = proc.stdout.strip()
-        logger.debug(
-            "systemctl command=%s elapsed_ms=%.2f cache=%s",
-            " ".join(args),
-            elapsed_ms,
-            "miss" if cache_key else "bypass",
-        )
         ServiceCommandMetrics.record(
             backend="systemctl",
             service_name=self.name,
@@ -80,10 +71,12 @@ class SystemCtl(ServiceControllerBase):
             cmd, check=False, text=True, capture_output=True
         )
         elapsed_ms = (time.perf_counter() - started) * 1000
-        logger.debug(
-            "systemctl command=%s elapsed_ms=%.2f cache=bypass",
-            " ".join(args),
-            elapsed_ms,
+        ServiceCommandMetrics.record(
+            backend="systemctl",
+            service_name=self.name,
+            command=args[0],
+            elapsed_ms=elapsed_ms,
+            cache_state="bypass",
         )
         return proc
 

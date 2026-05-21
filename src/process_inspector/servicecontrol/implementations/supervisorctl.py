@@ -25,7 +25,7 @@ class SupervisorCtl(ServiceControllerBase):
     instead.
     """
 
-    _command_cache_ttl_seconds = 3.0
+    _command_cache_ttl_seconds = 5.0
 
     def __init__(self, name, state_change_callback=None):
         super().__init__(name, state_change_callback)
@@ -50,10 +50,6 @@ class SupervisorCtl(ServiceControllerBase):
         if cache_key:
             cached_output = self._get_cached_output(cache_key)
             if cached_output is not None:
-                logger.debug(
-                    "supervisorctl command=%s elapsed_ms=0.00 cache=hit",
-                    " ".join(args),
-                )
                 ServiceCommandMetrics.record(
                     backend="supervisorctl",
                     service_name=self.name,
@@ -77,12 +73,6 @@ class SupervisorCtl(ServiceControllerBase):
         )
         elapsed_ms = (time.perf_counter() - started) * 1000
         output = proc.stdout.strip()
-        logger.debug(
-            "supervisorctl command=%s elapsed_ms=%.2f cache=%s",
-            " ".join(args),
-            elapsed_ms,
-            "miss" if cache_key else "bypass",
-        )
         ServiceCommandMetrics.record(
             backend="supervisorctl",
             service_name=self.name,

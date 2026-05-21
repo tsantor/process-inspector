@@ -94,4 +94,4 @@ def test_cache_invalidates_on_lifecycle_and_reset_cache():
 
 
 def test_supervisor_ttl_updated():
-    assert SupervisorCtl._command_cache_ttl_seconds == 3.0
+    assert SupervisorCtl._command_cache_ttl_seconds == 5.0
