@@ -7,9 +7,6 @@ from pathlib import Path
 from process_inspector.servicecontrol.infrastructure.base_controller import (
     ServiceControllerBase,
 )
-from process_inspector.servicecontrol.infrastructure.command_metrics import (
-    ServiceCommandMetrics,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -36,29 +33,13 @@ class SystemCtl(ServiceControllerBase):
                 cached
                 and time.monotonic() - cached[0] <= self._command_cache_ttl_seconds
             ):
-                ServiceCommandMetrics.record(
-                    backend="systemctl",
-                    service_name=self.name,
-                    command=args[0],
-                    elapsed_ms=0.0,
-                    cache_state="hit",
-                )
                 return str(cached[1])
 
         cmd = ["sudo", str(self.service_control_path), *args]
-        started = time.perf_counter()
         proc = subprocess.run(  # noqa: S603
             cmd, check=False, text=True, capture_output=True
         )
-        elapsed_ms = (time.perf_counter() - started) * 1000
         output = proc.stdout.strip()
-        ServiceCommandMetrics.record(
-            backend="systemctl",
-            service_name=self.name,
-            command=args[0],
-            elapsed_ms=elapsed_ms,
-            cache_state="miss" if cache_key else "bypass",
-        )
         if cache_key:
             # Timestamp when the command completes so TTL measures staleness of data.
             self._command_cache[cache_key] = (time.monotonic(), output)
@@ -66,19 +47,9 @@ class SystemCtl(ServiceControllerBase):
 
     def _run_systemctl_proc(self, *args: str) -> subprocess.CompletedProcess:
         cmd = ["sudo", str(self.service_control_path), *args]
-        started = time.perf_counter()
-        proc = subprocess.run(  # noqa: S603
+        return subprocess.run(  # noqa: S603
             cmd, check=False, text=True, capture_output=True
         )
-        elapsed_ms = (time.perf_counter() - started) * 1000
-        ServiceCommandMetrics.record(
-            backend="systemctl",
-            service_name=self.name,
-            command=args[0],
-            elapsed_ms=elapsed_ms,
-            cache_state="bypass",
-        )
-        return proc
 
     @cached_property
     def service_control_path(self) -> Path:

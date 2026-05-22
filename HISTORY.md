@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
+### 0.2.7 (2026-05-22)
+
+- CHANGED - Reduced Linux service polling overhead by reusing cached read results in supervisor/systemctl service control paths and avoiding redundant status/pid subprocess calls per read cycle.
+- CHANGED - Consolidated Linux `systemctl` read flow to a single cached `show` source for status and PID resolution, preserving existing status/running semantics.
+- CHANGED - Tuned Linux supervisor read-cache TTL for real polling cadence to reduce repeated expensive status calls between adjacent poll windows.
+- CHANGED - Removed temporary service command aggregation debug instrumentation after validation to keep runtime logs clean.
+- ADDED - Expanded targeted servicecontrol tests covering read-path subprocess call-count reduction, cache-hit behavior, cache invalidation after lifecycle/reset actions, and status/running compatibility.
+
 ### 0.2.6 (2026-04-20)
 
 - CHANGED - Updated build tooling stack and lock/config wiring for the current release workflow.

@@ -9,9 +9,6 @@ from pathlib import Path
 from process_inspector.servicecontrol.infrastructure.base_controller import (
     ServiceControllerBase,
 )
-from process_inspector.servicecontrol.infrastructure.command_metrics import (
-    ServiceCommandMetrics,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -50,13 +47,6 @@ class SupervisorCtl(ServiceControllerBase):
         if cache_key:
             cached_output = self._get_cached_output(cache_key)
             if cached_output is not None:
-                ServiceCommandMetrics.record(
-                    backend="supervisorctl",
-                    service_name=self.name,
-                    command=args[0],
-                    elapsed_ms=0.0,
-                    cache_state="hit",
-                )
                 return cached_output
 
         if ".local/bin" in str(self.service_control_path):
@@ -67,19 +57,10 @@ class SupervisorCtl(ServiceControllerBase):
             cmd = [str(self.service_control_path), *args]
         else:
             cmd = ["sudo", str(self.service_control_path), *args]
-        started = time.perf_counter()
         proc = subprocess.run(  # noqa: S603
             cmd, check=False, text=True, capture_output=True
         )
-        elapsed_ms = (time.perf_counter() - started) * 1000
         output = proc.stdout.strip()
-        ServiceCommandMetrics.record(
-            backend="supervisorctl",
-            service_name=self.name,
-            command=args[0],
-            elapsed_ms=elapsed_ms,
-            cache_state="miss" if cache_key else "bypass",
-        )
         if cache_key:
             # Timestamp when the command completes so TTL measures staleness of data.
             self._command_cache[cache_key] = (time.monotonic(), output)
