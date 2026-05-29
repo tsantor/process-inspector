@@ -3,6 +3,7 @@ import sys
 import time
 from pathlib import Path
 from unittest.mock import MagicMock
+from unittest.mock import patch
 
 import psutil
 import pytest
@@ -164,6 +165,50 @@ def test_get_process_info(proc):
     assert isinstance(proc_info["proc_usage"], str)
     assert isinstance(proc_info["uptime_seconds"], int)
     assert isinstance(proc_info["uptime"], str)
+
+
+def test_get_process_info_cpu_percent_called_with_interval_none():
+    process = MagicMock()
+    mem_info = MagicMock(rss=1024, vms=2048)
+    oneshot_ctx = MagicMock()
+    oneshot_ctx.__enter__.return_value = None
+    oneshot_ctx.__exit__.return_value = None
+
+    process.pid = 123
+    process.status.return_value = "running"
+    process.memory_percent.return_value = 3.14
+    process.memory_info.return_value = mem_info
+    process.cpu_percent.return_value = 7.5
+    process.create_time.return_value = 10.0
+    process.oneshot.return_value = oneshot_ctx
+
+    with patch("process_inspector.utils.processutils.time.time", return_value=20.0):
+        proc_info = processutils.get_process_info(process)
+
+    process.cpu_percent.assert_called_once_with(interval=None)
+    assert proc_info["proc_usage"] == "7.5%"
+
+
+def test_get_process_info_avoids_duplicate_memory_info_and_create_time_calls():
+    process = MagicMock()
+    mem_info = MagicMock(rss=1024, vms=2048)
+    oneshot_ctx = MagicMock()
+    oneshot_ctx.__enter__.return_value = None
+    oneshot_ctx.__exit__.return_value = None
+
+    process.pid = 123
+    process.status.return_value = "running"
+    process.memory_percent.return_value = 3.14
+    process.memory_info.return_value = mem_info
+    process.cpu_percent.return_value = 7.5
+    process.create_time.return_value = 10.0
+    process.oneshot.return_value = oneshot_ctx
+
+    with patch("process_inspector.utils.processutils.time.time", return_value=20.0):
+        processutils.get_process_info(process)
+
+    process.memory_info.assert_called_once_with()
+    process.create_time.assert_called_once_with()
 
 
 def test_debug_process_info(proc):

@@ -112,7 +112,7 @@ def get_mem_usage_perc(process: psutil.Process) -> str:
 
 def get_proc_usage(process: psutil.Process) -> str:
     """Return proce usage as a percent."""
-    cpu_usage = process.cpu_percent()
+    cpu_usage = process.cpu_percent(interval=None)
     return f"{cpu_usage}%"
 
 
@@ -129,13 +129,25 @@ def get_uptime_as_string(process: psutil.Process) -> str:
 def get_process_info(process: psutil.Process) -> dict:
     """Return a dictionary representation of the process."""
     with process.oneshot():
-        return {
-            "pid": process.pid,
-            "status": process.status().upper(),
-            "mem_usage_percent": get_mem_usage_perc(process) if process else "--",
-            "mem_usage": get_mem_usage(process) if process else "--",
-            "vmem_usage": get_vmem_usage(process) if process else "--",
-            "proc_usage": get_proc_usage(process) if process else "--",
-            "uptime_seconds": get_uptime(process) if process else "--",
-            "uptime": get_uptime_as_string(process) if process else "--",
-        }
+        status_value = process.status().upper()
+        mem_usage_percent = f"{round(process.memory_percent(), 2)}%"
+        mem_info = process.memory_info()
+        proc_usage = f"{process.cpu_percent(interval=None)}%"
+        create_time = process.create_time()
+        uptime_seconds = int(time.time() - create_time)
+        uptime = human_delta(uptime_seconds)
+
+    return {
+        "pid": process.pid,
+        "status": status_value,
+        "mem_usage_percent": mem_usage_percent if process else "--",
+        "mem_usage": human_readable_bytes(mem_info.rss, metric=False)
+        if process
+        else "--",
+        "vmem_usage": human_readable_bytes(mem_info.vms, metric=False)
+        if process
+        else "--",
+        "proc_usage": proc_usage if process else "--",
+        "uptime_seconds": uptime_seconds if process else "--",
+        "uptime": uptime if process else "--",
+    }
