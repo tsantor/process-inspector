@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
+### 0.2.8 (2026-05-29)
+
+- CHANGED - Hardened process snapshot collection path in `get_process_info` for lower heartbeat latency on Linux/Raspberry Pi by reusing values within a single `oneshot()` snapshot.
+- CHANGED - Removed duplicate expensive psutil getter calls within one snapshot (single `memory_info()` reuse for `mem_usage`/`vmem_usage`, single `create_time()` reuse for uptime fields).
+- CHANGED - Made CPU usage collection explicit and non-blocking via `cpu_percent(interval=None)` in process snapshot output, preserving existing `proc_usage` format.
+- CHANGED - Simplified `get_process_info` internals by removing temporary timing instrumentation while keeping the latency-focused optimizations.
+- ADDED - Targeted processutils tests covering CPU call semantics (`interval=None`) and no-duplicate-call behavior in snapshot assembly.
+
 ### 0.2.7 (2026-05-22)
 
 - CHANGED - Reduced Linux service polling overhead by reusing cached read results in supervisor/systemctl service control paths and avoiding redundant status/pid subprocess calls per read cycle.
