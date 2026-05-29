@@ -15,25 +15,16 @@ class App(AppInterface):
 
     def is_running(self) -> bool:
         """Determine if app is running."""
-        logger.warning(
-            "Linux App control is experimental and may not work as expected."
-        )
         return False
 
     def open(self) -> bool:
         """Open app"""
-        logger.warning(
-            "Linux App control is experimental and may not work as expected."
-        )
         # Manually update running state to immediately reflect change
         # self._update_running_state(is_running=True)
         return False
 
     def close(self) -> bool:
         """Close app"""
-        logger.warning(
-            "Linux App control is experimental and may not work as expected."
-        )
         # Manually update running state to immediately reflect change
         # self._update_running_state(is_running=False)
         return False

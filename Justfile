@@ -1,4 +1,5 @@
-set shell := ["bash", "-cu"]
+set shell := ["sh", "-cu"]
+set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
 # set shell := ["powershell.exe", "-NoLogo", "-Command"]
 
 # List all available recipes

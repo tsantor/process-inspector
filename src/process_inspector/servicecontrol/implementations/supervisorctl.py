@@ -50,10 +50,6 @@ class SupervisorCtl(ServiceControllerBase):
                 return cached_output
 
         if ".local/bin" in str(self.service_control_path):
-            logger.warning(
-                "Using supervisorctl from a local path (%s) may require elevated permissions and could lead to unexpected behavior.",
-                self.service_control_path,
-            )
             cmd = [str(self.service_control_path), *args]
         else:
             cmd = ["sudo", str(self.service_control_path), *args]
@@ -109,17 +105,6 @@ class SupervisorCtl(ServiceControllerBase):
         matches = ["started", "already started"]
         result = any(x in output.lower() for x in matches)
 
-        # Wait for process to start so we can get its PID
-        # while not self.is_running():
-        #     if time.perf_counter() - start_time > timeout:
-        #         logger.warning(
-        #             "Timed out (%s secs) waiting for service '%s' to start",
-        #             timeout,
-        #             self.name,
-        #         )
-        #         return False
-        #     time.sleep(0.1)
-
         elapsed = time.perf_counter() - start_time
         logger.debug(
             "Service '%s' started successfully in %.3f seconds.",
@@ -139,17 +124,6 @@ class SupervisorCtl(ServiceControllerBase):
         output = self._run_supervisorctl("stop", self.name)
         matches = ["stopped", "not running"]
         result = any(x in output.lower() for x in matches)
-
-        # Wait a moment for the quit to complete
-        # while self.is_running():
-        #     if time.perf_counter() - start_time > timeout:
-        #         logger.warning(
-        #             "Timed out (%s secs) waiting for service '%s' to stop",
-        #             timeout,
-        #             self.name,
-        #         )
-        #         return super().close()
-        #     time.sleep(0.1)
 
         elapsed = time.perf_counter() - start_time
         logger.debug(
