@@ -1,6 +1,6 @@
 import logging
 
-from .interface import OperatingSystemInterface
+from .presentation import OperatingSystemInterface
 
 logger = logging.getLogger(__name__)
 

@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 
 from process_inspector.appcontrol.application.dtos import AppInfoDTO
 from process_inspector.appcontrol.domain.value_objects import AppIdentity
-from process_inspector.appcontrol.interface.dependencies import get_runtime_service
+from process_inspector.appcontrol.presentation.dependencies import get_runtime_service
 
 if TYPE_CHECKING:
     from pathlib import Path

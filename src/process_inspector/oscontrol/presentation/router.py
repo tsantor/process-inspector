@@ -4,7 +4,7 @@ import logging
 from abc import ABC
 from abc import abstractmethod
 
-from process_inspector.oscontrol.interface.dependencies import get_reboot_service
+from process_inspector.oscontrol.presentation.dependencies import get_reboot_service
 
 logger = logging.getLogger(__name__)
 

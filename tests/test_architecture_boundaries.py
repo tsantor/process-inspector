@@ -104,32 +104,32 @@ def test_application_layer_import_direction():
     )
 
 
-def test_servicecontrol_implementations_do_not_depend_on_interface_contracts():
+def test_servicecontrol_implementations_do_not_depend_on_presentation_contracts():
     impl_root = Path("src/process_inspector/servicecontrol/implementations")
     violations: list[str] = []
 
     for file_path in _iter_python_files(impl_root):
         content = file_path.read_text(encoding="utf-8")
-        if "process_inspector.servicecontrol.interface" in content:
+        if "process_inspector.servicecontrol.presentation" in content:
             violations.append(str(file_path))
 
-    assert not violations, "Implementations depend on interface layer:\n" + "\n".join(
-        violations
+    assert not violations, (
+        "Implementations depend on presentation layer:\n" + "\n".join(violations)
     )
 
 
-def test_unity_interface_init_is_not_backpointing_to_base_module():
-    init_file = Path("src/process_inspector/unity/interface/__init__.py")
+def test_unity_presentation_init_is_not_backpointing_to_base_module():
+    init_file = Path("src/process_inspector/unity/presentation/__init__.py")
     content = init_file.read_text(encoding="utf-8")
     assert "process_inspector.unity.base" not in content
 
 
-def test_interface_layer_do_not_import_system_libraries():
+def test_presentation_layer_do_not_import_system_libraries():
     base = Path("src/process_inspector")
     violations: list[str] = []
 
     for subdomain in SUBDOMAINS:
-        layer_root = base / subdomain / "interface"
+        layer_root = base / subdomain / "presentation"
         for file_path in _iter_python_files(layer_root):
             content = file_path.read_text(encoding="utf-8")
             matches = [
@@ -139,4 +139,4 @@ def test_interface_layer_do_not_import_system_libraries():
             ]
             violations.extend(matches)
 
-    assert not violations, "Interface boundary violations:\n" + "\n".join(violations)
+    assert not violations, "Presentation boundary violations:\n" + "\n".join(violations)

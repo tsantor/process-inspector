@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 
 from process_inspector.taskcontrol.application.dtos import TaskInfoDTO
-from process_inspector.taskcontrol.interface.dependencies import get_task_service
+from process_inspector.taskcontrol.presentation.dependencies import get_task_service
 
 logger = logging.getLogger(__name__)
 

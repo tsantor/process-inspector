@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from process_inspector.teamviewer.interface.dependencies import get_teamviewer_service
+from process_inspector.teamviewer.presentation.dependencies import (
+    get_teamviewer_service,
+)
 
 
 class Teamviewer:

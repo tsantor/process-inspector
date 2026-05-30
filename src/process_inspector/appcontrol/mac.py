@@ -7,7 +7,7 @@ from process_inspector.appcontrol.infrastructure.platform_commands import quit_m
 from process_inspector.appcontrol.infrastructure.platform_commands import (
     read_mac_app_version,
 )
-from process_inspector.appcontrol.interface.router import AppInterface
+from process_inspector.appcontrol.presentation.router import AppInterface
 
 logger = logging.getLogger(__name__)
 

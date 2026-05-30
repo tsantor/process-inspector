@@ -8,7 +8,7 @@ import psutil
 import pytest
 
 from process_inspector.appcontrol import NativeApp
-from process_inspector.appcontrol.interface import AppInterface
+from process_inspector.appcontrol.presentation import AppInterface
 
 from .utils import wait_for_condition
 
