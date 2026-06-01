@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 import pytest
 
+import process_inspector.teamviewer.infrastructure.teamviewer as teamviewer_module
 from process_inspector.teamviewer import Teamviewer
 from process_inspector.teamviewer import get_teamviewer_info
 from process_inspector.teamviewer import get_teamviewer_path
@@ -109,8 +110,9 @@ class DummyController:
 
 def test_teamviewer_delegates_to_controller():
     expected_pid = 555
-    with patch(
-        "process_inspector.teamviewer.teamviewer.build_teamviewer_controller",
+    with patch.object(
+        teamviewer_module,
+        "build_teamviewer_controller",
         return_value=DummyController(),
     ):
         teamviewer = Teamviewer()
