@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 
-from .base import UnityAppBase
+from .infrastructure.base import UnityAppBase
 
 logger = logging.getLogger(__name__)
 
