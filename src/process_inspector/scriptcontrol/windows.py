@@ -1,9 +1,7 @@
 import logging
 
-from process_inspector.scriptcontrol.infrastructure.base import ScriptBase
-from process_inspector.scriptcontrol.infrastructure.platform_runners import (
-    run_windows_script,
-)
+from process_inspector.scriptcontrol.runtime.base import ScriptBase
+from process_inspector.scriptcontrol.runtime.platform_runners import run_windows_script
 
 logger = logging.getLogger(__name__)
 

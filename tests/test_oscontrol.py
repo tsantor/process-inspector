@@ -4,7 +4,7 @@ import subprocess
 from unittest.mock import Mock
 from unittest.mock import patch
 
-from process_inspector.oscontrol.infrastructure.reboot_service import RebootService
+from process_inspector.oscontrol.runtime.reboot_service import RebootService
 
 
 def test_reboot_service_success():

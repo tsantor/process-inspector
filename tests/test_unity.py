@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from process_inspector.unity.infrastructure.path_service import UnityPathService
-from process_inspector.unity.infrastructure.repository import read_text_file
+from process_inspector.unity.runtime.filesystem import read_text_file
+from process_inspector.unity.runtime.path_service import UnityPathService
 
 
 def test_unity_path_service_variations_include_expected_forms():

@@ -3,7 +3,7 @@ import subprocess
 
 import psutil
 
-from .infrastructure.controller_base import ServiceControllerBase
+from .runtime.controller_base import ServiceControllerBase
 
 logger = logging.getLogger(__name__)
 

@@ -7,7 +7,7 @@ from datetime import datetime
 from functools import cached_property
 from pathlib import Path
 
-from process_inspector.appcontrol.infrastructure.factory import build_runtime_service
+from process_inspector.appcontrol.runtime.factory import build_runtime_service
 
 logger = logging.getLogger(__name__)
 

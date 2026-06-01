@@ -8,12 +8,10 @@ from datetime import datetime
 import pytest
 
 from process_inspector.servicecontrol import Service
-from process_inspector.servicecontrol.infrastructure.runtime_service import (
+from process_inspector.servicecontrol.runtime.runtime_service import (
     ServiceRuntimeService,
 )
-from process_inspector.servicecontrol.infrastructure.runtime_state import (
-    ServiceRuntimeState,
-)
+from process_inspector.servicecontrol.runtime.runtime_state import ServiceRuntimeState
 
 from .utils import wait_for_condition
 

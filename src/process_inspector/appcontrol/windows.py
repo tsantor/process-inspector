@@ -1,11 +1,9 @@
 import logging
 import time
 
-from process_inspector.appcontrol.infrastructure.app_base import AppControllerBase
-from process_inspector.appcontrol.infrastructure.platform_commands import (
-    launch_windows_app,
-)
-from process_inspector.appcontrol.infrastructure.platform_commands import (
+from process_inspector.appcontrol.runtime.app_base import AppControllerBase
+from process_inspector.appcontrol.runtime.platform_commands import launch_windows_app
+from process_inspector.appcontrol.runtime.platform_commands import (
     read_windows_app_version,
 )
 

@@ -7,12 +7,10 @@ from unittest.mock import patch
 import pytest
 
 from process_inspector.scriptcontrol import Script
-from process_inspector.scriptcontrol.infrastructure.execution_service import (
+from process_inspector.scriptcontrol.runtime.execution_service import (
     ScriptExecutionService,
 )
-from process_inspector.scriptcontrol.infrastructure.platform_runners import (
-    run_windows_script,
-)
+from process_inspector.scriptcontrol.runtime.platform_runners import run_windows_script
 
 
 @pytest.mark.skipif(os.name == "nt", reason="Mac/Linux specific test")

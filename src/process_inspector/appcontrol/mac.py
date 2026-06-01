@@ -2,12 +2,10 @@ import logging
 import subprocess
 import time
 
-from process_inspector.appcontrol.infrastructure.app_base import AppControllerBase
-from process_inspector.appcontrol.infrastructure.platform_commands import launch_mac_app
-from process_inspector.appcontrol.infrastructure.platform_commands import quit_mac_app
-from process_inspector.appcontrol.infrastructure.platform_commands import (
-    read_mac_app_version,
-)
+from process_inspector.appcontrol.runtime.app_base import AppControllerBase
+from process_inspector.appcontrol.runtime.platform_commands import launch_mac_app
+from process_inspector.appcontrol.runtime.platform_commands import quit_mac_app
+from process_inspector.appcontrol.runtime.platform_commands import read_mac_app_version
 
 logger = logging.getLogger(__name__)
 

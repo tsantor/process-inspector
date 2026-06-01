@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-from process_inspector.teamviewer.infrastructure.factory import (
-    build_teamviewer_controller,
-)
+from process_inspector.teamviewer.runtime.factory import build_teamviewer_controller
 
 
 class Teamviewer:

@@ -2,10 +2,8 @@ from __future__ import annotations
 
 import logging
 
-from process_inspector.taskcontrol.infrastructure.repository import PowerShellRunner
-from process_inspector.taskcontrol.infrastructure.task_service import (
-    ScheduledTaskService,
-)
+from process_inspector.taskcontrol.runtime.powershell import PowerShellRunner
+from process_inspector.taskcontrol.runtime.task_service import ScheduledTaskService
 
 logger = logging.getLogger(__name__)
 

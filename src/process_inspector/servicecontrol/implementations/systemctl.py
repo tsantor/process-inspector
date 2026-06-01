@@ -4,7 +4,7 @@ import time
 from functools import cached_property
 from pathlib import Path
 
-from process_inspector.servicecontrol.infrastructure.controller_base import (
+from process_inspector.servicecontrol.runtime.controller_base import (
     ServiceControllerBase,
 )
 

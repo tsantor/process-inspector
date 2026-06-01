@@ -4,7 +4,7 @@ import logging
 from abc import ABC
 from abc import abstractmethod
 
-from process_inspector.oscontrol.infrastructure.reboot_service import RebootService
+from process_inspector.oscontrol.runtime.reboot_service import RebootService
 
 logger = logging.getLogger(__name__)
 

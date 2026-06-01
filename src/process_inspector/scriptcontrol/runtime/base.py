@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from abc import abstractmethod
 
-from process_inspector.appcontrol.infrastructure.app_base import AppControllerBase
-from process_inspector.scriptcontrol.infrastructure.execution_service import (
+from process_inspector.appcontrol.runtime.app_base import AppControllerBase
+from process_inspector.scriptcontrol.runtime.execution_service import (
     ScriptExecutionService,
 )
 

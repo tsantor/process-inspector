@@ -4,9 +4,7 @@ from abc import ABC
 from abc import abstractmethod
 from contextlib import suppress
 
-from process_inspector.servicecontrol.infrastructure.factory import (
-    build_runtime_service,
-)
+from process_inspector.servicecontrol.runtime.factory import build_runtime_service
 
 
 class ServiceControllerBase(ABC):

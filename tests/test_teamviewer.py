@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import pytest
 
-import process_inspector.teamviewer.infrastructure.teamviewer as teamviewer_module
+import process_inspector.teamviewer.runtime.teamviewer as teamviewer_module
 from process_inspector.teamviewer import Teamviewer
 from process_inspector.teamviewer import get_teamviewer_info
 from process_inspector.teamviewer import get_teamviewer_path

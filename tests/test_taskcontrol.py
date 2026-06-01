@@ -3,9 +3,7 @@ import sys
 import pytest
 
 from process_inspector.taskcontrol import ScheduledTask
-from process_inspector.taskcontrol.infrastructure.task_service import (
-    ScheduledTaskService,
-)
+from process_inspector.taskcontrol.runtime.task_service import ScheduledTaskService
 
 pytestmark = pytest.mark.skipif(
     sys.platform != "win32", reason="Only Windows supported for Scheduled Tasks"
