@@ -7,8 +7,8 @@ from unittest.mock import patch
 import psutil
 import pytest
 
-from process_inspector.appcontrol import AppBase
 from process_inspector.appcontrol import NativeApp
+from process_inspector.appcontrol.infrastructure.base import AppBase
 
 from .utils import wait_for_condition
 
