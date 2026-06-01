@@ -1,6 +1,7 @@
 import contextlib
 import json
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -91,3 +92,30 @@ def test_teamviewer_not_running(teamviewer):
         description="TeamViewer to be closed",
     )
     assert teamviewer.is_running() is False
+
+
+class DummyController:
+    pid = 555
+
+    def is_running(self) -> bool:
+        return True
+
+    def open(self) -> bool:
+        return True
+
+    def close(self) -> bool:
+        return True
+
+
+def test_teamviewer_delegates_to_controller():
+    expected_pid = 555
+    with patch(
+        "process_inspector.teamviewer.teamviewer.build_teamviewer_controller",
+        return_value=DummyController(),
+    ):
+        teamviewer = Teamviewer()
+
+        assert teamviewer.get_pid() == expected_pid
+        assert teamviewer.is_running() is True
+        assert teamviewer.open() is True
+        assert teamviewer.close() is True

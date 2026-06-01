@@ -7,6 +7,9 @@ from unittest.mock import patch
 import pytest
 
 from process_inspector.scriptcontrol import Script
+from process_inspector.scriptcontrol.infrastructure.execution_service import (
+    ScriptExecutionService,
+)
 from process_inspector.scriptcontrol.infrastructure.platform_runners import (
     run_windows_script,
 )
@@ -101,3 +104,30 @@ def test_run_windows_script_called_process_error_returns_false():
     ):
         result = run_windows_script(Path(r"C:\temp\script.ps1"))
         assert result is False
+
+
+class DummyScript:
+    app_name = "dummy-script"
+
+    def __init__(self):
+        self.states = []
+
+    def _update_running_state(self, *, is_running: bool) -> None:
+        self.states.append(is_running)
+
+
+def test_script_execution_service_success_updates_state():
+    script = DummyScript()
+    service = ScriptExecutionService()
+
+    def set_running_state(*, is_running: bool) -> None:
+        script.states.append(is_running)
+
+    result = service.run(
+        script,
+        run_callable=lambda: True,
+        set_running_state=set_running_state,
+    )
+
+    assert result is True
+    assert script.states == [True, False]
