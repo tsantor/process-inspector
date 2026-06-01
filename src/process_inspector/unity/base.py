@@ -1,20 +1,12 @@
 # import json
 import logging
-import sys
 from pathlib import Path
 
+from process_inspector.appcontrol import NativeApp
 from process_inspector.unity.infrastructure.factory import build_unity_path_service
 from process_inspector.unity.infrastructure.repository import read_text_file
 
 logger = logging.getLogger(__name__)
-
-
-if sys.platform == "darwin":
-    from process_inspector.appcontrol.mac import App as NativeApp
-elif sys.platform == "win32":
-    from process_inspector.appcontrol.windows import App as NativeApp
-else:
-    from process_inspector.appcontrol.linux import App as NativeApp
 
 
 class UnityAppBase(NativeApp):
@@ -37,8 +29,7 @@ class UnityAppBase(NativeApp):
 
     def get_config_path(self) -> Path:
         """Return path to config.json that we always implement."""
-        paths = self._path_service.build_paths(self.get_streaming_assets_path())
-        return paths.config_path
+        return self._path_service.build_config_path(self.get_streaming_assets_path())
 
     def get_file_content(self, filename: str) -> str:
         filepath = self.get_streaming_assets_path() / filename
@@ -53,19 +44,6 @@ class UnityAppBase(NativeApp):
         """Get path to player log file."""
         msg = "This method should return a Path"
         raise NotImplementedError(msg)
-
-    # def get_file_content(self, filename: str) -> str:
-    #     """Get file content from streaming assets path."""
-    #     filepath = self.get_streaming_assets_path() / filename
-    #     if filepath.is_file():
-    #         with filepath.open(encoding="utf8") as fh:
-    #             return fh.read().strip()
-    #     return ""
-
-    # def get_config(self) -> dict:
-    #     """Get config contents."""
-    #     config_content = self.get_file_content("config.json")
-    #     return json.loads(config_content) if config_content else {}
 
     def get_version(self) -> str:
         """Get app version from file. Must be a better way?"""
