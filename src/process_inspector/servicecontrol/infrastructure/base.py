@@ -9,7 +9,7 @@ from process_inspector.servicecontrol.infrastructure.factory import (
 )
 
 
-class ServiceControllerBase(ABC):
+class ServiceBase(ABC):
     """Shared service controller behavior used by concrete infrastructure implementations."""
 
     def __init__(self, name, state_change_callback=None):

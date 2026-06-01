@@ -84,6 +84,11 @@ class AppRuntimeService:
             self.update_running_state(app, is_running=True)
             return True
 
+        except OSError as e:
+            logger.error("Error checking process state for %s: %s", app, e)  # noqa: TRY400
+            self.reset_cache()
+            self.update_running_state(app, is_running=False)
+            return False
         except Exception as exc:
             if self._runtime_port.is_process_error(exc):
                 logger.error("Process %s error", app)  # noqa: TRY400
@@ -91,10 +96,6 @@ class AppRuntimeService:
                 self.update_running_state(app, is_running=False)
                 return False
             raise
-        except OSError as e:
-            logger.error("Error checking process state for %s: %s", app, e)  # noqa: TRY400
-            self.update_running_state(app, is_running=False)
-            return False
 
     def close(self, app_path: Path, app: Any, *, timeout: float = 5.0) -> bool:  # noqa: C901
         if not self.is_running(app_path, app):

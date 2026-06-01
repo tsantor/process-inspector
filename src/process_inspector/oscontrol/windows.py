@@ -1,11 +1,11 @@
 import logging
 
-from .infrastructure.base import OperatingSystemInterface
+from .infrastructure.base import OperatingSystemBase
 
 logger = logging.getLogger(__name__)
 
 
-class OperatingSystem(OperatingSystemInterface):
+class OperatingSystem(OperatingSystemBase):
     """Windows"""
 
     def reboot(self, name="Dashboard") -> bool:  # pragma: no cover

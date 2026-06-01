@@ -9,7 +9,7 @@ from process_inspector.oscontrol.infrastructure.factory import build_reboot_serv
 logger = logging.getLogger(__name__)
 
 
-class OperatingSystemInterface(ABC):
+class OperatingSystemBase(ABC):
     """Basic control of an OS."""
 
     def __init__(self):

@@ -6,14 +6,12 @@ import time
 from functools import cached_property
 from pathlib import Path
 
-from process_inspector.servicecontrol.infrastructure.base_controller import (
-    ServiceControllerBase,
-)
+from process_inspector.servicecontrol.infrastructure.base import ServiceBase
 
 logger = logging.getLogger(__name__)
 
 
-class SupervisorCtl(ServiceControllerBase):
+class SupervisorCtl(ServiceBase):
     """
     Supervisor Service
 

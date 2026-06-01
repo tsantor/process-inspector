@@ -6,4 +6,4 @@ get_teamviewer_info = platform_module.get_teamviewer_info
 get_teamviewer_path = platform_module.get_teamviewer_path
 is_teamviewer_installed = platform_module.is_teamviewer_installed
 
-from .teamviewer import Teamviewer  # noqa: F401, E402
+from .infrastructure.teamviewer import Teamviewer  # noqa: F401, E402
