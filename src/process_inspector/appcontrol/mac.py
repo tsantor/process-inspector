@@ -2,7 +2,7 @@ import logging
 import subprocess
 import time
 
-from process_inspector.appcontrol.infrastructure.base import AppInterface
+from process_inspector.appcontrol.infrastructure.base import AppBase
 from process_inspector.appcontrol.infrastructure.platform_commands import launch_mac_app
 from process_inspector.appcontrol.infrastructure.platform_commands import quit_mac_app
 from process_inspector.appcontrol.infrastructure.platform_commands import (
@@ -12,7 +12,7 @@ from process_inspector.appcontrol.infrastructure.platform_commands import (
 logger = logging.getLogger(__name__)
 
 
-class App(AppInterface):
+class App(AppBase):
     """Basic control of a Mac App using Popen and psutil."""
 
     def open(self, timeout: float = 5.0) -> bool:  # noqa: PLR0911

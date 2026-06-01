@@ -1,7 +1,7 @@
 import logging
 import subprocess
 
-from process_inspector.appcontrol.infrastructure.base import AppInterface
+from process_inspector.appcontrol.infrastructure.base import AppBase
 from process_inspector.appcontrol.infrastructure.platform_commands import (
     read_linux_app_version,
 )
@@ -9,7 +9,7 @@ from process_inspector.appcontrol.infrastructure.platform_commands import (
 logger = logging.getLogger(__name__)
 
 
-class App(AppInterface):
+class App(AppBase):
     """Basic control of a Linux App. This is under the full assumption you are
     running apps under Supervisor."""
 

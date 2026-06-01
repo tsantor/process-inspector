@@ -1,7 +1,7 @@
 import logging
 import time
 
-from process_inspector.appcontrol.infrastructure.base import AppInterface
+from process_inspector.appcontrol.infrastructure.base import AppBase
 from process_inspector.appcontrol.infrastructure.platform_commands import (
     launch_windows_app,
 )
@@ -12,7 +12,7 @@ from process_inspector.appcontrol.infrastructure.platform_commands import (
 logger = logging.getLogger(__name__)
 
 
-class App(AppInterface):
+class App(AppBase):
     """Basic control of a Windows App"""
 
     def open(self, timeout: float = 5.0) -> bool:

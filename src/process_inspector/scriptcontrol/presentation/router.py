@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from abc import abstractmethod
 
-from process_inspector.appcontrol.infrastructure.base import AppInterface
+from process_inspector.appcontrol.infrastructure.base import AppBase
 from process_inspector.scriptcontrol.presentation.dependencies import (
     get_script_execution_service,
 )
 
 
-class ScriptInterface(AppInterface):
+class ScriptInterface(AppBase):
     """Basic control of a Script which launches a child process."""
 
     def __init__(self, app_path, state_change_callback=None):
