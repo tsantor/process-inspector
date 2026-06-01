@@ -11,25 +11,28 @@ default:
 # -----------------------------------------------------------------------------
 
 python_version := "3.13.1"
-aws_profile := "xstudios"
-s3_bucket := "xstudios-pypi"
 cov_fail_under := "62"
 
+aws_profile := "xstudios"
+s3_bucket := "xstudios-pypi"
+
+package_name := "process_inspector"
+version := "0.2.8"
+
 # Dynamic variables (evaluated at runtime - DO NOT EDIT)
-package_name := `uv run python -c "import tomllib; n=tomllib.load(open('pyproject.toml','rb'))['project']['name']; print(n.replace('-', '_'))"`
-wheel_name := `basename $(ls dist/*.whl 2>/dev/null | head -n 1) 2>/dev/null || echo ""`
+wheel_name := package_name + "-" + version + "-py3-none-any.whl"
 package_url := "https://" + s3_bucket + ".s3.amazonaws.com/" + wheel_name
 
 # Show variable values
 [group('help')]
 show-vars:
-  @echo "Python Version: {{python_version}}"
-  @echo "AWS Profile: {{aws_profile}}"
-  @echo "S3 Bucket: {{s3_bucket}}"
-  @echo "Coverage Fail Under: {{cov_fail_under}}"
-  @echo "Package Name: {{package_name}}"
-  @echo "Wheel Name: {{wheel_name}}"
-  @echo "Package URL: {{package_url}}"
+    @echo "Python Version: {{ python_version }}"
+    @echo "Coverage Fail Under: {{ cov_fail_under }}"
+    @echo "AWS Profile: {{ aws_profile }}"
+    @echo "S3 Bucket: {{ s3_bucket }}"
+    @echo "Package Name: {{ package_name }}"
+    @echo "Wheel Name: {{ wheel_name }}"
+    @echo "Package URL: {{ package_url }}"
 
 # DO NOT EDIT BELOW THIS LINE - auto-generated from template
 # -----------------------------------------------------------------------------

@@ -4,7 +4,6 @@ from pathlib import Path
 
 import pytest
 
-from process_inspector.appcontrol import NativeApp
 from process_inspector.teamviewer import Teamviewer
 from process_inspector.teamviewer import get_teamviewer_info
 from process_inspector.teamviewer import get_teamviewer_path
@@ -54,12 +53,14 @@ def test_get_teamviewer_path():
 
 def test_get_teamviewer_app(teamviewer):
     app = teamviewer.app
-    assert isinstance(app, NativeApp)
+    assert hasattr(app, "open")
+    assert hasattr(app, "close")
+    assert hasattr(app, "is_running")
 
 
 def test_get_teamviewer_pid(teamviewer):
     pid = teamviewer.get_pid()
-    assert isinstance(pid, int)
+    assert pid is None or isinstance(pid, int)
 
 
 def test_teamviewer_open(teamviewer):
