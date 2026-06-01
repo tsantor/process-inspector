@@ -12,7 +12,7 @@ from process_inspector.appcontrol.infrastructure.factory import build_runtime_se
 logger = logging.getLogger(__name__)
 
 
-class AppBase(ABC):
+class AppControllerBase(ABC):
     """Basic control of an App."""
 
     def __init__(self, app_path: Path, state_change_callback=None):

@@ -4,12 +4,14 @@ import time
 from functools import cached_property
 from pathlib import Path
 
-from process_inspector.servicecontrol.infrastructure.base import ServiceBase
+from process_inspector.servicecontrol.infrastructure.controller_base import (
+    ServiceControllerBase,
+)
 
 logger = logging.getLogger(__name__)
 
 
-class SystemCtl(ServiceBase):
+class SystemCtl(ServiceControllerBase):
     """Linux System Ctl Service"""
 
     _command_cache_ttl_seconds = 3.0

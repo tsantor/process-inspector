@@ -10,7 +10,7 @@ import psutil
 import pytest
 
 from process_inspector.appcontrol import NativeApp
-from process_inspector.appcontrol.infrastructure.base import AppBase
+from process_inspector.appcontrol.infrastructure.app_base import AppControllerBase
 from process_inspector.appcontrol.infrastructure.runtime_service import (
     AppRuntimeService,
 )
@@ -23,8 +23,8 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-class MockApp(AppBase):
-    """Mock implementation of AppBase for testing."""
+class MockApp(AppControllerBase):
+    """Mock implementation of AppControllerBase for testing."""
 
     def open(self) -> bool:
         return True

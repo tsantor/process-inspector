@@ -3,12 +3,12 @@ import subprocess
 
 import psutil
 
-from .infrastructure.base import ServiceBase
+from .infrastructure.controller_base import ServiceControllerBase
 
 logger = logging.getLogger(__name__)
 
 
-class Service(ServiceBase):
+class Service(ServiceControllerBase):
     """Basic control of a Windows Service."""
 
     def __init__(self, name, state_change_callback=None):

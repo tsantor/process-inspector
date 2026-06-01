@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from abc import abstractmethod
 
-from process_inspector.appcontrol.infrastructure.base import AppBase
+from process_inspector.appcontrol.infrastructure.app_base import AppControllerBase
 from process_inspector.scriptcontrol.infrastructure.execution_service import (
     ScriptExecutionService,
 )
 
 
-class ScriptBase(AppBase):
+class ScriptBase(AppControllerBase):
     """Basic control of a script which launches a child process."""
 
     def __init__(self, app_path, state_change_callback=None):
