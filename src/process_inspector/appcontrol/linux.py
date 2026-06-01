@@ -1,10 +1,10 @@
 import logging
 import subprocess
 
+from process_inspector.appcontrol.infrastructure.base import AppInterface
 from process_inspector.appcontrol.infrastructure.platform_commands import (
     read_linux_app_version,
 )
-from process_inspector.appcontrol.presentation.router import AppInterface
 
 logger = logging.getLogger(__name__)
 

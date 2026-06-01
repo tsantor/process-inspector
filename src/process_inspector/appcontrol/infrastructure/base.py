@@ -7,16 +7,13 @@ from datetime import datetime
 from functools import cached_property
 from typing import TYPE_CHECKING
 
-from process_inspector.appcontrol.application.dtos import AppInfoDTO
 from process_inspector.appcontrol.domain.value_objects import AppIdentity
-from process_inspector.appcontrol.presentation.dependencies import get_runtime_service
+from process_inspector.appcontrol.infrastructure.factory import build_runtime_service
 
 if TYPE_CHECKING:
     from pathlib import Path
 
 logger = logging.getLogger(__name__)
-
-PID_CREATE_TIME_TOLERANCE = 0.001
 
 
 class AppInterface(ABC):
@@ -24,7 +21,9 @@ class AppInterface(ABC):
 
     def __init__(self, app_path: Path, state_change_callback=None):
         self._identity = AppIdentity.from_path(app_path)
-        self._runtime = get_runtime_service(state_change_callback=state_change_callback)
+        self._runtime = build_runtime_service(
+            state_change_callback=state_change_callback
+        )
 
         self.app_path = self._identity.app_path
         self.app_exe = self._identity.app_exe
@@ -89,16 +88,15 @@ class AppInterface(ABC):
 
     @cached_property
     def _cached_dict(self) -> dict:
-        dto = AppInfoDTO(
-            exe=self.app_exe,
-            name=self.app_name,
-            path=str(self.app_path),
-            is_installed=self.is_installed(),
-            version=self.version,
-            install_date_short=self.install_date_short,
-            install_date=self.install_date_human_short,
-        )
-        return dto.as_dict()
+        return {
+            "exe": self.app_exe,
+            "name": self.app_name,
+            "path": str(self.app_path),
+            "is_installed": self.is_installed(),
+            "version": self.version,
+            "install_date_short": self.install_date_short,
+            "install_date": self.install_date_human_short,
+        }
 
     def as_dict(self) -> dict:
         return self._cached_dict
