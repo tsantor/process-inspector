@@ -5,13 +5,9 @@ from abc import ABC
 from abc import abstractmethod
 from datetime import datetime
 from functools import cached_property
-from typing import TYPE_CHECKING
+from pathlib import Path
 
-from process_inspector.appcontrol.domain.value_objects import AppIdentity
 from process_inspector.appcontrol.infrastructure.factory import build_runtime_service
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -20,14 +16,12 @@ class AppInterface(ABC):
     """Basic control of an App."""
 
     def __init__(self, app_path: Path, state_change_callback=None):
-        self._identity = AppIdentity.from_path(app_path)
+        self.app_path = Path(app_path)
+        self.app_exe = self.app_path.name
+        self.app_name = self.app_path.stem
         self._runtime = build_runtime_service(
             state_change_callback=state_change_callback
         )
-
-        self.app_path = self._identity.app_path
-        self.app_exe = self._identity.app_exe
-        self.app_name = self._identity.app_name
 
         if not self.is_installed():
             logger.warning(

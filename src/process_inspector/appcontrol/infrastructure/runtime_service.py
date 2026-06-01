@@ -10,19 +10,15 @@ from process_inspector.appcontrol.domain.entities import AppRuntimeState
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from process_inspector.appcontrol.infrastructure.repository import (
-        PsutilRuntimeRepository,
-    )
-
 logger = logging.getLogger(__name__)
 
 
 class AppRuntimeService:
-    """Application service orchestrating app runtime state and process lifecycle."""
+    """Runtime orchestration service for process lifecycle and state caching."""
 
     def __init__(
         self,
-        runtime_port: PsutilRuntimeRepository,
+        runtime_port,
         state_change_callback=None,
         *,
         pid_create_time_tolerance: float = 0.001,

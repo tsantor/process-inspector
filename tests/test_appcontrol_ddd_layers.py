@@ -4,9 +4,10 @@ from datetime import UTC
 from datetime import datetime
 from pathlib import Path
 
-from process_inspector.appcontrol.application.service import AppRuntimeService
 from process_inspector.appcontrol.domain.entities import AppRuntimeState
-from process_inspector.appcontrol.domain.value_objects import AppIdentity
+from process_inspector.appcontrol.infrastructure.runtime_service import (
+    AppRuntimeService,
+)
 
 
 class DummyProcess:
@@ -83,12 +84,6 @@ class DummyRuntimePort:
 
 class DummyApp:
     app_name = "dummy"
-
-
-def test_app_identity_from_path():
-    identity = AppIdentity.from_path(Path("/Applications/Safari.app"))
-    assert identity.app_exe == "Safari.app"
-    assert identity.app_name == "Safari"
 
 
 def test_runtime_state_reset():
