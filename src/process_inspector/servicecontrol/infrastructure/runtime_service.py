@@ -3,7 +3,9 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from process_inspector.servicecontrol.domain.entities import ServiceRuntimeState
+from process_inspector.servicecontrol.infrastructure.runtime_state import (
+    ServiceRuntimeState,
+)
 
 logger = logging.getLogger(__name__)
 

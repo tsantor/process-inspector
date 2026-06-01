@@ -5,7 +5,7 @@ import time
 from typing import TYPE_CHECKING
 from typing import Any
 
-from process_inspector.appcontrol.domain.entities import AppRuntimeState
+from process_inspector.appcontrol.infrastructure.runtime_state import AppRuntimeState
 
 if TYPE_CHECKING:
     from pathlib import Path

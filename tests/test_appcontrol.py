@@ -10,11 +10,11 @@ import psutil
 import pytest
 
 from process_inspector.appcontrol import NativeApp
-from process_inspector.appcontrol.domain.entities import AppRuntimeState
 from process_inspector.appcontrol.infrastructure.base import AppBase
 from process_inspector.appcontrol.infrastructure.runtime_service import (
     AppRuntimeService,
 )
+from process_inspector.appcontrol.infrastructure.runtime_state import AppRuntimeState
 
 from .utils import wait_for_condition
 

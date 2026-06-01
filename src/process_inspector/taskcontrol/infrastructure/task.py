@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import logging
 
-from process_inspector.taskcontrol.infrastructure.factory import build_task_service
+from process_inspector.taskcontrol.infrastructure.repository import PowerShellRunner
+from process_inspector.taskcontrol.infrastructure.task_service import (
+    ScheduledTaskService,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +16,7 @@ class ScheduledTask:
         self._on_state_change_cb = state_change_callback
         self._last_running_state: bool | None = None
         self._task_data: dict | None = None
-        self._service = build_task_service()
+        self._service = ScheduledTaskService(powershell_runner=PowerShellRunner())
         self._fetch_task_data()
 
     def _fetch_task_data(self) -> None:

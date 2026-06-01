@@ -3,8 +3,8 @@ from __future__ import annotations
 from abc import abstractmethod
 
 from process_inspector.appcontrol.infrastructure.base import AppBase
-from process_inspector.scriptcontrol.infrastructure.factory import (
-    build_script_execution_service,
+from process_inspector.scriptcontrol.infrastructure.execution_service import (
+    ScriptExecutionService,
 )
 
 
@@ -13,7 +13,7 @@ class ScriptBase(AppBase):
 
     def __init__(self, app_path, state_change_callback=None):
         super().__init__(app_path, state_change_callback)
-        self._script_service = build_script_execution_service()
+        self._script_service = ScriptExecutionService()
 
     def open(self) -> bool:
         return self._script_service.run(

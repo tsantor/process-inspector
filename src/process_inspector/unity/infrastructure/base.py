@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 
 from process_inspector.appcontrol import NativeApp
-from process_inspector.unity.infrastructure.factory import build_unity_path_service
+from process_inspector.unity.infrastructure.path_service import UnityPathService
 from process_inspector.unity.infrastructure.repository import read_text_file
 
 logger = logging.getLogger(__name__)
@@ -14,7 +14,7 @@ class UnityAppBase(NativeApp):
 
     def __init__(self, app_path: Path, developer: str = "X Studios"):
         super().__init__(app_path)
-        self._path_service = build_unity_path_service()
+        self._path_service = UnityPathService()
         # Unity apps have a streaming assets path
         self.config_path = self.get_config_path()
         self.developer = developer
