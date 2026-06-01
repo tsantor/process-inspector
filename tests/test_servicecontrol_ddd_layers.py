@@ -3,9 +3,10 @@ from __future__ import annotations
 from datetime import UTC
 from datetime import datetime
 
-from process_inspector.servicecontrol.application.service import ServiceRuntimeService
 from process_inspector.servicecontrol.domain.entities import ServiceRuntimeState
-from process_inspector.servicecontrol.domain.value_objects import ServiceIdentity
+from process_inspector.servicecontrol.infrastructure.runtime_service import (
+    ServiceRuntimeService,
+)
 
 
 class DummyProcess:
@@ -32,11 +33,6 @@ class DummyRuntimePort:
 
 class DummyService:
     name = "dummy"
-
-
-def test_service_identity_name():
-    identity = ServiceIdentity(name="svc")
-    assert identity.name == "svc"
 
 
 def test_service_runtime_state_reset():

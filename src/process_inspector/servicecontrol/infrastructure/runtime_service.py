@@ -1,20 +1,15 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
 from typing import Any
 
-from process_inspector.servicecontrol.application.dtos import ServiceProcessInfoDTO
 from process_inspector.servicecontrol.domain.entities import ServiceRuntimeState
-
-if TYPE_CHECKING:
-    from process_inspector.servicecontrol.application.ports import ServiceRuntimePort
 
 logger = logging.getLogger(__name__)
 
 
 class ServiceRuntimeService:
-    def __init__(self, runtime_port: ServiceRuntimePort, state_change_callback=None):
+    def __init__(self, runtime_port, state_change_callback=None):
         self._runtime_port = runtime_port
         self._state = ServiceRuntimeState()
         self._on_state_change_cb = state_change_callback
@@ -86,12 +81,10 @@ class ServiceRuntimeService:
         process = self._state.process
         if process:
             try:
-                return ServiceProcessInfoDTO(
-                    {
-                        **self._runtime_port.get_process_info(process),
-                        "last_seen": self.get_last_seen_str(),
-                    }
-                ).as_dict()
+                return {
+                    **self._runtime_port.get_process_info(process),
+                    "last_seen": self.get_last_seen_str(),
+                }
             except Exception as exc:
                 if self._runtime_port.is_process_error(exc):
                     logger.warning("Failed to get process for %s: %s", service, exc)
@@ -100,9 +93,7 @@ class ServiceRuntimeService:
                 else:
                     raise
 
-        return ServiceProcessInfoDTO(
-            {
-                "is_running": False,
-                "last_seen": self.get_last_seen_str(),
-            }
-        ).as_dict()
+        return {
+            "is_running": False,
+            "last_seen": self.get_last_seen_str(),
+        }

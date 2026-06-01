@@ -1,8 +1,10 @@
 from __future__ import annotations
 
-from process_inspector.servicecontrol.application.service import ServiceRuntimeService
 from process_inspector.servicecontrol.infrastructure.repository import (
     PsutilServiceRuntimeRepository,
+)
+from process_inspector.servicecontrol.infrastructure.runtime_service import (
+    ServiceRuntimeService,
 )
 
 

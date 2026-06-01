@@ -4,8 +4,6 @@ from abc import ABC
 from abc import abstractmethod
 from contextlib import suppress
 
-from process_inspector.servicecontrol.application.dtos import ServiceInfoDTO
-from process_inspector.servicecontrol.domain.value_objects import ServiceIdentity
 from process_inspector.servicecontrol.infrastructure.factory import (
     build_runtime_service,
 )
@@ -15,8 +13,7 @@ class ServiceControllerBase(ABC):
     """Shared service controller behavior used by concrete infrastructure implementations."""
 
     def __init__(self, name, state_change_callback=None):
-        self._identity = ServiceIdentity(name=name)
-        self.name = self._identity.name
+        self.name = name
         self._runtime = build_runtime_service(
             state_change_callback=state_change_callback
         )
@@ -81,7 +78,7 @@ class ServiceControllerBase(ABC):
         return self.stop()  # pragma: no cover
 
     def as_dict(self) -> dict:
-        return ServiceInfoDTO(name=self.name).as_dict()
+        return {"name": self.name}
 
     def get_last_seen_str(self) -> str | None:
         return self._runtime.get_last_seen_str()
