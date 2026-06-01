@@ -4,9 +4,15 @@ import json
 import logging
 from datetime import datetime
 
-from process_inspector.taskcontrol.domain.value_objects import map_task_state
-
 logger = logging.getLogger(__name__)
+
+TASK_STATE_MAP = {
+    0: "UNKNOWN",
+    1: "DISABLED",
+    2: "QUEUED",
+    3: "READY",
+    4: "RUNNING",
+}
 
 
 class ScheduledTaskService:
@@ -27,7 +33,7 @@ class ScheduledTaskService:
             try:
                 return json.loads(raw_output)
             except json.JSONDecodeError:
-                logger.error(  # noqa: TRY400
+                logger.exception(
                     "Failed to decode JSON output for task '%s'. Raw Output: %s",
                     task_name,
                     raw_output,
@@ -48,7 +54,7 @@ class ScheduledTaskService:
     def get_task_status(self, task_data: dict | None) -> str:
         if not task_data:
             return "NOT FOUND"
-        return map_task_state(task_data.get("State"))
+        return TASK_STATE_MAP.get(task_data.get("State"), "UNKNOWN")
 
     def get_last_run_time(self, task_data: dict | None, task_name: str) -> str | None:
         if not task_data:

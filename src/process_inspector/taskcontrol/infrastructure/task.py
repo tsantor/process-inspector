@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import logging
 
-from process_inspector.taskcontrol.application.dtos import TaskInfoDTO
-from process_inspector.taskcontrol.presentation.dependencies import get_task_service
+from process_inspector.taskcontrol.infrastructure.factory import build_task_service
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +13,7 @@ class ScheduledTask:
         self._on_state_change_cb = state_change_callback
         self._last_running_state: bool | None = None
         self._task_data: dict | None = None
-        self._service = get_task_service()
+        self._service = build_task_service()
         self._fetch_task_data()
 
     def _fetch_task_data(self) -> None:
@@ -85,10 +84,10 @@ class ScheduledTask:
         return f"ScheduledTask('{self.name}')"
 
     def as_dict(self) -> dict:
-        return TaskInfoDTO(
-            name=self.name,
-            status=self._get_task_status(),
-            is_running=self.is_running(),
-            last_run_time=self._get_last_run_time(),
-            last_run_result=self._get_last_run_result(),
-        ).as_dict()
+        return {
+            "name": self.name,
+            "status": self._get_task_status(),
+            "is_running": self.is_running(),
+            "last_run_time": self._get_last_run_time(),
+            "last_run_result": self._get_last_run_result(),
+        }

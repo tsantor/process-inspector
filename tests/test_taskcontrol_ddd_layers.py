@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from process_inspector.taskcontrol.application.service import ScheduledTaskService
-from process_inspector.taskcontrol.domain.value_objects import map_task_state
+from process_inspector.taskcontrol.infrastructure.task_service import (
+    ScheduledTaskService,
+)
 
 
 class DummyRunner:
@@ -17,10 +18,6 @@ class DummyResult:
         self.stdout = stdout
         self.returncode = returncode
         self.stderr = stderr
-
-
-def test_map_task_state_unknown_fallback():
-    assert map_task_state(99) == "UNKNOWN"
 
 
 def test_get_task_status_from_service_data():

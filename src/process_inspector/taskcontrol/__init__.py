@@ -1,3 +1,3 @@
-from process_inspector.taskcontrol.presentation.router import ScheduledTask
+from process_inspector.taskcontrol.infrastructure.task import ScheduledTask
 
 __all__ = ["ScheduledTask"]
