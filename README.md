@@ -1,6 +1,6 @@
 # Process Inspector
 
-![Coverage](https://img.shields.io/badge/coverage-64.57%25-yellow)
+![Coverage](https://img.shields.io/badge/coverage-65.64%25-yellow)
 
 ## Overview
 
